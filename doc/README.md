@@ -17,27 +17,29 @@ which map the semantics of exception handling you're probably already used to:
 
 You can use exceptions in C by writing `try/catch/finally` blocks:
 
-    #include "e4c.h"
+```c
+#include "e4c.h"
 
-    int foobar(){
+int foobar(){
 
-        int foo;
-        void * buffer = malloc(1024);
+    int foo;
+    void * buffer = malloc(1024);
 
-        if(buffer == NULL){
-            throw(NotEnoughMemoryException, "Could not allocate buffer.");
-        }
-
-        try{
-            foo = get_user_input(buffer, 1024);
-        }catch(BadUserInputException){
-            foo = 123;
-        }finally{
-            free(buffer);
-        }
-
-        return(foo);
+    if(buffer == NULL){
+        throw(NotEnoughMemoryException, "Could not allocate buffer.");
     }
+
+    try{
+        foo = get_user_input(buffer, 1024);
+    }catch(BadUserInputException){
+        foo = 123;
+    }finally{
+        free(buffer);
+    }
+
+    return(foo);
+}
+```
 
 This way you will never have to deal again with boring error codes, or check
 return values every time you call a function.
@@ -68,26 +70,28 @@ If you write a `catch` block that handles an exception with no defined
 exceptions in *hierarchies*, you can design generic `catch` blocks that deal
 with several exceptions:
 
-    /*                   Name             Default message   Supertype */
-    E4C_DEFINE_EXCEPTION(ColorException, "Colorful error.", RuntimeException);
-    E4C_DEFINE_EXCEPTION(RedException,   "Red error.",      ColorException);
-    E4C_DEFINE_EXCEPTION(GreenException, "Green error.",    ColorException);
-    E4C_DEFINE_EXCEPTION(BlueException,  "Blue error.",     ColorException);
+```c
+/*                   Name             Default message   Supertype */
+E4C_DEFINE_EXCEPTION(ColorException, "Colorful error.", RuntimeException);
+E4C_DEFINE_EXCEPTION(RedException,   "Red error.",      ColorException);
+E4C_DEFINE_EXCEPTION(GreenException, "Green error.",    ColorException);
+E4C_DEFINE_EXCEPTION(BlueException,  "Blue error.",     ColorException);
 
-    ...
+...
 
-    try{
-        int color = chooseColor();
-        if(color == 0xff0000) throw(RedException, "I don't like it.");
-        if(color == 0x00ff00) throw(GreenException, NULL);
-        if(color == 0x0000ff) throw(BlueException, "It's way too blue.");
-        doSomething(color);
-    }catch(GreenException){
-        printf("You cannot use green.");
-    }catch(ColorException){
-        const e4c_exception * e = e4c_get_exception();
-        printf("You cannot use that color: %s (%s).", e->name, e->message);
-    }
+try{
+    int color = chooseColor();
+    if(color == 0xff0000) throw(RedException, "I don't like it.");
+    if(color == 0x00ff00) throw(GreenException, NULL);
+    if(color == 0x0000ff) throw(BlueException, "It's way too blue.");
+    doSomething(color);
+}catch(GreenException){
+    printf("You cannot use green.");
+}catch(ColorException){
+    const e4c_exception * e = e4c_get_exception();
+    printf("You cannot use that color: %s (%s).", e->name, e->message);
+}
+```
 
 When looking for a match, `catch` blocks are inspected in the order they appear
 *in the code*. If you place a handler for a superclass before a subclass
@@ -103,21 +107,23 @@ There are other keywords related to resource handling:
 
 They allow you to express the *Dispose Pattern* in your code:
 
-    /* syntax #1 */
-    FOO f;
-    with(f, e4c_dispose_FOO) f = e4c_acquire_FOO(foo, bar); use do_something(f);
+```c
+/* syntax #1 */
+FOO f;
+with(f, e4c_dispose_FOO) f = e4c_acquire_FOO(foo, bar); use do_something(f);
 
-    /* syntax #2 (relies on 'e4c_acquire_BAR' and 'e4c_dispose_BAR') */
-    BAR bar;
-    using(BAR, bar, ("BAR", 123) ){
-        do_something_else(bar);
-    }
+/* syntax #2 (relies on 'e4c_acquire_BAR' and 'e4c_dispose_BAR') */
+BAR bar;
+using(BAR, bar, ("BAR", 123) ){
+    do_something_else(bar);
+}
 
-    /* syntax #3 (customized to specific resource types) */
-    FILE * report;
-    e4c_using_file(report, "log.txt", "a"){
-        fputs("hello, world!\n", report);
-    }
+/* syntax #3 (customized to specific resource types) */
+FILE * report;
+e4c_using_file(report, "log.txt", "a"){
+    fputs("hello, world!\n", report);
+}
+```
 
 This is a clean and terse way to handle all kinds of resources with implicit
 acquisition and automatic disposal.
@@ -129,13 +135,15 @@ In addition, signals such as `SIGHUP`, `SIGFPE` and `SIGSEGV` can be handled in
 an *exceptional* way. Forget about scary segmentation faults, all you need is to
 catch `BadPointerException`:
 
-    int * pointer = NULL;
+```c
+int * pointer = NULL;
 
-    try{
-        int oops = *pointer;
-    }catch(BadPointerException){
-        printf("No problem ;-)");
-    }
+try{
+    int oops = *pointer;
+}catch(BadPointerException){
+    printf("No problem ;-)");
+}
+```
 
 
 ## Multithreading
