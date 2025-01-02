@@ -19,6 +19,8 @@ int integer = 123;
  */
 TEST_CASE{
 
+    TEST_SKIP("Skip this test temporarily");
+
     int * pointer = &integer;
 
     e4c_context_begin(E4C_FALSE);

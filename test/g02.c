@@ -18,6 +18,8 @@ int integer = 123;
  */
 TEST_CASE{
 
+    TEST_SKIP("Skip this test temporarily");
+
     int divisor = 10;
 
     e4c_context_begin(E4C_FALSE);

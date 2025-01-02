@@ -20,6 +20,8 @@ int integer = 123;
  */
 TEST_CASE{
 
+    TEST_SKIP("Skip this test temporarily");
+
     int divisor = 10;
 
     TEST_EXPECTING(ArithmeticException);

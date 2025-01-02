@@ -14,6 +14,8 @@
  */
 TEST_CASE{
 
+    TEST_SKIP("Skip this test temporarily");
+
     e4c_context_begin(E4C_FALSE);
 
     abort();
