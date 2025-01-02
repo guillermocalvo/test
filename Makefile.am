@@ -7,7 +7,7 @@
 
 AUTOMAKE_OPTIONS = foreign subdir-objects
 
-AM_CFLAGS = -Wall -Werror --pedantic -Wno-missing-braces -coverage -O0 -I$(E4C_PATH) -I$(E4C_LITE_PATH)
+AM_CFLAGS = -Wall -Werror --pedantic -Wno-missing-braces -Wno-dangling-else -coverage -O0 -I$(E4C_PATH) -I$(E4C_LITE_PATH)
 
 
 # Library
