@@ -1,0 +1,57 @@
+# Generate and publish docs to GitHub Pages
+name: Make Docs
+
+on:
+  workflow_dispatch:
+
+jobs:
+  docs:
+
+    permissions:
+      pages: write
+      id-token: write
+    name: Generate Documentation
+    runs-on: ubuntu-latest
+
+    steps:
+
+    # ================================
+    # INSTALL DOXYGEN
+    # ================================
+    - name: Install Doxygen
+      run: |
+        mkdir ~/doxygen
+        cd ~/doxygen
+        echo "Installing latest Doxygen version"
+        DOWNLOAD_URL=`curl -s https://api.github.com/repos/doxygen/doxygen/releases/latest | jq -r '.assets[].browser_download_url | select(contains("linux"))'`
+        wget -nv $DOWNLOAD_URL
+        tar -xf *.linux.bin.tar.gz
+        rm *.linux.bin.tar.gz
+        cd doxygen-*
+        sudo make install
+
+    # ================================
+    # SHALLOW CLONE
+    # ================================
+    - name: Shallow clone
+      uses: actions/checkout@v4
+
+    # ================================
+    # BUILD WITH MAKE
+    # ================================
+    - name: Make docs
+      run: autoreconf --install; ./configure; make clean && make docs
+
+    # ================================
+    # UPLOAD DOXYGEN
+    # ================================
+    - name: Upload Doxygen files as artifact
+      uses: actions/upload-pages-artifact@v3
+      with:
+        path: ${{github.workspace}}/doc/html
+
+    # ================================
+    # PUBLISH DOCUMENTATION
+    # ================================
+    - name: Publish documentation to GitHub Pages
+      uses: actions/deploy-pages@v4
