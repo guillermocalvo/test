@@ -3419,11 +3419,14 @@ e4c_status e4c_get_status(void){
 /* EXCEPTION TYPE
  ================================================================ */
 
-static E4C_INLINE E4C_BOOL _e4c_exception_type_extends(const e4c_exception_type * child, const e4c_exception_type * parent){
+static E4C_INLINE E4C_BOOL _e4c_exception_type_extends(const e4c_exception_type * temp, const e4c_exception_type * parent){
 
     /* assert: child != parent */
     /* assert: child != NULL */
     /* assert: parent != NULL */
+
+    /*@shared@*/ /*@notnull@*/
+    const e4c_exception_type * child = temp;
 
     for(; child->supertype != NULL && child->supertype != child; child = child->supertype){
 
