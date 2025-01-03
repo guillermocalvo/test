@@ -1,0 +1,40 @@
+# Static Analysis
+name: Splint
+
+on:
+  push:
+    branches:
+    - '*'
+  pull_request:
+    branches:
+    - main
+    - develop
+
+permissions:
+  checks: write
+
+jobs:
+  build:
+
+    name: Analyze
+    runs-on: ubuntu-latest
+
+    steps:
+
+    # ================================
+    # INSTALL SPLINT
+    # ================================
+    - name: Install Splint
+      run: sudo apt-get install splint
+
+    # ================================
+    # SHALLOW CLONE
+    # ================================
+    - name: Shallow clone
+      uses: actions/checkout@v4
+
+    # ================================
+    # SPLINT
+    # ================================
+    - name: Splint
+      run: cd src && splint e4c.c
