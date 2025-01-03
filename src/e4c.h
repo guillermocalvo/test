@@ -1951,7 +1951,7 @@
  * @see     #catch
  */
 typedef struct e4c_exception_type_ e4c_exception_type;
-struct e4c_exception_type_{
+struct e4c_exception_type_ {
 
     /** The name of this exception type */
     /*@observer@*/ /*@notnull@*/
@@ -2004,7 +2004,7 @@ struct e4c_exception_type_{
  * @see     #AssertionException
  */
 typedef struct e4c_exception_ e4c_exception;
-struct e4c_exception_{
+struct e4c_exception_ {
 
     /* This field is undocumented on purpose and reserved for internal use */
     int                             _;
@@ -2135,7 +2135,7 @@ struct e4c_exception_{
  * @see     #e4c_default_signal_mappings
  */
 typedef struct e4c_signal_mapping_ e4c_signal_mapping;
-struct e4c_signal_mapping_{
+struct e4c_signal_mapping_ {
 
     /** The signal to be converted */
     int                                 signal_number;
@@ -2177,7 +2177,7 @@ struct e4c_signal_mapping_{
  * @see     #e4c_get_status
  * @see     #finally
  */
-enum e4c_status_{
+enum e4c_status_ {
 
     /** There were no exceptions */
     e4c_succeeded,
@@ -2385,7 +2385,7 @@ typedef void (*e4c_finalize_handler)(void * custom_data)
  * Next types are undocumented on purpose, in order to hide implementation
  * details, subject to change.
  */
-enum e4c_frame_stage_{
+enum e4c_frame_stage_ {
     e4c_beginning_,
     e4c_acquiring_,
     e4c_trying_,
@@ -2395,7 +2395,7 @@ enum e4c_frame_stage_{
     e4c_done_
 };
 
-struct e4c_continuation_{
+struct e4c_continuation_ {
     /*@partial@*/ /*@dependent@*/
     E4C_CONTINUATION_BUFFER_        buffer;
 };
@@ -2886,7 +2886,8 @@ E4C_DECLARE_EXCEPTION(ProgramSignal2Exception);
  * @see     #e4c_using_context
  * @see     #e4c_reusing_context
  */
-/*@unused@*/ extern
+/*@unused@*/
+extern
 E4C_BOOL
 e4c_context_is_ready(
     void
@@ -2950,7 +2951,8 @@ e4c_context_is_ready(
  * @see     #e4c_print_exception
  * @see     #e4c_context_set_handlers
  */
-/*@unused@*/ extern
+/*@unused@*/
+extern
 void
 e4c_context_begin(
     E4C_BOOL                    handle_signals
@@ -2984,7 +2986,8 @@ e4c_context_begin(
  * @see     #e4c_using_context
  * @see     #e4c_reusing_context
  */
-/*@unused@*/ extern
+/*@unused@*/
+extern
 void
 e4c_context_end(
     void
@@ -3044,7 +3047,8 @@ e4c_context_end(
  * @see     #e4c_exception
  * @see     #e4c_print_exception
  */
-/*@unused@*/ extern
+/*@unused@*/
+extern
 void
 e4c_context_set_handlers(
     /*@dependent@*/ /*@null@*/
@@ -3055,7 +3059,8 @@ e4c_context_set_handlers(
     e4c_initialize_handler initialize_handler,
     /*@dependent@*/ /*@null@*/
     e4c_finalize_handler finalize_handler
-)/*@globals
+)
+/*@globals
     fileSystem,
     internalState
 @*/
@@ -3087,7 +3092,8 @@ e4c_context_set_handlers(
  * @see     #e4c_signal_mapping
  * @see     #e4c_default_signal_mappings
  */
-/*@unused@*/ extern
+/*@unused@*/
+extern
 void
 e4c_context_set_signal_mappings(
     /*@dependent@*/ /*@null@*/
@@ -3120,7 +3126,8 @@ e4c_context_set_signal_mappings(
  * @see     #e4c_signal_mapping
  * @see     #e4c_default_signal_mappings
  */
-/*@unused@*/ extern
+/*@unused@*/
+extern
 /*@observer@*/ /*@null@*/
 const e4c_signal_mapping *
 e4c_context_get_signal_mappings(
@@ -3158,7 +3165,8 @@ e4c_context_get_signal_mappings(
  * @see     #e4c_status
  * @see     #finally
  */
-/*@unused@*/ extern
+/*@unused@*/
+extern
 e4c_status
 e4c_get_status(
     void
@@ -3224,7 +3232,8 @@ e4c_get_status(
  * @see     #catch
  * @see     #finally
  */
-/*@unused@*/ extern
+/*@unused@*/
+extern
 /*@observer@*/ /*@relnull@*/
 const e4c_exception *
 e4c_get_exception(
@@ -3268,7 +3277,8 @@ e4c_get_exception(
  *
  * @see     #E4C_VERSION_NUMBER
  */
-/*@unused@*/ extern
+/*@unused@*/
+extern
 long
 e4c_library_version(
     void
@@ -3316,7 +3326,8 @@ e4c_library_version(
  * @see     #e4c_exception_type
  * @see     #e4c_get_exception
  */
-/*@unused@*/ extern
+/*@unused@*/
+extern
 E4C_BOOL
 e4c_is_instance_of(
     /*@temp@*/ /*@notnull@*/
@@ -3351,7 +3362,8 @@ e4c_is_instance_of(
  * @see     #e4c_context_begin
  * @see     #e4c_using_context
  */
-/*@unused@*/ extern
+/*@unused@*/
+extern
 void
 e4c_print_exception(
     /*@temp@*/ /*@notnull@*/
@@ -3404,7 +3416,8 @@ e4c_print_exception(
  *
  * @see     #e4c_exception_type
  */
-/*@unused@*/ extern
+/*@unused@*/
+extern
 void
 e4c_print_exception_type(
     /*@shared@*/ /*@notnull@*/
@@ -3430,7 +3443,8 @@ e4c_print_exception_type(
  * directly (but through the "keywords").
  */
 
-/*@unused@*/ extern
+/*@unused@*/
+extern
 /*@notnull@*/ /*@temp@*/
 struct e4c_continuation_ *
 e4c_frame_first_stage_(
@@ -3453,7 +3467,8 @@ e4c_frame_first_stage_(
 @*/
 ;
 
-/*@unused@*/ extern
+/*@unused@*/
+extern
 E4C_BOOL
 e4c_frame_next_stage_(
     void
@@ -3470,7 +3485,8 @@ e4c_frame_next_stage_(
 @*/
 ;
 
-/*@unused@*/ extern
+/*@unused@*/
+extern
 enum e4c_frame_stage_
 e4c_frame_get_stage_(
     /*@observer@*/ /*@null@*/
@@ -3489,7 +3505,8 @@ e4c_frame_get_stage_(
 @*/
 ;
 
-/*@unused@*/ extern
+/*@unused@*/
+extern
 E4C_BOOL
 e4c_frame_catch_(
     /*@temp@*/ /*@null@*/
@@ -3512,7 +3529,8 @@ e4c_frame_catch_(
 @*/
 ;
 
-/*@unused@*/ /*@maynotreturn@*/ extern
+/*@unused@*/ /*@maynotreturn@*/
+extern
 void
 e4c_frame_repeat_(
     int                         max_repeat_attempts,
@@ -3535,7 +3553,8 @@ e4c_frame_repeat_(
 @*/
 ;
 
-/*@unused@*/ /*@noreturn@*/ extern
+/*@unused@*/ /*@noreturn@*/
+extern
 void
 e4c_exception_throw_verbatim_(
     /*@shared@*/ /*@notnull@*/
