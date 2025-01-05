@@ -1,0 +1,31 @@
+# Lint
+name: Lint
+
+on:
+  push:
+    branches:
+    - '*'
+
+jobs:
+  build:
+
+    name: Lint
+    runs-on: ubuntu-latest
+
+    steps:
+
+    # ================================
+    # SHALLOW CLONE
+    # ================================
+    - name: Shallow clone
+      uses: actions/checkout@v4
+
+    # ================================
+    # LINT
+    # ================================
+    - name: Lint
+      uses: cpp-linter/cpp-linter-action@v2
+      with:
+        style: 'file'
+        tidy-checks: ''
+        step-summary: true
