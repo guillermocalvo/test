@@ -298,14 +298,12 @@
 
 typedef void (*signal_handler)(int);
 
-typedef enum e4c_frame_stage_ e4c_frame_stage;
-
 typedef struct e4c_continuation_ e4c_continuation;
 
 typedef struct e4c_frame_ e4c_frame;
 struct e4c_frame_ {
     e4c_frame *                 previous;
-    e4c_frame_stage             stage;
+    enum e4c_frame_stage        stage;
     bool                        uncaught;
     e4c_exception *             thrown_exception;
     int                         retry_attempts;
@@ -498,7 +496,7 @@ static noreturn void _e4c_context_propagate(e4c_context * context, e4c_exception
 
 static e4c_frame * _e4c_frame_allocate(int line, const char * function);
 static void _e4c_frame_deallocate(e4c_frame * frame, e4c_finalize_handler finalize_handler);
-static void _e4c_frame_initialize(e4c_frame * frame, e4c_frame * previous, e4c_frame_stage stage);
+static void _e4c_frame_initialize(e4c_frame * frame, e4c_frame * previous, enum e4c_frame_stage stage);
 static void _e4c_print_exception_type(const e4c_exception_type *  exception_type);
 static int _e4c_print_exception_type_node(const e4c_exception_type * exception_type);
 static bool _e4c_exception_type_extends(const e4c_exception_type * child, const e4c_exception_type * parent);
@@ -806,7 +804,7 @@ static void _e4c_context_initialize(e4c_context * context, e4c_uncaught_handler 
     context->finalize_handler   = NULL;
     context->current_frame      = _e4c_frame_allocate(__LINE__, "_e4c_context_initialize");
 
-    _e4c_frame_initialize(context->current_frame, NULL, e4c_done_);
+    _e4c_frame_initialize(context->current_frame, NULL, e4c_done);
 }
 
 static void _e4c_context_propagate(e4c_context * context, e4c_exception * exception) {
@@ -840,9 +838,9 @@ static void _e4c_context_propagate(e4c_context * context, e4c_exception * except
     /* otherwise, we will jump to the upper frame */
 
     /* simple optimization */
-    if (frame->stage == e4c_acquiring_) {
+    if (frame->stage == e4c_acquiring) {
         /* if we are in the middle of an acquisition, we don't need to dispose the resource */
-        frame->stage = e4c_disposing_;
+        frame->stage = e4c_disposing;
         /* (that actually jumps over the "disposing" stage) */
     }
 
@@ -1128,7 +1126,7 @@ bool e4c_context_is_ready(void) {
 /* FRAME
  ================================================================ */
 
-e4c_continuation * e4c_frame_first_stage_(e4c_frame_stage stage, const char * file, int line, const char * function) {
+e4c_continuation * e4c_frame_first_stage_(enum e4c_frame_stage stage, const char * file, int line, const char * function) {
 
     e4c_context *   context;
     e4c_frame *     current_frame;
@@ -1138,7 +1136,7 @@ e4c_continuation * e4c_frame_first_stage_(e4c_frame_stage stage, const char * fi
 
     /* check if 'try' was used before calling e4c_context_begin */
     if (context == NULL) {
-        if (stage == e4c_beginning_) {
+        if (stage == e4c_beginning) {
             MISUSE_ERROR(ContextHasNotBegunYet, "E4C_WITH: " DESC_NOT_BEGUN_YET, file, line, function);
         }
         MISUSE_ERROR(ContextHasNotBegunYet, "E4C_TRY: " DESC_NOT_BEGUN_YET, file, line, function);
@@ -1160,7 +1158,7 @@ e4c_continuation * e4c_frame_first_stage_(e4c_frame_stage stage, const char * fi
     return &(new_frame->continuation);
 }
 
-static void _e4c_frame_initialize(e4c_frame * frame, e4c_frame * previous, e4c_frame_stage stage) {
+static void _e4c_frame_initialize(e4c_frame * frame, e4c_frame * previous, enum e4c_frame_stage stage) {
 
     frame->previous             = previous;
     frame->stage                = stage;
@@ -1202,7 +1200,7 @@ static void _e4c_frame_deallocate(e4c_frame * frame, e4c_finalize_handler finali
     }
 }
 
-e4c_frame_stage e4c_frame_get_stage_(const char * file, int line, const char * function) {
+enum e4c_frame_stage e4c_frame_get_stage_(const char * file, int line, const char * function) {
 
     e4c_context * context;
 
@@ -1234,7 +1232,7 @@ bool e4c_frame_catch_(const e4c_exception_type * exception_type, const char * fi
         /* check if the current frame is NULL (very unlikely) */
         STOP_IF(frame == NULL, DESC_INVALID_FRAME, "e4c_frame_catch_");
 
-        if (frame->stage != e4c_catching_) {
+        if (frame->stage != e4c_catching) {
             return false;
         }
 
@@ -1287,14 +1285,14 @@ bool e4c_frame_next_stage_(void) {
     frame->stage++;
 
     /* simple optimization */
-    if (frame->stage == e4c_catching_ && (!frame->uncaught || (frame->thrown_exception == NULL) || IS_UNCATCHABLE(frame->thrown_exception))) {
+    if (frame->stage == e4c_catching && (!frame->uncaught || (frame->thrown_exception == NULL) || IS_UNCATCHABLE(frame->thrown_exception))) {
         /* if no exception was thrown, or if the thrown exception cannot be
             caught, we don't need to go through the "catching" stage */
         frame->stage++;
     }
 
     /* keep looping until we reach the "done" stage */
-    if (frame->stage < e4c_done_) {
+    if (frame->stage < e4c_done) {
         return true;
     }
 
@@ -1334,7 +1332,7 @@ bool e4c_frame_next_stage_(void) {
     return false;
 }
 
-void e4c_frame_repeat_(int max_repeat_attempts, e4c_frame_stage stage, const char * file, int line, const char * function) {
+void e4c_frame_repeat_(int max_repeat_attempts, enum e4c_frame_stage stage, const char * file, int line, const char * function) {
 
     e4c_context *       context;
     e4c_frame *         frame;
@@ -1344,7 +1342,7 @@ void e4c_frame_repeat_(int max_repeat_attempts, e4c_frame_stage stage, const cha
 
     /* check if 'e4c_frame_repeat_' was used before calling e4c_context_begin */
     if (context == NULL) {
-        if (stage == e4c_beginning_) {
+        if (stage == e4c_beginning) {
             MISUSE_ERROR(ContextHasNotBegunYet, "E4C_REACQUIRE: " DESC_NOT_BEGUN_YET, file, line, function);
         }
         MISUSE_ERROR(ContextHasNotBegunYet, "E4C_RETRY: " DESC_NOT_BEGUN_YET, file, line, function);
@@ -1358,7 +1356,7 @@ void e4c_frame_repeat_(int max_repeat_attempts, e4c_frame_stage stage, const cha
 
     /* check if 'e4c_frame_repeat_' was used before 'try' or 'use' */
     if (IS_TOP_FRAME(frame)) {
-        if (stage == e4c_beginning_) {
+        if (stage == e4c_beginning) {
             MISUSE_ERROR(ExceptionSystemFatalError, "E4C_REACQUIRE: " DESC_CANNOT_REACQUIRE, file, line, function);
         }
         MISUSE_ERROR(ExceptionSystemFatalError, "E4C_RETRY: " DESC_CANNOT_RETRY, file, line, function);
@@ -1372,7 +1370,7 @@ void e4c_frame_repeat_(int max_repeat_attempts, e4c_frame_stage stage, const cha
     /* check if maximum number of attempts reached and update the number of attempts */
     switch (stage) {
 
-        case e4c_beginning_:
+        case e4c_beginning:
             /* reacquire */
             if (frame->reacquire_attempts >= max_repeat_attempts) {
                 return;
@@ -1380,7 +1378,7 @@ void e4c_frame_repeat_(int max_repeat_attempts, e4c_frame_stage stage, const cha
             frame->reacquire_attempts++;
             break;
 
-        case e4c_acquiring_:
+        case e4c_acquiring:
             /* retry */
             if (frame->retry_attempts >= max_repeat_attempts) {
                 return;
@@ -1388,11 +1386,11 @@ void e4c_frame_repeat_(int max_repeat_attempts, e4c_frame_stage stage, const cha
             frame->retry_attempts++;
             break;
 
-        case e4c_trying_:
-        case e4c_disposing_:
-        case e4c_catching_:
-        case e4c_finalizing_:
-        case e4c_done_:
+        case e4c_trying:
+        case e4c_disposing:
+        case e4c_catching:
+        case e4c_finalizing:
+        case e4c_done:
         default:
             MISUSE_ERROR(ExceptionSystemFatalError, "e4c_frame_repeat: " DESC_CANNOT_REPEAT, file, line, function);
     }

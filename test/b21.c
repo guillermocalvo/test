@@ -21,7 +21,7 @@ TEST_CASE{
     E4C_TRY{
 
         /* Never call this function like this! */
-        e4c_frame_repeat_(10, e4c_done_ + 1, "misuse.c", 0xBADC0DE, NULL);
+        e4c_frame_repeat_(10, e4c_done + 1, "misuse.c", 0xBADC0DE, NULL);
     }
 
     e4c_context_end();

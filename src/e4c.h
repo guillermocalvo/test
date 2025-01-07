@@ -271,8 +271,8 @@
  * @see     #e4c_get_status
  */
 #define E4C_TRY                                                             \
-  E4C_FRAME_LOOP_(e4c_acquiring_)                                           \
-  if (e4c_frame_get_stage_(E4C_INFO_) == e4c_trying_ && e4c_frame_next_stage_() )
+  E4C_FRAME_LOOP_(e4c_acquiring)                                            \
+  if (e4c_frame_get_stage_(E4C_INFO_) == e4c_trying && e4c_frame_next_stage_())
     /* simple optimization: e4c_frame_next_stage_ will avoid disposing stage */
 
 /**
@@ -412,7 +412,7 @@
  * @see     #e4c_status
  */
 #define E4C_FINALLY                                                         \
-  else if (e4c_frame_get_stage_(E4C_INFO_) == e4c_finalizing_)
+  else if (e4c_frame_get_stage_(E4C_INFO_) == e4c_finalizing)
 
 /**
  * Repeats the previous #E4C_TRY (or #E4C_USE) block entirely
@@ -503,7 +503,7 @@
  * @see     #E4C_USE
  */
 #define E4C_RETRY(max_retry_attempts)                                       \
-    e4c_frame_repeat_(max_retry_attempts, e4c_acquiring_, E4C_INFO_)
+    e4c_frame_repeat_(max_retry_attempts, e4c_acquiring, E4C_INFO_)
 
 /**
  * Signals an exceptional situation represented by an exception object
@@ -689,10 +689,10 @@
  * @see     #E4C_USING
  */
 #define E4C_WITH(resource, dispose)                                         \
-  E4C_FRAME_LOOP_(e4c_beginning_)                                           \
-  if (e4c_frame_get_stage_(E4C_INFO_) == e4c_disposing_) {                  \
+  E4C_FRAME_LOOP_(e4c_beginning)                                            \
+  if (e4c_frame_get_stage_(E4C_INFO_) == e4c_disposing) {                   \
   dispose((resource), e4c_get_status() == e4c_failed);                      \
-  } else if( e4c_frame_get_stage_(E4C_INFO_) == e4c_acquiring_ ) {
+  } else if (e4c_frame_get_stage_(E4C_INFO_) == e4c_acquiring) {
 
 /**
  * Closes a block of code with automatic disposal of a resource
@@ -715,7 +715,7 @@
  * @see     #E4C_WITH
  */
 #define E4C_USE                                                             \
-  } else if (e4c_frame_get_stage_(E4C_INFO_) == e4c_trying_)
+  } else if (e4c_frame_get_stage_(E4C_INFO_) == e4c_trying)
 
 /**
  * Introduces a block of code with automatic acquisition and disposal of a
@@ -826,7 +826,7 @@
  * @see     #E4C_USE
  */
 #define E4C_REACQUIRE(max_reacquire_attempts)                               \
-  e4c_frame_repeat_(max_reacquire_attempts, e4c_beginning_, E4C_INFO_)
+  e4c_frame_repeat_(max_reacquire_attempts, e4c_beginning, E4C_INFO_)
 
 /** @} */
 
@@ -1868,14 +1868,14 @@ typedef void (*e4c_finalize_handler)(void * custom_data);
  * Next types are undocumented on purpose, in order to hide implementation
  * details, subject to change.
  */
-enum e4c_frame_stage_ {
-    e4c_beginning_,
-    e4c_acquiring_,
-    e4c_trying_,
-    e4c_disposing_,
-    e4c_catching_,
-    e4c_finalizing_,
-    e4c_done_
+enum e4c_frame_stage {
+    e4c_beginning,
+    e4c_acquiring,
+    e4c_trying,
+    e4c_disposing,
+    e4c_catching,
+    e4c_finalizing,
+    e4c_done
 };
 
 struct e4c_continuation_ {
@@ -2755,7 +2755,7 @@ e4c_print_exception_type(
 
 struct e4c_continuation_ *
 e4c_frame_first_stage_(
-    enum e4c_frame_stage_       stage,
+    enum e4c_frame_stage        stage,
     const char *                file,
     int                         line,
     const char *                function
@@ -2766,7 +2766,7 @@ e4c_frame_next_stage_(
     void
 );
 
-enum e4c_frame_stage_
+enum e4c_frame_stage
 e4c_frame_get_stage_(
     const char *                file,
     int                         line,
@@ -2784,7 +2784,7 @@ e4c_frame_catch_(
 void
 e4c_frame_repeat_(
     int                         max_repeat_attempts,
-    enum e4c_frame_stage_       stage,
+    enum e4c_frame_stage        stage,
     const char *                file,
     int                         line,
     const char *                function
