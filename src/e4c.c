@@ -2505,7 +2505,7 @@ static void _e4c_library_finalize(void) {
         e4c_exception exception;
 
         /* create temporary exception to be printed out */
-        _e4c_exception_initialize(&exception, &ContextNotEnded, true, DESC_NOT_ENDED, E4C_INFO_FILE_, E4C_INFO_LINE_, "_e4c_library_finalize", errno);
+        _e4c_exception_initialize(&exception, &ContextNotEnded, true, DESC_NOT_ENDED, __FILE__, __LINE__, __func__, errno);
         _e4c_context_at_uncaught_exception(E4C_CONTEXT, &exception);
 
         fatal_error_flag = true;
@@ -3479,7 +3479,7 @@ static E4C_INLINE void _e4c_print_exception_type(const e4c_exception_type * exce
 void e4c_print_exception_type(const e4c_exception_type * exception_type) {
 
     if (exception_type == NULL) {
-        e4c_exception_throw_verbatim_(&NullPointerException, E4C_INFO_FILE_, E4C_INFO_LINE_, "e4c_print_exception_type", "Null exception type.");
+        e4c_exception_throw_verbatim_(&NullPointerException, __FILE__, __LINE__, __func__, "Null exception type.");
     }
 
     _e4c_print_exception_type(exception_type);
@@ -3767,7 +3767,7 @@ static void _e4c_print_exception(const e4c_exception * exception) {
 void e4c_print_exception(const e4c_exception * exception) {
 
     if (exception == NULL) {
-        e4c_exception_throw_verbatim_(&NullPointerException, E4C_INFO_FILE_, E4C_INFO_LINE_, "e4c_print_exception", "Null exception.");
+        e4c_exception_throw_verbatim_(&NullPointerException, __FILE__, __LINE__, __func__, "Null exception.");
     }
 
     _e4c_print_exception(exception);

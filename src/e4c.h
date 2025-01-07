@@ -103,10 +103,6 @@
 #       define HAVE_C99_VARIADIC_MACROS
 #   endif
 
-#   ifndef HAVE_C99_FUNC
-#       define HAVE_C99_FUNC
-#   endif
-
 #   ifndef HAVE_C99_VSNPRINTF
 #       define HAVE_C99_VSNPRINTF
 #   endif
@@ -146,29 +142,6 @@
 #ifndef __bool_true_false_are_defined
 #include <stdbool.h>
 #endif
-
-/*
- * The E4C_FUNCTION_NAME_ compile-time parameter
- * could be defined in order to work with some specific compiler.
- */
-# ifndef E4C_FUNCTION_NAME_
-
-#   ifdef HAVE_C99_FUNC
-#       define E4C_FUNCTION_NAME_       __func__
-
-#   elif defined(__GNUC__)
-#       if !defined(__OPTIMIZE__) && (__GNUC__ >= 2)
-#           define E4C_FUNCTION_NAME_   __extension__ __FUNCTION__
-#       else
-#           define E4C_FUNCTION_NAME_   NULL
-#       endif
-
-#   else
-#       define E4C_FUNCTION_NAME_       NULL
-#   endif
-
-# endif
-
 
 /*
  * The E4C_INVALID_SIGNAL_NUMBER_ compile-time parameter
@@ -225,25 +198,16 @@
 
 
 # ifndef NDEBUG
-#   define E4C_INFO_FILE_               __FILE__
-#   define E4C_INFO_LINE_               __LINE__
-#   define E4C_INFO_FUNC_               E4C_FUNCTION_NAME_
+#   define E4C_INFO_                    __FILE__, __LINE__, __func__
 #   define E4C_ASSERT(condition) ( \
         (condition) \
         ? (void)0 \
         : E4C_THROW(AssertionException, "Assertion failed: " #condition) \
     )
 # else
-#   define E4C_INFO_FILE_               NULL
-#   define E4C_INFO_LINE_               0
-#   define E4C_INFO_FUNC_               NULL
+#   define E4C_INFO_                    NULL, 0, NULL
 #   define E4C_ASSERT(ignore)           ( (void)0 )
 # endif
-
-# define E4C_INFO_ \
-            E4C_INFO_FILE_, \
-            E4C_INFO_LINE_, \
-            E4C_INFO_FUNC_
 
 
 # define E4C_PASTE_(x, y, z)            x ## _ ## y ## _ ## z
