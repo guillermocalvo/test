@@ -74,7 +74,7 @@ void myfunc() {
 
 int main(int argc, char *argv[]) {
     int r = 0;
-    e4c_using_context(E4C_FALSE) {
+    e4c_using_context(false) {
         e4c_context_set_handlers(NULL, NULL, BackTrace_create_for_exception, BackTrace_destroy);
         try {
             myfunc();

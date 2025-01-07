@@ -13,10 +13,10 @@
  */
 TEST_CASE{
 
-    volatile E4C_BOOL caught1 = E4C_FALSE;
-    volatile E4C_BOOL caught2 = E4C_FALSE;
+    volatile bool caught1 = false;
+    volatile bool caught2 = false;
 
-    e4c_context_begin(E4C_FALSE);
+    e4c_context_begin(false);
 
     E4C_TRY{
 
@@ -24,11 +24,11 @@ TEST_CASE{
 
     }E4C_CATCH(RuntimeException){
 
-        caught1 = E4C_TRUE;
+        caught1 = true;
 
     }E4C_CATCH(IllegalArgumentException){
 
-        caught2 = E4C_TRUE;
+        caught2 = true;
     }
 
     e4c_context_end();

@@ -11,9 +11,9 @@
  */
 TEST_CASE{
 
-    volatile E4C_BOOL caught = E4C_FALSE;
+    volatile bool caught = false;
 
-    e4c_using_context(E4C_TRUE){
+    e4c_using_context(true){
 
         E4C_TRY{
 
@@ -21,7 +21,7 @@ TEST_CASE{
 
         }E4C_CATCH(RuntimeException){
 
-            caught = E4C_TRUE;
+            caught = true;
 
         }
     }

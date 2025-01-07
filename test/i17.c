@@ -14,7 +14,7 @@ E4C_DEFINE_EXCEPTION(CustomException, "This is a custom exception", RuntimeExcep
  */
 TEST_CASE{
 
-    e4c_context_begin(E4C_FALSE);
+    e4c_context_begin(false);
 
     E4C_TRY{
 

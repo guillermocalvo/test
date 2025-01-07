@@ -2,7 +2,7 @@
 # include "testing.h"
 
 
-volatile E4C_BOOL custom_initializer_was_executed = E4C_FALSE;
+volatile bool custom_initializer_was_executed = false;
 void * custom_initialize_handler(const e4c_exception * exception);
 
 
@@ -21,7 +21,7 @@ TEST_CASE{
 
 # else
 
-    e4c_context_begin(E4C_FALSE);
+    e4c_context_begin(false);
 
     e4c_context_set_handlers(NULL, NULL, custom_initialize_handler, NULL);
 
@@ -52,7 +52,7 @@ TEST_CASE{
 
 void * custom_initialize_handler(const e4c_exception * exception){
 
-    custom_initializer_was_executed = E4C_TRUE;
+    custom_initializer_was_executed = true;
 
     return(NULL);
 }

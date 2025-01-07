@@ -11,9 +11,9 @@
  */
 TEST_CASE{
 
-    volatile E4C_BOOL caught = E4C_FALSE;
+    volatile bool caught = false;
 
-    e4c_context_begin(E4C_FALSE);
+    e4c_context_begin(false);
 
     E4C_TRY{
 
@@ -21,7 +21,7 @@ TEST_CASE{
 
     }E4C_CATCH(IllegalArgumentException){
 
-        caught = E4C_TRUE;
+        caught = true;
     }
 
     e4c_context_end();

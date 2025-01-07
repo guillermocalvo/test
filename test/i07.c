@@ -4,7 +4,7 @@
 
 char foobar[64] = "FOOBAR";
 void * custom_initialize_handler(const e4c_exception * exception);
-volatile E4C_BOOL custom_handler_was_initialized = E4C_FALSE;
+volatile bool custom_handler_was_initialized = false;
 
 
 /**
@@ -16,7 +16,7 @@ volatile E4C_BOOL custom_handler_was_initialized = E4C_FALSE;
  */
 TEST_CASE{
 
-    e4c_context_begin(E4C_FALSE);
+    e4c_context_begin(false);
 
     e4c_context_set_handlers(NULL, NULL, custom_initialize_handler, NULL);
 

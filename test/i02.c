@@ -14,7 +14,7 @@ TEST_CASE{
 
     volatile int total_tries = 0;
 
-    e4c_context_begin(E4C_FALSE);
+    e4c_context_begin(false);
 
     E4C_TRY{
 

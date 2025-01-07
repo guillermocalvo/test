@@ -14,9 +14,9 @@
  */
 TEST_CASE{
 
-    volatile E4C_BOOL exception_was_caught = E4C_FALSE;
+    volatile bool exception_was_caught = false;
 
-    e4c_context_begin(E4C_TRUE);
+    e4c_context_begin(true);
 
     E4C_TRY{
 
@@ -26,7 +26,7 @@ TEST_CASE{
 
     }E4C_CATCH(SignalException){
 
-        exception_was_caught = E4C_TRUE;
+        exception_was_caught = true;
 
         TEST_ASSERT(e4c_get_exception()->type == &IllegalInstructionException);
     }

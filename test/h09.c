@@ -26,7 +26,7 @@ TEST_CASE{
 
     int status = LIBRARY_FAILURE;
 
-    e4c_using_context(E4C_TRUE){
+    e4c_using_context(true){
 
         /* The client will check the returned error code */
         status = library_3rd_party(0);

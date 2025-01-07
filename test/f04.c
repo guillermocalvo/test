@@ -2,7 +2,7 @@
 # include "testing.h"
 
 
-void aux(volatile E4C_BOOL * flag);
+void aux(volatile bool * flag);
 
 
 /**
@@ -15,11 +15,11 @@ void aux(volatile E4C_BOOL * flag);
  */
 TEST_CASE{
 
-    volatile E4C_BOOL uncaught = E4C_FALSE;
+    volatile bool uncaught = false;
 
     TEST_EXPECTING(RuntimeException);
 
-    e4c_context_begin(E4C_FALSE);
+    e4c_context_begin(false);
 
     E4C_TRY{
 
@@ -36,7 +36,7 @@ TEST_CASE{
 }
 
 
-void aux(volatile E4C_BOOL * flag){
+void aux(volatile bool * flag){
 
     E4C_TRY{
 
@@ -53,5 +53,5 @@ void aux(volatile E4C_BOOL * flag){
 
     THIS_SHOULD_NOT_HAPPEN;
 
-    *flag = E4C_FALSE;
+    *flag = false;
 }

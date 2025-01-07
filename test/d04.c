@@ -16,7 +16,7 @@ TEST_CASE{
 
     TEST_EXPECTING(RuntimeException);
 
-    e4c_context_begin(E4C_FALSE);
+    e4c_context_begin(false);
 
     E4C_TRY{
 

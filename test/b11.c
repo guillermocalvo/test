@@ -14,21 +14,21 @@
  */
 TEST_CASE{
 
-    volatile E4C_BOOL ignored = E4C_FALSE;
+    volatile bool ignored = false;
 
-    e4c_context_begin(E4C_FALSE);
+    e4c_context_begin(false);
 
     E4C_TRY{
 
         TEST_ECHO("Inside `try` block...");
 
-        ignored = E4C_TRUE;
+        ignored = true;
 
     /* } */ E4C_USE{
 
         TEST_ECHO("Inside `use` block...");
 
-        ignored = E4C_FALSE;
+        ignored = false;
     }
 
     /**

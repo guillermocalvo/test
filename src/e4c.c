@@ -138,7 +138,7 @@
         if(pthread_mutex_unlock(&mutex) != 0){ \
             _e4c_library_fatal_error(&ExceptionSystemFatalError, DESC_UNLOCK_ERROR, __FILE__, __LINE__, function, errno); \
         }
-#   define STOP_EXECUTION           do{ THREAD_CANCEL_CURRENT; THREAD_EXIT; }while(E4C_TRUE)
+#   define STOP_EXECUTION           do{ THREAD_CANCEL_CURRENT; THREAD_EXIT; }while(true)
 #   define DANGLING_CONTEXT         (environment_collection.first != NULL)
 # else
 #   define E4C_CONTEXT              current_context
@@ -341,7 +341,7 @@ struct e4c_frame_ {
     /*@only@*/ /*@null@*/
     e4c_frame *                 previous;
     e4c_frame_stage             stage;
-    E4C_BOOL                    uncaught;
+    bool                        uncaught;
     /*@only@*/ /*@null@*/
     e4c_exception *             thrown_exception;
     int                         retry_attempts;
@@ -388,18 +388,18 @@ struct e4c_environment_collection_{
 
 /** flag to signal a critical error in the exception system */
 static volatile
-E4C_BOOL
-fatal_error_flag = E4C_FALSE;
+bool
+fatal_error_flag = false;
 
 /** flag to determine if the exception system is initialized */
 static volatile
-E4C_BOOL
-is_initialized = E4C_FALSE;
+bool
+is_initialized = false;
 
 /** flag to determine if the exception system is finalized */
 static volatile
-E4C_BOOL
-is_finalized = E4C_FALSE;
+bool
+is_finalized = false;
 
 # ifdef E4C_THREADSAFE
 
@@ -951,7 +951,7 @@ _e4c_environment_get_current(
 /*@-redecl@*/
 void
 e4c_context_begin(
-    E4C_BOOL                    handle_signals
+    bool                        handle_signals
 )
 # ifdef E4C_THREADSAFE
 /*@globals
@@ -1049,7 +1049,7 @@ e4c_context_end(
 /*@=redecl@*/
 
 /*@-redecl@*/
-E4C_BOOL
+bool
 e4c_context_is_ready(
     void
 )
@@ -1597,7 +1597,7 @@ e4c_frame_first_stage_(
 /*@=redecl@*/
 
 /*@-redecl@*/
-E4C_BOOL
+bool
 e4c_frame_next_stage_(
     void
 )
@@ -1695,7 +1695,7 @@ e4c_frame_get_stage_(
 /*@=redecl@*/
 
 /*@-redecl@*/
-E4C_BOOL
+bool
 e4c_frame_catch_(
     /*@in@*/ /*@temp@*/ /*@null@*/
     const e4c_exception_type *  exception_type,
@@ -1952,7 +1952,7 @@ e4c_print_exception_type(
 /*@=redecl@*/
 
 /*@-redecl@*/
-E4C_BOOL
+bool
 e4c_is_instance_of(
     /*@in@*/ /*@temp@*/ /*@notnull@*/
     const e4c_exception *       instance,
@@ -1994,7 +1994,7 @@ _e4c_print_exception_type_node(
 ;
 
 static E4C_INLINE
-E4C_BOOL
+bool
 _e4c_exception_type_extends(
     /*@in@*/ /*@temp@*/ /*@notnull@*/
     const e4c_exception_type *  child,
@@ -2346,7 +2346,7 @@ _e4c_exception_initialize(
     e4c_exception *             exception,
     /*@shared@*/ /*@notnull@*/
     const e4c_exception_type *  exception_type,
-    E4C_BOOL                    set_message,
+    bool                        set_message,
     /*@observer@*/ /*@temp@*/ /*@null@*/
     const char *                message,
     /*@observer@*/ /*@null@*/
@@ -2391,7 +2391,7 @@ _e4c_exception_throw(
     /*@in@*/ /*@observer@*/ /*@null@*/
     const char *                function,
     int                         error_number,
-    E4C_BOOL                    set_message,
+    bool                        set_message,
     /*@in@*/ /*@observer@*/ /*@temp@*/ /*@null@*/
     const char *                message
 )
@@ -2497,7 +2497,7 @@ static void _e4c_library_finalize(void) {
         return;
     }
 
-    is_finalized = E4C_TRUE;
+    is_finalized = true;
 
     /* check for dangling context */
     if (!fatal_error_flag && DANGLING_CONTEXT) {
@@ -2505,10 +2505,10 @@ static void _e4c_library_finalize(void) {
         e4c_exception exception;
 
         /* create temporary exception to be printed out */
-        _e4c_exception_initialize(&exception, &ContextNotEnded, E4C_TRUE, DESC_NOT_ENDED, E4C_INFO_FILE_, E4C_INFO_LINE_, "_e4c_library_finalize", errno);
+        _e4c_exception_initialize(&exception, &ContextNotEnded, true, DESC_NOT_ENDED, E4C_INFO_FILE_, E4C_INFO_LINE_, "_e4c_library_finalize", errno);
         _e4c_context_at_uncaught_exception(E4C_CONTEXT, &exception);
 
-        fatal_error_flag = E4C_TRUE;
+        fatal_error_flag = true;
     }
 
 # ifndef NDEBUG
@@ -2587,7 +2587,7 @@ static void _e4c_library_handle_signal(int signal_number) {
             }
 
             /* check context and frame; initialize exception and cause */
-            new_exception = _e4c_exception_throw(context->current_frame, mapping->exception_type, signal_name, signal_number, "_e4c_library_handle_signal", errno, E4C_TRUE, NULL);
+            new_exception = _e4c_exception_throw(context->current_frame, mapping->exception_type, signal_name, signal_number, "_e4c_library_handle_signal", errno, true, NULL);
 
             /* set initial value for custom data */
             new_exception->custom_data = context->custom_data;
@@ -2613,7 +2613,7 @@ static E4C_INLINE void _e4c_library_fatal_error(const e4c_exception_type * excep
 
     e4c_exception exception;
 
-    _e4c_exception_initialize(&exception, exception_type, E4C_TRUE, message, file, line, function, error_number);
+    _e4c_exception_initialize(&exception, exception_type, true, message, file, line, function, error_number);
 
     /* ensures library initialization so that _e4c_library_finalize will be called */
     INITIALIZE_ONCE;
@@ -2622,7 +2622,7 @@ static E4C_INLINE void _e4c_library_fatal_error(const e4c_exception_type * excep
     _e4c_context_at_uncaught_exception(E4C_CONTEXT, &exception);
 
     /* records critical error so that MSG_AT_EXIT_ERROR will be printed too */
-    fatal_error_flag = E4C_TRUE;
+    fatal_error_flag = true;
 
     /*@-noeffectuncon@*/
     STOP_EXECUTION;
@@ -2768,7 +2768,7 @@ static void _e4c_context_propagate(e4c_context * context, e4c_exception * except
     frame = context->current_frame;
 
     /* update the frame with the exception information */
-    frame->uncaught         = E4C_TRUE;
+    frame->uncaught         = true;
 
     /* deallocate previously thrown exception */
     _e4c_exception_deallocate(frame->thrown_exception, context->finalize_handler);
@@ -2810,7 +2810,7 @@ static E4C_INLINE e4c_context * _e4c_context_get_current(void){
 }
 
 /* e4c_context_begin (multi-thread) */
-void e4c_context_begin(E4C_BOOL handle_signals){
+void e4c_context_begin(bool handle_signals){
 
     e4c_environment * environment;
 
@@ -2883,7 +2883,7 @@ void e4c_context_end(void){
 # else
 
 /* e4c_context_begin (single-thread) */
-void e4c_context_begin(E4C_BOOL handle_signals) {
+void e4c_context_begin(bool handle_signals) {
 
     INITIALIZE_ONCE;
 
@@ -3082,7 +3082,7 @@ const e4c_signal_mapping * e4c_context_get_signal_mappings(void) {
     E4C_UNREACHABLE_RETURN(NULL);
 }
 
-E4C_BOOL e4c_context_is_ready(void) {
+bool e4c_context_is_ready(void) {
 
     return E4C_CONTEXT != NULL;
 }
@@ -3127,7 +3127,7 @@ static E4C_INLINE void _e4c_frame_initialize(e4c_frame * frame, e4c_frame * prev
 
     frame->previous             = previous;
     frame->stage                = stage;
-    frame->uncaught             = E4C_FALSE;
+    frame->uncaught             = false;
     frame->reacquire_attempts   = 0;
     frame->retry_attempts       = 0;
     frame->thrown_exception     = NULL;
@@ -3184,7 +3184,7 @@ e4c_frame_stage e4c_frame_get_stage_(const char * file, int line, const char * f
     return context->current_frame->stage;
 }
 
-E4C_BOOL e4c_frame_catch_(const e4c_exception_type * exception_type, const char * file, int line, const char * function) {
+bool e4c_frame_catch_(const e4c_exception_type * exception_type, const char * file, int line, const char * function) {
 
     e4c_context *   context;
     e4c_frame *     frame;
@@ -3197,23 +3197,23 @@ E4C_BOOL e4c_frame_catch_(const e4c_exception_type * exception_type, const char 
         frame = context->current_frame;
 
         /* check if the current frame is NULL (very unlikely) */
-        PREVENT_FUNC(frame == NULL, DESC_INVALID_FRAME, "e4c_frame_catch_", E4C_FALSE);
+        PREVENT_FUNC(frame == NULL, DESC_INVALID_FRAME, "e4c_frame_catch_", false);
 
         if (frame->stage != e4c_catching_) {
-            return E4C_FALSE;
+            return false;
         }
 
         /* passing NULL to a catch block is considered a fatal error */
         if (exception_type == NULL) {
             MISUSE_ERROR(NullPointerException, "E4C_CATCH: " DESC_CATCH_NULL, file, line, function);
-            E4C_UNREACHABLE_RETURN(E4C_FALSE);
+            E4C_UNREACHABLE_RETURN(false);
         }
 
         /* check if the thrown exception is NULL (very unlikely) */
-        PREVENT_FUNC(frame->thrown_exception == NULL, DESC_INVALID_STATE, "e4c_frame_catch_", E4C_FALSE);
+        PREVENT_FUNC(frame->thrown_exception == NULL, DESC_INVALID_STATE, "e4c_frame_catch_", false);
 
         /* check if the exception type is NULL (very unlikely) */
-        PREVENT_FUNC(frame->thrown_exception->type == NULL, DESC_INVALID_STATE, "e4c_frame_catch_", E4C_FALSE);
+        PREVENT_FUNC(frame->thrown_exception->type == NULL, DESC_INVALID_STATE, "e4c_frame_catch_", false);
 
         /* assert: thrown_exception is catchable (otherwise we would have skipped the "catching" stage in e4c_frame_next_stage_) */
 
@@ -3221,20 +3221,20 @@ E4C_BOOL e4c_frame_catch_(const e4c_exception_type * exception_type, const char 
         if (frame->thrown_exception->type == exception_type || _e4c_exception_type_extends(frame->thrown_exception->type, exception_type)) {
 
             /* yay, catch current exception by executing the handler */
-            frame->uncaught = E4C_FALSE;
+            frame->uncaught = false;
 
-            return E4C_TRUE;
+            return true;
         }
 
         /* nay, keep looking for an exception handler */
-        return E4C_FALSE;
+        return false;
     }
 
     MISUSE_ERROR(ContextHasNotBegunYet, "e4c_frame_catch_: " DESC_NOT_BEGUN_YET, file, line, function);
-    E4C_UNREACHABLE_RETURN(E4C_FALSE);
+    E4C_UNREACHABLE_RETURN(false);
 }
 
-E4C_BOOL e4c_frame_next_stage_(void) {
+bool e4c_frame_next_stage_(void) {
 
     e4c_context *   context;
     e4c_frame *     frame;
@@ -3244,12 +3244,12 @@ E4C_BOOL e4c_frame_next_stage_(void) {
     context = E4C_CONTEXT;
 
     /* check if the current exception context is NULL (unlikely) */
-    PREVENT_FUNC(context == NULL, DESC_NOT_BEGUN_YET, "e4c_frame_next_stage_", E4C_FALSE);
+    PREVENT_FUNC(context == NULL, DESC_NOT_BEGUN_YET, "e4c_frame_next_stage_", false);
 
     frame = context->current_frame;
 
     /* check if the current frame is NULL (very unlikely) */
-    PREVENT_FUNC(frame == NULL, DESC_INVALID_FRAME, "e4c_frame_next_stage_", E4C_FALSE);
+    PREVENT_FUNC(frame == NULL, DESC_INVALID_FRAME, "e4c_frame_next_stage_", false);
 
     frame->stage++;
 
@@ -3262,11 +3262,11 @@ E4C_BOOL e4c_frame_next_stage_(void) {
 
     /* keep looping until we reach the "done" stage */
     if (frame->stage < e4c_done_) {
-        return E4C_TRUE;
+        return true;
     }
 
     /* check if the previous frame is NULL (unlikely) */
-    PREVENT_FUNC(frame->previous == NULL, DESC_INVALID_FRAME, "e4c_frame_next_stage_", E4C_FALSE);
+    PREVENT_FUNC(frame->previous == NULL, DESC_INVALID_FRAME, "e4c_frame_next_stage_", false);
 
     /* the exception loop is finished */
 
@@ -3298,7 +3298,7 @@ E4C_BOOL e4c_frame_next_stage_(void) {
     /* otherwise, we're free to go */
 
     /* get out of the exception loop */
-    return E4C_FALSE;
+    return false;
 }
 
 void e4c_frame_repeat_(int max_repeat_attempts, e4c_frame_stage stage, const char * file, int line, const char * function) {
@@ -3374,7 +3374,7 @@ void e4c_frame_repeat_(int max_repeat_attempts, e4c_frame_stage stage, const cha
 
     /* reset exception information */
     frame->thrown_exception = NULL;
-    frame->uncaught         = E4C_FALSE;
+    frame->uncaught         = false;
     frame->stage            = stage;
 
     /* keep looping */
@@ -3414,7 +3414,7 @@ e4c_status e4c_get_status(void) {
 /* EXCEPTION TYPE
  ================================================================ */
 
-static E4C_INLINE E4C_BOOL _e4c_exception_type_extends(const e4c_exception_type * temp, const e4c_exception_type * parent) {
+static E4C_INLINE bool _e4c_exception_type_extends(const e4c_exception_type * temp, const e4c_exception_type * parent) {
 
     /* assert: child != parent */
     /* assert: child != NULL */
@@ -3427,21 +3427,21 @@ static E4C_INLINE E4C_BOOL _e4c_exception_type_extends(const e4c_exception_type 
 
         if (child->supertype == parent) {
 
-            return E4C_TRUE;
+            return true;
         }
     }
 
-    return E4C_FALSE;
+    return false;
 }
 
-E4C_BOOL e4c_is_instance_of(const e4c_exception * instance, const e4c_exception_type * exception_type) {
+bool e4c_is_instance_of(const e4c_exception * instance, const e4c_exception_type * exception_type) {
 
     if (instance == NULL || instance->type == NULL || exception_type == NULL) {
-        return E4C_FALSE;
+        return false;
     }
 
     if (instance->type == exception_type) {
-        return E4C_TRUE;
+        return true;
     }
 
     return _e4c_exception_type_extends(instance->type, exception_type);
@@ -3508,7 +3508,7 @@ const e4c_exception * e4c_get_exception(void) {
     return context->current_frame->thrown_exception;
 }
 
-static E4C_INLINE e4c_exception * _e4c_exception_throw(e4c_frame * frame, const e4c_exception_type * exception_type, const char * file, int line, const char * function, int error_number, E4C_BOOL set_message, const char * message) {
+static E4C_INLINE e4c_exception * _e4c_exception_throw(e4c_frame * frame, const e4c_exception_type * exception_type, const char * file, int line, const char * function, int error_number, bool set_message, const char * message) {
 
     e4c_exception *     new_exception;
 
@@ -3569,7 +3569,7 @@ void e4c_exception_throw_verbatim_(const e4c_exception_type * exception_type, co
         PREVENT_PROC(frame == NULL, DESC_INVALID_FRAME, "e4c_exception_throw_verbatim_");
 
         /* check context and frame; initialize exception and cause */
-        new_exception = _e4c_exception_throw(frame, exception_type, file, line, function, error_number, E4C_TRUE, message);
+        new_exception = _e4c_exception_throw(frame, exception_type, file, line, function, error_number, true, message);
 
         /* set initial value for custom data */
         new_exception->custom_data = context->custom_data;
@@ -3636,7 +3636,7 @@ void e4c_exception_throw_format_(const e4c_exception_type * exception_type, cons
 
 # endif
 
-static E4C_INLINE void _e4c_exception_initialize(e4c_exception * exception, const e4c_exception_type * exception_type, E4C_BOOL set_message, const char * message, const char * file, int line, const char * function, int error_number) {
+static E4C_INLINE void _e4c_exception_initialize(e4c_exception * exception, const e4c_exception_type * exception_type, bool set_message, const char * message, const char * file, int line, const char * function, int error_number) {
 
     /* assert: exception != NULL */
     /* assert: exception_type != NULL */

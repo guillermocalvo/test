@@ -841,10 +841,7 @@ EXCLUDE_SYMBOLS        = e4c_frame_stage_ \
                          E4C_TRY \
                          E4C_FINALLY \
                          E4C_REACQUIRE \
-                         E4C_BOOL \
                          E4C_ASSERT \
-                         E4C_FALSE \
-                         E4C_TRUE \
                          E4C_RETHROW \
                          E4C_RETHROWF \
                          E4C_RETRY \

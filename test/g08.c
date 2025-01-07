@@ -22,9 +22,9 @@ TEST_CASE{
 
     TEST_SKIP("Skip this test temporarily");
 
-    volatile E4C_BOOL caught = E4C_FALSE;
+    volatile bool caught = false;
 
-    e4c_context_begin(E4C_TRUE);
+    e4c_context_begin(true);
 
     E4C_TRY{
 
@@ -39,7 +39,7 @@ TEST_CASE{
 
     }E4C_CATCH(SignalException){
 
-        caught = E4C_TRUE;
+        caught = true;
 
         TEST_ASSERT(e4c_get_exception()->type == &ArithmeticException);
     }

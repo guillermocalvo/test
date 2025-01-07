@@ -2,8 +2,8 @@
 # include "testing.h"
 
 
-void another_function(volatile E4C_BOOL * flag1, volatile E4C_BOOL * flag2);
-void yet_another_function(volatile E4C_BOOL * flag2);
+void another_function(volatile bool * flag1, volatile bool * flag2);
+void yet_another_function(volatile bool * flag2);
 
 
 /**
@@ -27,10 +27,10 @@ void yet_another_function(volatile E4C_BOOL * flag2);
  */
 TEST_CASE{
 
-    volatile E4C_BOOL cleanup1 = E4C_FALSE;
-    volatile E4C_BOOL cleanup2 = E4C_FALSE;
+    volatile bool cleanup1 = false;
+    volatile bool cleanup2 = false;
 
-    e4c_context_begin(E4C_FALSE);
+    e4c_context_begin(false);
 
     E4C_TRY{
 
@@ -47,7 +47,7 @@ TEST_CASE{
     e4c_context_end();
 }
 
-void another_function(volatile E4C_BOOL * flag1, volatile E4C_BOOL * flag2){
+void another_function(volatile bool * flag1, volatile bool * flag2){
 
     E4C_TRY{
 
@@ -55,13 +55,13 @@ void another_function(volatile E4C_BOOL * flag1, volatile E4C_BOOL * flag2){
 
     }E4C_FINALLY{
 
-        *flag1 = E4C_TRUE;
+        *flag1 = true;
     }
 
-    *flag1 = E4C_FALSE;
+    *flag1 = false;
 }
 
-void yet_another_function(volatile E4C_BOOL * flag2){
+void yet_another_function(volatile bool * flag2){
 
     E4C_TRY{
 
@@ -69,8 +69,8 @@ void yet_another_function(volatile E4C_BOOL * flag2){
 
     }E4C_FINALLY{
 
-        *flag2 = E4C_TRUE;
+        *flag2 = true;
     }
 
-    *flag2 = E4C_FALSE;
+    *flag2 = false;
 }

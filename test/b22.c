@@ -13,20 +13,20 @@
  */
 TEST_CASE{
 
-    volatile E4C_BOOL thrown = E4C_FALSE;
-    volatile E4C_BOOL caught = E4C_FALSE;
+    volatile bool thrown = false;
+    volatile bool caught = false;
 
     TEST_EXPECTING(NullPointerException);
 
-    e4c_context_begin(E4C_FALSE);
+    e4c_context_begin(false);
 
     E4C_TRY{
 
-        thrown = E4C_TRUE;
+        thrown = true;
 
         E4C_THROW( *( (const e4c_exception_type *)NULL ), "I see what you did there..." );
 
-        thrown = E4C_FALSE;
+        thrown = false;
 
     }E4C_CATCH(RuntimeException){
 

@@ -21,9 +21,9 @@ e4c_signal_mapping custom_mappings[2] = {
  */
 TEST_CASE{
 
-    volatile E4C_BOOL SIGTERM_was_thrown = E4C_FALSE;
+    volatile bool SIGTERM_was_thrown = false;
 
-    e4c_context_begin(E4C_FALSE);
+    e4c_context_begin(false);
 
     e4c_context_set_signal_mappings(custom_mappings);
 
@@ -31,11 +31,11 @@ TEST_CASE{
 
     E4C_TRY{
 
-        SIGTERM_was_thrown = E4C_TRUE;
+        SIGTERM_was_thrown = true;
 
         raise(SIGTERM);
 
-        SIGTERM_was_thrown = E4C_FALSE;
+        SIGTERM_was_thrown = false;
 
     }E4C_CATCH(RuntimeException){
 

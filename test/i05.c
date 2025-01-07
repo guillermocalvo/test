@@ -2,7 +2,7 @@
 # include "testing.h"
 
 
-volatile E4C_BOOL custom_handler_was_executed = E4C_FALSE;
+volatile bool custom_handler_was_executed = false;
 void check_execution(void);
 void custom_uncaught_handler(const e4c_exception * exception);
 
@@ -20,7 +20,7 @@ TEST_CASE{
 
     atexit(check_execution);
 
-    e4c_context_begin(E4C_FALSE);
+    e4c_context_begin(false);
 
     e4c_context_set_handlers(custom_uncaught_handler, NULL, NULL, NULL);
 
@@ -36,5 +36,5 @@ void check_execution(void){
 
 void custom_uncaught_handler(const e4c_exception * exception){
 
-    custom_handler_was_executed = E4C_TRUE;
+    custom_handler_was_executed = true;
 }

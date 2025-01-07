@@ -99,10 +99,6 @@
     ||  defined(_GNU_SOURCE) \
     ||  ( defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) )
 
-#   ifndef HAVE_C99_STDBOOL
-#       define HAVE_C99_STDBOOL
-#   endif
-
 #   ifndef HAVE_C99_VARIADIC_MACROS
 #       define HAVE_C99_VARIADIC_MACROS
 #   endif
@@ -147,22 +143,9 @@
 # include <stdlib.h>
 # include <setjmp.h>
 
-
-# if defined(HAVE_C99_STDBOOL) || defined(HAVE_STDBOOL_H)
-#   include <stdbool.h>
-# endif
-
-# if    defined(__bool_true_false_are_defined) \
-    ||  defined(bool) \
-    ||  defined(S_SPLINT_S)
-#   define E4C_BOOL                     bool
-#   define E4C_FALSE                    false
-#   define E4C_TRUE                     true
-# else
-#   define E4C_BOOL                     int
-#   define E4C_FALSE                    0
-#   define E4C_TRUE                     1
-# endif
+#ifndef __bool_true_false_are_defined
+#include <stdbool.h>
+#endif
 
 /*
  * The E4C_FUNCTION_NAME_ compile-time parameter
@@ -314,25 +297,25 @@
 
 # define E4C_REUSING_CONTEXT(status, on_failure) \
     \
-    volatile E4C_BOOL       E4C_AUTO_(BEGIN)    = !e4c_context_is_ready(); \
-    volatile E4C_BOOL       E4C_AUTO_(DONE)     = E4C_FALSE; \
+    volatile bool E4C_AUTO_(BEGIN) = !e4c_context_is_ready(); \
+    volatile bool E4C_AUTO_(DONE)  = false; \
     \
     if( E4C_AUTO_(BEGIN) ){ \
-        e4c_context_begin(E4C_FALSE); \
+        e4c_context_begin(false); \
         E4C_TRY{ \
             goto E4C_AUTO_(PAYLOAD); \
             E4C_AUTO_(CLEANUP): \
-            E4C_AUTO_(DONE) = E4C_TRUE; \
+            E4C_AUTO_(DONE) = true; \
         }E4C_CATCH(RuntimeException){ \
             (status) = (on_failure); \
         } \
         e4c_context_end(); \
-        E4C_AUTO_(DONE)     = E4C_TRUE; \
-        E4C_AUTO_(BEGIN)    = E4C_FALSE; \
+        E4C_AUTO_(DONE)     = true; \
+        E4C_AUTO_(BEGIN)    = false; \
     } \
     \
     E4C_AUTO_(PAYLOAD): \
-    for(; !E4C_AUTO_(DONE) || E4C_AUTO_(BEGIN); E4C_AUTO_(DONE) = E4C_TRUE) \
+    for(; !E4C_AUTO_(DONE) || E4C_AUTO_(BEGIN); E4C_AUTO_(DONE) = true) \
         if( E4C_AUTO_(DONE) ){ \
             goto E4C_AUTO_(CLEANUP); \
         }else
@@ -925,7 +908,7 @@
  * functions **e4c_acquire_<em>type</em>** and **e4c_dispose_<em>type</em>**:
  *
  *   - `TYPE e4c_acquire_TYPE(ARGS)`
- *   - `void e4c_dispose_TYPE(TYPE RESOURCE, E4C_BOOL failed)`
+ *   - `void e4c_dispose_TYPE(TYPE RESOURCE, bool failed)`
  *
  * These two symbols **must** exist, in the form of either *functions* or
  * *macros*.
@@ -1429,12 +1412,12 @@
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
  *   // block 1
- *   e4c_context_begin(E4C_TRUE);
+ *   e4c_context_begin(true);
  *   // ...
  *   e4c_context_end();
  *
  *   // block 2
- *   e4c_using_context(E4C_TRUE){
+ *   e4c_using_context(true){
  *       // ...
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1910,7 +1893,7 @@ typedef struct e4c_exception_struct {
  * *divisions by zero*. Then the program would clean up and continue normally:
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   e4c_using_context(E4C_TRUE){
+ *   e4c_using_context(true){
  *       int * pointer = NULL;
  *       try{
  *           int oops = *pointer;
@@ -1965,7 +1948,7 @@ typedef struct e4c_exception_struct {
  * exceptions.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   e4c_using_context(E4C_FALSE){
+ *   e4c_using_context(false){
  *
  *       e4c_context_set_signal_mappings(my_signal_mappings);
  *       ...
@@ -2057,7 +2040,7 @@ typedef enum {
  *
  *   int main(int argc, char * argv[]){
  *
- *       e4c_using_context(E4C_TRUE){
+ *       e4c_using_context(true){
  *
  *           e4c_context_set_handlers(my_uncaught_handler, NULL, NULL, NULL);
  *           // ...
@@ -2117,7 +2100,7 @@ typedef void (*e4c_uncaught_handler)(const e4c_exception * exception)
  *
  *   int main(int argc, char * argv[]){
  *
- *       e4c_using_context(E4C_TRUE){
+ *       e4c_using_context(true){
  *
  *           e4c_context_set_handlers(NULL, NULL, my_initialize_handler, NULL);
  *           // ...
@@ -2139,13 +2122,13 @@ typedef void (*e4c_uncaught_handler)(const e4c_exception * exception)
  *
  *   int main(int argc, char * argv[]){
  *
- *       e4c_using_context(E4C_TRUE){
+ *       e4c_using_context(true){
  *
  *           e4c_context_set_handlers(NULL, "FOO", log_handler, NULL);
  *           // ...
  *       }
  *
- *       e4c_using_context(E4C_TRUE){
+ *       e4c_using_context(true){
  *
  *           e4c_context_set_handlers(NULL, "BAR", log_handler, NULL);
  *           // ...
@@ -2206,7 +2189,7 @@ typedef void * (*e4c_initialize_handler)(const e4c_exception * exception)
  *
  *   int main(int argc, char * argv[]){
  *
- *       e4c_using_context(E4C_TRUE){
+ *       e4c_using_context(true){
  *
  *           e4c_context_set_handlers(NULL, NULL, initialize_data, finalize_data);
  *           ...
@@ -2737,7 +2720,7 @@ E4C_DECLARE_EXCEPTION(ProgramSignal2Exception);
  * @see     #e4c_reusing_context
  */
 /*@unused@*/
-E4C_BOOL
+bool
 e4c_context_is_ready(
     void
 )
@@ -2803,7 +2786,7 @@ e4c_context_is_ready(
 /*@unused@*/
 void
 e4c_context_begin(
-    E4C_BOOL                    handle_signals
+    bool                        handle_signals
 )
 /*@globals
     fileSystem,
@@ -3168,7 +3151,7 @@ e4c_library_version(
  * @see     #e4c_get_exception
  */
 /*@unused@*/
-E4C_BOOL
+bool
 e4c_is_instance_of(
     /*@temp@*/ /*@notnull@*/
     const e4c_exception *       instance,
@@ -3305,7 +3288,7 @@ e4c_frame_first_stage_(
 ;
 
 /*@unused@*/
-E4C_BOOL
+bool
 e4c_frame_next_stage_(
     void
 )
@@ -3341,7 +3324,7 @@ e4c_frame_get_stage_(
 ;
 
 /*@unused@*/
-E4C_BOOL
+bool
 e4c_frame_catch_(
     /*@temp@*/ /*@null@*/
     const e4c_exception_type *  exception_type,

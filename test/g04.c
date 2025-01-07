@@ -24,7 +24,7 @@ TEST_CASE{
 
     TEST_EXPECTING(BadPointerException);
 
-    e4c_context_begin(E4C_TRUE);
+    e4c_context_begin(true);
 
     pointer = null(integer);
     integer = *pointer;

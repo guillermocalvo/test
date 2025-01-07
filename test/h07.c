@@ -20,9 +20,9 @@ void library_function(int foobar);
  */
 TEST_CASE{
 
-    volatile E4C_BOOL exception_caught = E4C_FALSE;
+    volatile bool exception_caught = false;
 
-    e4c_context_begin(E4C_FALSE);
+    e4c_context_begin(false);
 
     E4C_TRY{
 
@@ -31,7 +31,7 @@ TEST_CASE{
 
     }E4C_CATCH(IllegalArgumentException){
 
-        exception_caught = E4C_TRUE;
+        exception_caught = true;
     }
 
     e4c_context_end();

@@ -3,7 +3,7 @@
 
 
 void * e4c_acquire_buffer(size_t bytes);
-void e4c_dispose_buffer(void * buffer, E4C_BOOL failed);
+void e4c_dispose_buffer(void * buffer, bool failed);
 
 
 /**
@@ -22,7 +22,7 @@ TEST_CASE{
 
     TEST_EXPECTING(ContextHasNotBegunYet);
 
-    e4c_context_begin(E4C_FALSE);
+    e4c_context_begin(false);
 
     e4c_context_end();
 
@@ -38,7 +38,7 @@ void * e4c_acquire_buffer(size_t bytes){
     return( calloc( (size_t)1, bytes ) );
 }
 
-void e4c_dispose_buffer(void * buffer, E4C_BOOL failed){
+void e4c_dispose_buffer(void * buffer, bool failed){
 
     (void)failed;
 

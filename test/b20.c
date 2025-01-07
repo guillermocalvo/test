@@ -23,7 +23,7 @@ TEST_CASE{
 
     TEST_EXPECTING(ExceptionSystemFatalError);
 
-    e4c_context_begin(E4C_FALSE);
+    e4c_context_begin(false);
 
     e4c_context_set_signal_mappings(custom_mappings);
 

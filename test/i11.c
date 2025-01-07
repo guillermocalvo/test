@@ -14,7 +14,7 @@ TEST_CASE{
 
     volatile e4c_status status = e4c_succeeded;
 
-    e4c_context_begin(E4C_FALSE);
+    e4c_context_begin(false);
 
     E4C_TRY{
 

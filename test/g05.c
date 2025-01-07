@@ -26,7 +26,7 @@ TEST_CASE{
 
     TEST_EXPECTING(ArithmeticException);
 
-    e4c_context_begin(E4C_TRUE);
+    e4c_context_begin(true);
 
     divisor = zero(integer);
     integer = integer / divisor;

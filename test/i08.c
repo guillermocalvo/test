@@ -4,8 +4,8 @@
 
 char foobar[64] = "FOOBAR";
 void custom_finalize_handler(void * custom_data);
-volatile E4C_BOOL custom_handler_was_initialized = E4C_FALSE;
-volatile E4C_BOOL custom_handler_was_finalized = E4C_FALSE;
+volatile bool custom_handler_was_initialized = false;
+volatile bool custom_handler_was_finalized = false;
 
 
 /**
@@ -17,7 +17,7 @@ volatile E4C_BOOL custom_handler_was_finalized = E4C_FALSE;
  */
 TEST_CASE{
 
-    e4c_context_begin(E4C_FALSE);
+    e4c_context_begin(false);
 
     e4c_context_set_handlers(NULL, foobar, NULL, custom_finalize_handler);
 
@@ -38,5 +38,5 @@ TEST_CASE{
 
 void custom_finalize_handler(void * custom_data){
 
-    custom_handler_was_finalized = E4C_TRUE;
+    custom_handler_was_finalized = true;
 }

@@ -20,9 +20,9 @@ void aux5(void);
  */
 TEST_CASE{
 
-    volatile E4C_BOOL caught = E4C_FALSE;
+    volatile bool caught = false;
 
-    e4c_context_begin(E4C_FALSE);
+    e4c_context_begin(false);
 
     E4C_TRY{
 
@@ -30,7 +30,7 @@ TEST_CASE{
 
     }E4C_CATCH(RuntimeException){
 
-        caught = E4C_TRUE;
+        caught = true;
 
         TEST_ASSERT_EQUALS(e4c_get_exception()->type, &RuntimeException);
     }

@@ -18,7 +18,7 @@ TEST_CASE{
 
     TEST_EXPECTING(AbortException);
 
-    e4c_context_begin(E4C_TRUE);
+    e4c_context_begin(true);
 
     abort();
 

@@ -16,7 +16,7 @@ custom_data_t initial_data = {123, "FOOBAR"};
  */
 TEST_CASE{
 
-    e4c_context_begin(E4C_FALSE);
+    e4c_context_begin(false);
 
     e4c_context_set_handlers(NULL, &initial_data, NULL, NULL);
 

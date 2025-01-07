@@ -2,7 +2,7 @@
 # include "testing.h"
 
 
-void another_function(volatile E4C_BOOL * flag);
+void another_function(volatile bool * flag);
 
 
 /**
@@ -25,9 +25,9 @@ void another_function(volatile E4C_BOOL * flag);
  */
 TEST_CASE{
 
-    volatile E4C_BOOL cleanup = E4C_FALSE;
+    volatile bool cleanup = false;
 
-    e4c_context_begin(E4C_FALSE);
+    e4c_context_begin(false);
 
     E4C_TRY{
 
@@ -44,7 +44,7 @@ TEST_CASE{
 }
 
 
-void another_function(volatile E4C_BOOL * flag){
+void another_function(volatile bool * flag){
 
 
     E4C_TRY{
@@ -57,8 +57,8 @@ void another_function(volatile E4C_BOOL * flag){
 
     }E4C_FINALLY{
 
-        *flag = E4C_TRUE;
+        *flag = true;
     }
 
-    *flag = E4C_FALSE;
+    *flag = false;
 }
