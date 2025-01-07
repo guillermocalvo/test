@@ -541,15 +541,6 @@ E4C_DEFINE_EXCEPTION(ContextNotEnded,                   DESC_NOT_ENDED,         
  *
  */
 
-/*@-redecl@*/
-int
-e4c_library_version(
-    void
-)
-/*@*/
-;
-/*@=redecl@*/
-
 static
 void
 _e4c_library_initialize(
