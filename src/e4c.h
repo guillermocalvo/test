@@ -229,9 +229,9 @@
 /**
  * Introduces a block of code aware of exceptions
  *
- * A `#try` statement executes a block of code. If an exception is thrown and
- * there is a `#catch` block that can handle it, then control will be
- * transferred to it. If there is a `#finally` block, then it will be executed,
+ * A #E4C_TRY statement executes a block of code. If an exception is thrown and
+ * there is a #E4C_CATCH block that can handle it, then control will be
+ * transferred to it. If there is a #E4C_FINALLY block, then it will be executed,
  * no matter whether the `try` block completes normally or abruptly, and no
  * matter whether a `catch` block is first given control.
  *
@@ -261,16 +261,16 @@
  * One `try` block may precede many `catch` blocks (also called *exception
  * handlers*). A `catch` block **must** have exactly one parameter, which is the
  * exception type it is capable of handling. Within the `catch` block, the
- * exception can be accessed through the function `#e4c_get_exception`.
+ * exception can be accessed through the function #e4c_get_exception.
  * Exception handlers are considered in left-to-right order: the earliest
  * possible `catch` block handles the exception. If no `catch` block can handle
  * the thrown exception, it will be *propagated*.
  *
- * Sometimes it may come in handy to `#retry` an entire `try` block; for
+ * Sometimes it may come in handy to #E4C_RETRY an entire `try` block; for
  * instance, once the exception has been caught and the error condition has been
  * solved.
  *
- * A `try` block has an associated [status](@ref e4c_status) according to the
+ * A `try` block has an associated [status](#e4c_status) according to the
  * way it has been executed:
  *
  *   - It *succeeds* when the execution reaches the end of the block without
@@ -279,7 +279,7 @@
  *   - It *fails* when an exception is thrown and it's not caught.
  *
  * The status of the current `try` block can be retrieved through the function
- * `#e4c_get_status`.
+ * #e4c_get_status.
  *
  * @pre
  *   - A program (or thread) **must** begin an exception context prior to using
@@ -290,16 +290,16 @@
  *     - A `try` block may precede several `catch` blocks.
  *     - A `try` block can precede, at most, one `finally` block.
  *   - A `try` block **must not** be exited through any of: `goto`, `break`,
- *     `continue` or `return` (but it is legal to `#throw` an exception).
+ *     `continue` or `return` (but it is legal to #E4C_THROW an exception).
  *
  * @post
  *   - A `finally` block will be executed after the `try` block and any `catch`
  *     block that might be executed, no matter whether the `try` block
  *     *succeeds*, *recovers* or *fails*.
  *
- * @see     #catch
- * @see     #finally
- * @see     #retry
+ * @see     #E4C_CATCH
+ * @see     #E4C_FINALLY
+ * @see     #E4C_RETRY
  * @see     #e4c_status
  * @see     #e4c_get_status
  */
@@ -314,8 +314,8 @@
  * @param   exception_type
  *          The type of exceptions to be handled
  *
- * `#catch` blocks are optional code blocks that **must** be preceded by `#try`,
- * `#with`... `#use` or `#using` blocks. Several `catch` blocks can be placed
+ * #E4C_CATCH blocks are optional code blocks that **must** be preceded by #E4C_TRY,
+ * #E4C_WITH... #E4C_USE or #E4C_USING blocks. Several `catch` blocks can be placed
  * next to one another.
  *
  * When an exception is thrown, the system looks for a `catch` block to handle
@@ -362,7 +362,7 @@
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * After the `catch` block completes, the `#finally` block (if any) is executed.
+ * After the `catch` block completes, the #E4C_FINALLY block (if any) is executed.
  * Then the program continues by the next line following the set of `try`...
  * `catch`... `finally` blocks.
  *
@@ -372,19 +372,19 @@
  *
  * Only one of all the `catch` blocks will be executed for each `try` block,
  * even though the executed `catch` block throws another exception. The only
- * possible way to execute more than one `catch` block would be by `#retry`ing
+ * possible way to execute more than one `catch` block would be by [retrying](#E4C_RETRY)
  * the entire `try` block.
  *
  * @pre
  *   - A `catch` block **must** be preceded by one of these blocks:
- *     - A `try` block
- *     - A `with`... `#use` block
- *     - A `using` block
- *     - Another `catch` block
+ *     - A #E4C_TRY block
+ *     - A #E4C_WITH... #E4C_USE block
+ *     - A #E4C_USING block
+ *     - Another #E4C_CATCH block
  *   - A `catch` block **must not** be exited through any of: `goto`, `break`,
- *     `continue` or `return` (but it is legal to `#throw` an exception).
+ *     `continue` or `return` (but it is legal to #E4C_THROW an exception).
  *
- * @see     #try
+ * @see     #E4C_TRY
  * @see     #e4c_exception_type
  * @see     #e4c_get_exception
  * @see     #e4c_exception
@@ -397,13 +397,13 @@
  * Introduces a block of code responsible for cleaning up the previous
  * exception-aware block
  *
- * `#finally` blocks are optional code blocks that **must** be preceded by
- * `#try`, `#with`... `#use` or `#using` blocks. It is allowed to place, at
+ * #E4C_FINALLY blocks are optional code blocks that **must** be preceded by
+ * #E4C_TRY, #E4C_WITH... #E4C_USE or #E4C_USING blocks. It is allowed to place, at
  * most, one `finally` block for each one of these.
  *
  * The `finally` block can determine the completeness of the *exception-aware*
- * block through the function `#e4c_get_status`. The thrown exception (if any)
- * can also be accessed through the function `#e4c_get_exception`.
+ * block through the function #e4c_get_status. The thrown exception (if any)
+ * can also be accessed through the function #e4c_get_exception.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
  *   try{
@@ -427,13 +427,13 @@
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * The finally block will be executed only **once**. The only possible way to
- * execute it again would be by `#retry`ing the entire `try` block.
+ * execute it again would be by [retrying](#E4C_RETRY) the entire #E4C_TRY block.
  *
  * @pre
  *   - A `finally` block **must** be preceded by a `try`, `with`... `use`,
  *     `using` or `catch` block.
  *   - A `finally` block **must not** be exited through any of: `goto`, `break`,
- *     `continue` or `return` (but it is legal to `#throw` an exception).
+ *     `continue` or `return` (but it is legal to #E4C_THROW an exception).
  * @pre
  *   - A program (or thread) **must** begin an exception context prior to using
  *     the keyword `finally`. Such programming error will lead to an abrupt exit
@@ -448,14 +448,14 @@
   else if (e4c_frame_get_stage_(E4C_INFO_) == e4c_finalizing_)
 
 /**
- * Repeats the previous `#try` (or `#use`) block entirely
+ * Repeats the previous #E4C_TRY (or #E4C_USE) block entirely
  *
  * @param   max_retry_attempts
  *          The maximum number of attempts to retry
  *
  * This macro discards any thrown exception (if any) and repeats the previous
  * `try` or `use` block, up to a specified maximum number of attempts. It is
- * intended to be used within `#catch` or `#finally` blocks as a quick way to
+ * intended to be used within #E4C_CATCH or #E4C_FINALLY blocks as a quick way to
  * fix an error condition and *try again*.
  *
  * If the block has already been *tried* at least the specified number of times,
@@ -484,7 +484,7 @@
  * @note
  * Once a `catch` code block is being executed, the current exception is
  * considered caught. If you want the exception to be propagated when the
- * maximum number of attempts has been reached, then you need to `#rethrow` it.
+ * maximum number of attempts has been reached, then you need to #E4C_RETHROW it.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
  *   int dividend = 100;
@@ -531,9 +531,9 @@
  *   - Control does not return to the `retry` point, unless the `try` (or `use`)
  *     block has already been attempted, at least, the specified number of times.
  *
- * @see     #reacquire
- * @see     #try
- * @see     #use
+ * @see     #E4C_REACQUIRE
+ * @see     #E4C_TRY
+ * @see     #E4C_USE
  */
 #define E4C_RETRY(max_retry_attempts)                                       \
     e4c_frame_repeat_(max_retry_attempts, e4c_acquiring_, E4C_INFO_)
@@ -553,8 +553,8 @@
  * exception will be used.
  *
  * When an exception is thrown, the exception handling framework looks for the
- * appropriate `#catch` block that can handle the exception. The system unwinds
- * the call chain of the program and executes the `#finally` blocks it finds.
+ * appropriate #E4C_CATCH block that can handle the exception. The system unwinds
+ * the call chain of the program and executes the #E4C_FINALLY blocks it finds.
  *
  * When no `catch` block is able to handle an exception, the system eventually
  * gets to the main function of the program. This situation is called an
@@ -567,8 +567,8 @@
  * @post
  *   - Control does not return to the `throw` point.
  *
- * @see     #throwf
- * @see     #rethrow
+ * @see     #E4C_THROWF
+ * @see     #E4C_RETHROW
  * @see     #e4c_exception_type
  * @see     #e4c_exception
  * @see     #e4c_uncaught_handler
@@ -587,7 +587,7 @@
  * This macro creates a new instance of the thrown exception, with a more
  * specific message.
  *
- * `rethrow` is intended to be used within a `#catch` block; the purpose is to
+ * `rethrow` is intended to be used within a #E4C_CATCH block; the purpose is to
  * refine the message of the currently caught exception. The previous exception
  * (and its message) will be stored as the *cause* of the newly thrown
  * exception.
@@ -609,8 +609,8 @@
  * @post
  *   - Control does not return to the `rethrow` point.
  *
- * @see     #throw
- * @see     #rethrowf
+ * @see     #E4C_THROW
+ * @see     #E4C_RETHROWF
  */
 #define E4C_RETHROW(message)                                                \
   e4c_exception_throw_verbatim_(                                            \
@@ -638,7 +638,7 @@
  * @param   dispose
  *          The name of the disposal function (or macro)
  *
- * The combination of keywords `with`... `#use` encapsules the *Dispose
+ * The combination of keywords `with`... #E4C_USE encapsules the *Dispose
  * Pattern*. This pattern consists of two separate blocks and an implicit call
  * to a given function:
  *
@@ -647,11 +647,11 @@
  *   - the disposal function will be called implicitly
  *
  * A `with` block **must** be followed by a `use` block. In addition, the `use`
- * block may be followed by several `#catch` blocks and/or one `#finally` block.
+ * block may be followed by several #E4C_CATCH blocks and/or one #E4C_FINALLY block.
  *
  * The `with` keyword guarantees that the disposal function will be called **if,
  * and only if**, the acquisition block is *completed* without any errors (i.e.
- * the acquisition block does not `#throw` any exceptions).
+ * the acquisition block does not #E4C_THROW any exceptions).
  *
  * If the `with` block does not complete, neither the disposal function nor the
  * `use` block will be executed.
@@ -718,8 +718,8 @@
  *     `continue` or `return` (but it is legal to `throw` an exception).
  *   - A `with` block **must** always be followed by a `use` block.
  *
- * @see     #use
- * @see     #using
+ * @see     #E4C_USE
+ * @see     #E4C_USING
  */
 #define E4C_WITH(resource, dispose)                                         \
   E4C_FRAME_LOOP_(e4c_beginning_)                                           \
@@ -738,9 +738,9 @@
 /**
  * Closes a block of code with automatic disposal of a resource
  *
- * A `#use` block **must** always be preceded by a `with` block. These two
+ * A #E4C_USE block **must** always be preceded by a #E4C_WITH block. These two
  * keywords are designed so the compiler will complain about *dangling*
- * `with`... `use` blocks.
+ * #E4C_WITH... #E4C_USE blocks.
  *
  * A code block introduced by the `use` keyword will only be executed *if, and
  * only if*, the acquisition of the resource *completes* without exceptions.
@@ -749,11 +749,11 @@
  * or not.
  *
  * @pre
- *   - A `use` block **must** be preceded by a `with` block.
- *   - A `use` block **must not** be exited through any of: `goto`, `break`,
- *     `continue` or `return`  (but it is legal to `#throw` an exception).
+ *   - A #E4C_USE block **must** be preceded by a #E4C_WITH block.
+ *   - A #E4C_USE block **must not** be exited through any of: `goto`, `break`,
+ *     `continue` or `return`  (but it is legal to #E4C_THROW an exception).
  *
- * @see     #with
+ * @see     #E4C_WITH
  */
 #define E4C_USE                                                             \
   } else if (e4c_frame_get_stage_(E4C_INFO_) == e4c_trying_)
@@ -780,17 +780,17 @@
  * *macros*.
  *
  * The semantics of the automatic acquisition and disposal are the same as for
- * blocks introduced by `#with`... `#use`. For example, a `using` block can also
- * precede `#catch` and `#finally` blocks.
+ * blocks introduced by #E4C_WITH... #E4C_USE. For example, a #E4C_USING block can also
+ * precede #E4C_CATCH and #E4C_FINALLY blocks.
  *
  * @pre
  *   - A program (or thread) **must** begin an exception context prior to using
  *     the keyword `using`. Such programming error will lead to an abrupt exit
  *     of the program (or thread).
  *   - A `using` block **must not** be exited through any of: `goto`, `break`,
- *     `continue` or `return`  (but it is legal to `#throw` an exception).
+ *     `continue` or `return`  (but it is legal to #E4C_THROW an exception).
  *
- * @see     #with
+ * @see     #E4C_WITH
  */
 #define E4C_USING(type, resource, args)                                     \
   E4C_WITH((resource), e4c_dispose_##type) {                                \
@@ -798,7 +798,7 @@
   } E4C_USE
 
 /**
- * Repeats the previous `#with` block entirely
+ * Repeats the previous #E4C_WITH block entirely
  *
  * @param   max_reacquire_attempts
  *          The maximum number of attempts to reacquire
@@ -807,8 +807,8 @@
  * `with` block, up to a specified maximum number of attempts. If the
  * acquisition completes, then the `use` block will be executed.
  *
- * It is intended to be used within `#catch` or `#finally` blocks, next to a
- * `#with`... `#use` or `#using` block, when the resource acquisition fails,
+ * It is intended to be used within #E4C_CATCH or #E4C_FINALLY blocks, next to a
+ * #E4C_WITH... #E4C_USE or #E4C_USING block, when the resource acquisition fails,
  * as a quick way to fix an error condition and try to acquire the resource
  * again.
  *
@@ -832,7 +832,7 @@
  * taken in order not to create an *infinite loop*.
  *
  * Once the resource has been acquired, the `use` block can also be repeated
- * *alone* through the keyword `#retry`:
+ * *alone* through the keyword #E4C_RETRY:
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
  *   image_type * image;
@@ -862,9 +862,9 @@
  *   - This macro won't return control unless the `with` block has already been
  *     attempted, at least, the specified maximum number of times.
  *
- * @see     #retry
- * @see     #with
- * @see     #use
+ * @see     #E4C_RETRY
+ * @see     #E4C_WITH
+ * @see     #E4C_USE
  */
 #define E4C_REACQUIRE(max_reacquire_attempts)                               \
   e4c_frame_repeat_(max_reacquire_attempts, e4c_beginning_, E4C_INFO_)
@@ -900,7 +900,7 @@
  *
  * This macro lets library developers use the exception framework, regardless of
  * whether the library clients are unaware of the exception handling system. In
- * a nutshell, function libraries can use `#try`, `#catch`, `#throw`, etc.
+ * a nutshell, function libraries can use #E4C_TRY, #E4C_CATCH, #E4C_THROW, etc.
  * whether the client previously began an exception context or not.
  *
  * You **must not** use this macro unless you are implementing some
@@ -984,7 +984,7 @@
  *
  * However, Most of the times you probably want to yield a different status
  * value depending on the specific exception being thrown. This can be easily
- * accomplished by making use of the macro `#E4C_ON_FAILURE`.
+ * accomplished by making use of the macro #E4C_ON_FAILURE.
  *
  * Next, the semantics of `e4c_reusing_context` are explained, step by step:
  *
@@ -1004,7 +1004,7 @@
  *       * `status` will be asigned the value of the expression `on_failure`.
  *
  * If you need to perform any cleanup, you should place it *inside* a
- * `#finally` block.
+ * #E4C_FINALLY block.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
  *   ...
@@ -1022,9 +1022,9 @@
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * If you need to rely on the signal handling system, you may call
- * `#e4c_context_set_signal_mappings` explicitly. You should take into account
+ * #e4c_context_set_signal_mappings explicitly. You should take into account
  * that you could be *hijacking* your client's original signal mappings, so you
- * should also call `#e4c_context_get_signal_mappings` in order to restore the
+ * should also call #e4c_context_get_signal_mappings in order to restore the
  * previous signal mappings when you are done.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
@@ -1052,13 +1052,13 @@
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * This macro only begins a new exception context **if there is no one, already
- * begun, to be used** whereas `#e4c_using_context` always attempts to begin a
+ * begun, to be used** whereas #e4c_using_context always attempts to begin a
  * new one.
  *
  * @pre
- *   - A block introduced by `e4c_reusing_context` **must not** be exited
+ *   - A block introduced by #e4c_reusing_context **must not** be exited
  *     through any of: `goto`, `break`, `continue` or `return` (but it is legal
- *     to `#throw` an exception).
+ *     to #E4C_THROW an exception).
  * @post
  *   - A block introduced by `e4c_reusing_context` is guaranteed to take place
  *     *inside* an exception context.
@@ -1178,7 +1178,7 @@
  * This macro ensures portability on compilers which don't support functions
  * that never return.
  *
- * It may be used after calling a function marked as `#E4C_NO_RETURN`, so that
+ * It may be used after calling a function marked as #E4C_NO_RETURN, so that
  * the compiler will not complain about *control reaching end of non-void
  * function*. For example:
  *
@@ -1214,7 +1214,7 @@
  * This macro ensures portability on static source code analyzers which don't
  * support functions that never return.
  *
- * It may be used after calling a function marked as `#E4C_NO_RETURN`, so that
+ * It may be used after calling a function marked as #E4C_NO_RETURN, so that
  * the analyzer will not complain about spurious errors. For example, if we
  * didn't use `E4C_UNREACHABLE_VOID_RETURN` here, some analyzers might complain
  * about *possible null pointer dereference* at line `foo = *bar`, because they
@@ -1268,7 +1268,7 @@
  *          default mapping.
  *
  * This macro begins a new exception context to be used by the code block right
- * next to it. When the code completes, `#e4c_context_end` will be called
+ * next to it. When the code completes, #e4c_context_end will be called
  * implicitly.
  *
  * This macro is very convenient when the beginning and the ending of the
@@ -1288,19 +1288,19 @@
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * This macro **always** attempts to begin a new exception context, whereas
- * `#e4c_reusing_context` only does if there is no exception context, already
+ * #e4c_reusing_context only does if there is no exception context, already
  * begun, to be used.
  *
  * This macro **should be used whenever possible**, rather than doing the
- * explicit, manual calls to `#e4c_context_begin` and `#e4c_context_end`,
+ * explicit, manual calls to #e4c_context_begin and #e4c_context_end,
  * because it is less prone to errors.
  *
  * @pre
- *   - A block introduced by `e4c_using_context` **must not** be exited through
+ *   - A block introduced by #e4c_using_context **must not** be exited through
  *     any of: `goto`, `break`, `continue` or `return` (but it is legal to
- *     `#throw` an exception).
+ *     #E4C_THROW an exception).
  * @post
- *   - A block introduced by `#e4c_using_context` is guaranteed to take place
+ *   - A block introduced by #e4c_using_context is guaranteed to take place
  *     *inside* an exception context.
  *
  * @see     #e4c_context_begin
@@ -1331,13 +1331,13 @@
  * In absence of `NDEBUG`, the assertion statements will verify that the
  * condition is met every time the program reaches that point of the program.
  *
- * If the assertion does not hold at any time, then an `#AssertionException`
+ * If the assertion does not hold at any time, then an #AssertionException
  * will be thrown to indicate the programming error. This exception cannot be
  * caught whatsoever. The program (or current thread) will be terminated.
  *
  * The main advantage of using this assertion mechanism (as opposed to the
  * macros provided by the standard header file `assert.h`) is that all of the
- * pending `#finally` blocks will be executed, before actually exiting the
+ * pending #E4C_FINALLY blocks will be executed, before actually exiting the
  * program or thread.
  *
  * @pre
@@ -1371,7 +1371,7 @@
  *          The variadic arguments that will be formatted according to the
  *          format control
  *
- * This is a handy way to compose a formatted message and `#throw` an exception
+ * This is a handy way to compose a formatted message and #E4C_THROW an exception
  * *on the fly*:
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
@@ -1403,8 +1403,8 @@
  * @post
  *   - Control does not return to the `throwf` point.
  *
- * @see     #throw
- * @see     #rethrowf
+ * @see     #E4C_THROW
+ * @see     #E4C_RETHROWF
  */
 #define E4C_THROWF(exception_type, format, ...)                             \
   e4c_exception_throw_format_(                                              \
@@ -1424,7 +1424,7 @@
  *          The variadic arguments that will be formatted according to the
  *          format control.
  *
- * This is a handy way to create (and then `#throw`) a new instance of the
+ * This is a handy way to create (and then #E4C_THROW) a new instance of the
  * currently thrown exception, with a more specific, formatted message.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
@@ -1456,8 +1456,8 @@
  * @post
  *   - Control does not return to the `rethrowf` point.
  *
- * @see     #rethrow
- * @see     #throwf
+ * @see     #E4C_RETHROW
+ * @see     #E4C_THROWF
  */
 #define E4C_RETHROWF(format, ...)                                           \
   e4c_exception_throw_format_(                                              \
@@ -1475,7 +1475,7 @@
  *          Name of the exception type
  *
  * This macro introduces the name of an `extern`, `const` [exception type]
- * (@ref e4c_exception_type) which will be available to be thrown or caught:
+ * (#e4c_exception_type) which will be available to be thrown or caught:
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
  *   E4C_DECLARE_EXCEPTION(StackException);
@@ -1487,7 +1487,7 @@
  *
  * @note
  * When you *declare* exception types, no storage is allocated. In order to
- * actually *define* them, you need to use the macro `#E4C_DEFINE_EXCEPTION`.
+ * actually *define* them, you need to use the macro #E4C_DEFINE_EXCEPTION.
  *
  * @see     #e4c_exception_type
  * @see     #E4C_DEFINE_EXCEPTION
@@ -1507,7 +1507,7 @@
  *          Supertype of the new exception type
  *
  * This macro allocates a new, `const` [exception type]
- * (@ref e4c_exception_type).
+ * (#e4c_exception_type).
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
  *   E4C_DEFINE_EXCEPTION(StackException, "Stack exception", RuntimeException);
@@ -1517,7 +1517,7 @@
  *
  * This macro is intended to be used inside sorce code files. The defined
  * exception types can be *declared* in a header file through the macro
- * `#E4C_DECLARE_EXCEPTION`.
+ * #E4C_DECLARE_EXCEPTION.
  *
  * @see     #e4c_exception_type
  * @see     #RuntimeException
@@ -1539,7 +1539,7 @@
  * @param   exception_type
  *          Exception type representing the signal
  *
- * This macro represents a [signal mapping](@ref e4c_signal_mapping) literal. It
+ * This macro represents a [signal mapping](#e4c_signal_mapping) literal. It
  * comes in handy for initializing arrays of signal mappings.
  *
  * @see     #e4c_signal_mapping
@@ -1559,7 +1559,7 @@
  * @param   signal_number
  *          Numeric value of the signal to be ignored
  *
- * This macro represents a [signal mapping](@ref e4c_signal_mapping) literal.
+ * This macro represents a [signal mapping](#e4c_signal_mapping) literal.
  * It comes in handy for initializing arrays of signal mappings.
  *
  * @see     #e4c_signal_mapping
@@ -1576,8 +1576,8 @@
 /**
  * Represents a null signal mapping literal
  *
- * This macro represents a *null* [signal mapping](@ref e4c_signal_mapping)
- * literal. It comes in handy for terminating arrays of `#e4c_signal_mapping`.
+ * This macro represents a *null* [signal mapping](#e4c_signal_mapping)
+ * literal. It comes in handy for terminating arrays of #e4c_signal_mapping.
  *
  * @see     #e4c_signal_mapping
  * @see     #e4c_context_set_signal_mappings
@@ -1597,8 +1597,8 @@
  * Represents an exception type in the exception handling system
  *
  * The types of the exceptions a program will use are **defined** in source code
- * files through the macro `#E4C_DEFINE_EXCEPTION`. In addition, they are
- * **declared** in header files through the macro `#E4C_DECLARE_EXCEPTION`.
+ * files through the macro #E4C_DEFINE_EXCEPTION. In addition, they are
+ * **declared** in header files through the macro #E4C_DECLARE_EXCEPTION.
  *
  * When defining types of exceptions, they are given a *name*, a *default
  * message* and a *supertype* to organize them into a *pseudo-hierarchy*:
@@ -1608,44 +1608,44 @@
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * Exceptions are defined as global objects. There is a set of predefined
- * exceptions built into the framework; `#RuntimeException` is the *root* of the
+ * exceptions built into the framework; #RuntimeException is the *root* of the
  * exceptions *pseudo-hierarchy*:
  *
- *   - `#RuntimeException`
- *     - `#NotEnoughMemoryException`
- *     - `#AssertionException`
- *     - `#IllegalArgumentException`
- *     - `#InputOutputException`
- *     - `#SignalException`
- *       - `#SignalAlarmException`
- *       - `#SignalChildException`
- *       - `#SignalTrapException`
- *       - `#ErrorSignalException`
- *         - `#IllegalInstructionException`
- *         - `#ArithmeticException`
- *         - `#BrokenPipeException`
- *         - `#BadPointerException`
- *           * `#NullPointerException`
- *       - `#ControlSignalException`
- *         - `#StopException`
- *         - `#KillException`
- *         - `#HangUpException`
- *         - `#TerminationException`
- *         - `#AbortException`
- *         - `#CPUTimeException`
- *         - `#UserControlSignalException`
- *           - `#UserQuitException`
- *           - `#UserInterruptionException`
- *           - `#UserBreakException`
- *       - `#ProgramSignalException`
- *         - `#ProgramSignal1Exception`
- *         - `#ProgramSignal2Exception`
+ *   - #RuntimeException
+ *     - #NotEnoughMemoryException
+ *     - #AssertionException
+ *     - #IllegalArgumentException
+ *     - #InputOutputException
+ *     - #SignalException
+ *       - #SignalAlarmException
+ *       - #SignalChildException
+ *       - #SignalTrapException
+ *       - #ErrorSignalException
+ *         - #IllegalInstructionException
+ *         - #ArithmeticException
+ *         - #BrokenPipeException
+ *         - #BadPointerException
+ *           * #NullPointerException
+ *       - #ControlSignalException
+ *         - #StopException
+ *         - #KillException
+ *         - #HangUpException
+ *         - #TerminationException
+ *         - #AbortException
+ *         - #CPUTimeException
+ *         - #UserControlSignalException
+ *           - #UserQuitException
+ *           - #UserInterruptionException
+ *           - #UserBreakException
+ *       - #ProgramSignalException
+ *         - #ProgramSignal1Exception
+ *         - #ProgramSignal2Exception
  *
  * @see     #e4c_exception
  * @see     #E4C_DEFINE_EXCEPTION
  * @see     #E4C_DECLARE_EXCEPTION
- * @see     #throw
- * @see     #catch
+ * @see     #E4C_THROW
+ * @see     #E4C_CATCH
  */
 typedef struct e4c_exception_type_struct {
 
@@ -1667,8 +1667,8 @@ typedef struct e4c_exception_type_struct {
  *
  * Exceptions are a means of breaking out of the normal flow of control of a
  * code block in order to handle errors or other exceptional conditions. An
- * exception should be [thrown](@ref throw) at the point where the error is
- * detected; it may be [handled](@ref catch) by the surrounding code block or by
+ * exception should be [thrown](#E4C_THROW) at the point where the error is
+ * detected; it may be [handled](#E4C_CATCH) by the surrounding code block or by
  * any code block that directly or indirectly invoked the code block where the
  * error occurred.
  *
@@ -1683,17 +1683,17 @@ typedef struct e4c_exception_type_struct {
  *   - The `cause` of the exception, which is the previous exception (if any),
  *     when the exception was thrown
  *   - The specific `type` of the exception, convenient when handling an
- *     abstract type of exceptions from a `#catch` block
+ *     abstract type of exceptions from a #E4C_CATCH block
  *   - Optional, *user-defined*, `custom_data`, which can be initialized and
  *     finalized throught context *handlers*
  *
  * @note
  * **Any** exception can be caught by a block introduced by
- * `catch(RuntimeException)`, **except for `#AssertionException`**.
+ * `catch(RuntimeException)`, **except for #AssertionException**.
  *
  * @see     #e4c_exception_type
- * @see     #throw
- * @see     #catch
+ * @see     #E4C_THROW
+ * @see     #E4C_CATCH
  * @see     #e4c_get_exception
  * @see     #e4c_context_set_handlers
  * @see     #RuntimeException
@@ -1749,7 +1749,7 @@ typedef struct e4c_exception_struct {
  * handled.
  *
  * For example, a *suspicious* or *dangerous* part of the program could be
- * wrapped up with `#try` blocks and then `#catch` *segmentation faults* or
+ * wrapped up with #E4C_TRY blocks and then #E4C_CATCH *segmentation faults* or
  * *divisions by zero*. Then the program would clean up and continue normally:
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
@@ -1769,20 +1769,20 @@ typedef struct e4c_exception_struct {
  * exceptions.
  *
  * The simplest way to get this working is by calling the function
- * `#e4c_context_begin`. This function will set up the [default mappings]
- * (@ref e4c_default_signal_mappings) for the available signals in the platform,
+ * #e4c_context_begin. This function will set up the [default mappings]
+ * (#e4c_default_signal_mappings) for the available signals in the platform,
  * when passed `handle_signals=true`.
  *
  * If you need to be more specific about which signals get converted to
  * exceptions, you can define an array of [signal mappings]
- * (@ref e4c_signal_mapping) and then pass it to the function
- * `#e4c_context_set_signal_mappings`.
+ * (#e4c_signal_mapping) and then pass it to the function
+ * #e4c_context_set_signal_mappings.
  *
  * An array of signal mappings is defined through three macros:
  *
- *   - `#E4C_SIGNAL_MAPPING`
- *   - `#E4C_IGNORE_SIGNAL`
- *   - `#E4C_NULL_SIGNAL_MAPPING`
+ *   - #E4C_SIGNAL_MAPPING
+ *   - #E4C_IGNORE_SIGNAL
+ *   - #E4C_NULL_SIGNAL_MAPPING
  *
  * While `E4C_SIGNAL_MAPPING` tells the system to convert a specific signal to a
  * given exception, `E4C_IGNORE_SIGNAL` allows you to disregard the signal and
@@ -1844,7 +1844,7 @@ typedef struct {
  * Represents the completeness of a code block aware of exceptions
  *
  * The symbolic values representing the status of a block help to distinguish
- * between different possible situations inside a `#finally` block. For example,
+ * between different possible situations inside a #E4C_FINALLY block. For example,
  * different cleanup actions can be taken, depending on the status of the block.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
@@ -1869,7 +1869,7 @@ typedef struct {
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * @see     #e4c_get_status
- * @see     #finally
+ * @see     #E4C_FINALLY
  */
 typedef enum {
 
@@ -1890,7 +1890,7 @@ typedef enum {
  * @param   exception
  *          The uncaught exception
  *
- * This handler can be set through the function `#e4c_context_set_handlers`:
+ * This handler can be set through the function #e4c_context_set_handlers:
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
  *   void my_uncaught_handler(const e4c_exception * exception){
@@ -1908,7 +1908,7 @@ typedef enum {
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * There exists a convenience function `#e4c_print_exception` which is used as
+ * There exists a convenience function #e4c_print_exception which is used as
  * the default *uncaught handler*, unless otherwise specified. It simply prints
  * information regarding the exception to `stderr`.
  *
@@ -1943,10 +1943,10 @@ typedef void (*e4c_uncaught_handler)(const e4c_exception * exception)
  * When this handler is set, it will be called any time a new exception is
  * created. The `void` pointer returned by this function will be assigned to
  * the exception's *custom_data*. This data can be accessed later on, for
- * example, from a `#catch` block, or an *uncaught handler*, for any
+ * example, from a #E4C_CATCH block, or an *uncaught handler*, for any
  * specific purpose.
  *
- * This handler can be set through the function `#e4c_context_set_handlers`:
+ * This handler can be set through the function #e4c_context_set_handlers:
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
  *   void * my_initialize_handler(const e4c_exception * e){
@@ -2024,7 +2024,7 @@ typedef void * (*e4c_initialize_handler)(const e4c_exception * exception)
  * discarded. It will be passed the *custom_data* of the exception, so it may
  * dispose resources previously acquired by the *initialize handler*.
  *
- * This handler can be set through the function `#e4c_context_set_handlers`:
+ * This handler can be set through the function #e4c_context_set_handlers:
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
  *   void * initialize_data(const e4c_exception * exception){
@@ -2101,10 +2101,10 @@ struct e4c_continuation_ {
  *
  * Common signals are mapped to its corresponding exception, for example:
  *
- *   - `SIGABRT` is mapped to `#AbortException`
- *   - `SIGFPE`  is mapped to `#ArithmeticException`
- *   - `SIGSEGV` is mapped to `#BadPointerException`
- *   - `SIGTERM` is mapped to `#TerminationException`
+ *   - `SIGABRT` is mapped to #AbortException
+ *   - `SIGFPE`  is mapped to #ArithmeticException
+ *   - `SIGSEGV` is mapped to #BadPointerException
+ *   - `SIGTERM` is mapped to #TerminationException
  *   - ...and so on
  *
  * @see     #e4c_signal_mapping
@@ -2128,7 +2128,7 @@ extern const e4c_signal_mapping * const e4c_default_signal_mappings;
  * Built-in exceptions represent usual error conditions that might occur during
  * the course of any program.
  *
- * They are organized into a *pseudo-hierarchy*; `#RuntimeException` is the
+ * They are organized into a *pseudo-hierarchy*; #RuntimeException is the
  * common *supertype* of all exceptions.
  *
  * @{
@@ -2137,7 +2137,7 @@ extern const e4c_signal_mapping * const e4c_default_signal_mappings;
 /**
  * This is the root of the exception *pseudo-hierarchy*
  *
- * `#RuntimeException` is the common *supertype* of all exceptions.
+ * #RuntimeException is the common *supertype* of all exceptions.
  *
  * @par     Direct known subexceptions:
  *          #NotEnoughMemoryException,
@@ -2152,7 +2152,7 @@ E4C_DECLARE_EXCEPTION(RuntimeException);
 /**
  * This exception is thrown when the system runs out of memory
  *
- * `#NotEnoughMemoryException` is thrown when there is not enough memory to
+ * #NotEnoughMemoryException is thrown when there is not enough memory to
  * continue the execution of the program.
  *
  * @par     Extends:
@@ -2165,7 +2165,7 @@ E4C_DECLARE_EXCEPTION(NotEnoughMemoryException);
  * This exception is thrown when a function is passed an illegal or
  * inappropriate argument
  *
- * `#IllegalArgumentException` is thrown by a function when it detects that some
+ * #IllegalArgumentException is thrown by a function when it detects that some
  * of the function parameters (passed by the caller) is unacceptable.
  *
  * @par     Extends:
@@ -2177,15 +2177,15 @@ E4C_DECLARE_EXCEPTION(IllegalArgumentException);
 /**
  * This exception is thrown when an assertion does not hold
  *
- * `#AssertionException` is part of the assertion facility of the library. It is
+ * #AssertionException is part of the assertion facility of the library. It is
  * thrown when the *compile-time* parameter `NDEBUG` is present and the
  * conditon of an assertion evaluates to `false`.
  *
  * @remark
  * This exception cannot be caught whatsoever. The program (or current thread)
- * will be terminated, after the execution of all pending `#finally` blocks.
+ * will be terminated, after the execution of all pending #E4C_FINALLY blocks.
  *
- * @see     #assert
+ * @see     #E4C_ASSERT
  */
 /*@unused@*/
 E4C_DECLARE_EXCEPTION(AssertionException);
@@ -2193,7 +2193,7 @@ E4C_DECLARE_EXCEPTION(AssertionException);
 /**
  * This exception is thrown when an input/output error occurs
  *
- * `#InputOutputException` is the general type of exceptions produced by failed
+ * #InputOutputException is the general type of exceptions produced by failed
  * or interrupted I/O operations.
  *
  * @par     Extends:
@@ -2227,7 +2227,7 @@ E4C_DECLARE_EXCEPTION(SignalException);
 /**
  * This exception is thrown when a time limit has elapsed
  *
- * `#SignalAlarmException` represents `SIGALRM`, the signal sent to a process
+ * #SignalAlarmException represents `SIGALRM`, the signal sent to a process
  * when a time limit has elapsed.
  *
  * @par     Extends:
@@ -2239,7 +2239,7 @@ E4C_DECLARE_EXCEPTION(SignalAlarmException);
 /**
  * This exception is thrown when a child process terminates
  *
- * `#SignalChildException` represents `SIGCHLD`, the signal sent to a process
+ * #SignalChildException represents `SIGCHLD`, the signal sent to a process
  * when a child process terminates.
  *
  * @par     Extends:
@@ -2252,7 +2252,7 @@ E4C_DECLARE_EXCEPTION(SignalChildException);
  * This exception is thrown when a condition arises that a debugger has
  * requested to be informed of
  *
- * `#SignalTrapException` represents `SIGTRAP`, the signal sent to a process
+ * #SignalTrapException represents `SIGTRAP`, the signal sent to a process
  * when a condition arises that a debugger has requested to be informed of.
  *
  * @par     Extends:
@@ -2283,7 +2283,7 @@ E4C_DECLARE_EXCEPTION(ErrorSignalException);
  * This exception is thrown when the process attempts to execute an illegal
  * instruction
  *
- * `#IllegalInstructionException` represents `SIGILL`, the signal sent to a
+ * #IllegalInstructionException represents `SIGILL`, the signal sent to a
  * process when it attempts to execute a malformed, unknown, or privileged
  * instruction.
  *
@@ -2297,7 +2297,7 @@ E4C_DECLARE_EXCEPTION(IllegalInstructionException);
  * This exception is thrown when the process performs an erroneous arithmetic
  * operation
  *
- * `#ArithmeticException` represents `SIGFPE`, the signal sent to a process
+ * #ArithmeticException represents `SIGFPE`, the signal sent to a process
  * when it performs an erroneous arithmetic operation.
  *
  * @par     Extends:
@@ -2309,7 +2309,7 @@ E4C_DECLARE_EXCEPTION(ArithmeticException);
 /**
  * This exception is thrown when the process attempts to write to a broken pipe
  *
- * `#BrokenPipeException` represents `SIGPIPE`, the signal sent to a process
+ * #BrokenPipeException represents `SIGPIPE`, the signal sent to a process
  * when it attempts to write to a pipe without a process connected to the other
  * end.
  *
@@ -2323,7 +2323,7 @@ E4C_DECLARE_EXCEPTION(BrokenPipeException);
  * This exception is thrown when the process tries to dereference an invalid
  * pointer
  *
- * `#BadPointerException` represents `SIGSEGV`, the signal sent to a process
+ * #BadPointerException represents `SIGSEGV`, the signal sent to a process
  * when it makes an invalid memory reference, or segmentation fault.
  *
  * @par     Extends:
@@ -2338,12 +2338,12 @@ E4C_DECLARE_EXCEPTION(BadPointerException);
 /**
  * This exception is thrown when an unexpected null pointer is found
  *
- * `#NullPointerException` is thrown when some part of the program gets a
+ * #NullPointerException is thrown when some part of the program gets a
  * pointer which was expected or required to contain a valid memory address.
  *
  * A *null* pointer exception is a special case of a *bad* pointer exception.
- * The difference between them is that `#NullPointerException` needs to be
- * thrown *explicitly* by some function, while `#BadPointerException` is
+ * The difference between them is that #NullPointerException needs to be
+ * thrown *explicitly* by some function, while #BadPointerException is
  * thrown *implicitly* by the signal handling system (if enabled).
  *
  * @note
@@ -2382,7 +2382,7 @@ E4C_DECLARE_EXCEPTION(ControlSignalException);
 /**
  * This exception is thrown to stop the process for later resumption
  *
- * `#StopException` represents `SIGSTOP`, the signal sent to a process to stop
+ * #StopException represents `SIGSTOP`, the signal sent to a process to stop
  * it for later resumption.
  *
  * @remark
@@ -2398,7 +2398,7 @@ E4C_DECLARE_EXCEPTION(StopException);
 /**
  * This exception is thrown to terminate the process immediately
  *
- * `#KillException` represents `SIGKILL`, the signal sent to a process to
+ * #KillException represents `SIGKILL`, the signal sent to a process to
  * cause it to terminate immediately.
  *
  * @remark
@@ -2414,7 +2414,7 @@ E4C_DECLARE_EXCEPTION(KillException);
 /**
  * This exception is thrown when the process' terminal is closed
  *
- * `#HangUpException` represents `SIGHUP`, the signal sent to a process when
+ * #HangUpException represents `SIGHUP`, the signal sent to a process when
  * its controlling terminal is closed.
  *
  * @par     Extends:
@@ -2426,7 +2426,7 @@ E4C_DECLARE_EXCEPTION(HangUpException);
 /**
  * This exception is thrown to request the termination of the process
  *
- * `#TerminationException` represents `SIGTERM`, the signal sent to a process
+ * #TerminationException represents `SIGTERM`, the signal sent to a process
  * to request its termination.
  *
  * @par     Extends:
@@ -2438,7 +2438,7 @@ E4C_DECLARE_EXCEPTION(TerminationException);
 /**
  * This exception is thrown to abort the process
  *
- * `#AbortException` represents `SIGABRT`, the signal sent by computer
+ * #AbortException represents `SIGABRT`, the signal sent by computer
  * programs to abort the process.
  *
  * @par     Extends:
@@ -2450,7 +2450,7 @@ E4C_DECLARE_EXCEPTION(AbortException);
 /**
  * This exception is thrown when the process has used up the CPU for too long
  *
- * `#CPUTimeException` represents `SIGXCPU`, the signal sent to a process when
+ * #CPUTimeException represents `SIGXCPU`, the signal sent to a process when
  * it has used up the CPU for a duration that exceeds a certain predetermined
  * user-settable value.
  *
@@ -2481,7 +2481,7 @@ E4C_DECLARE_EXCEPTION(UserControlSignalException);
 /**
  * This exception is thrown when the user requests to quit the process
  *
- * `#UserQuitException` represents `SIGQUIT`, the signal sent to a process by
+ * #UserQuitException represents `SIGQUIT`, the signal sent to a process by
  * its controlling terminal when the user requests that the process dump core.
  *
  * @par     Extends:
@@ -2493,7 +2493,7 @@ E4C_DECLARE_EXCEPTION(UserQuitException);
 /**
  * This exception is thrown when the user requests to interrupt the process
  *
- * `#UserInterruptionException` represents `SIGINT`, the signal sent to a
+ * #UserInterruptionException represents `SIGINT`, the signal sent to a
  * process by its controlling terminal when a user wishes to interrupt it.
  *
  * @par     Extends:
@@ -2505,7 +2505,7 @@ E4C_DECLARE_EXCEPTION(UserInterruptionException);
 /**
  * This exception is thrown when a user wishes to break the process
  *
- * `#UserBreakException` represents `SIGBREAK`, the signal sent to a process
+ * #UserBreakException represents `SIGBREAK`, the signal sent to a process
  * by its controlling terminal when a user wishes to break it.
  *
  * @par     Extends:
@@ -2533,7 +2533,7 @@ E4C_DECLARE_EXCEPTION(ProgramSignalException);
 /**
  * This exception is thrown when user-defined conditions occur
  *
- * `#ProgramSignal1Exception` represents `SIGUSR1`, the signal sent to a
+ * #ProgramSignal1Exception represents `SIGUSR1`, the signal sent to a
  * process to indicate user-defined conditions.
  *
  * @par     Extends:
@@ -2545,7 +2545,7 @@ E4C_DECLARE_EXCEPTION(ProgramSignal1Exception);
 /**
  * This exception is thrown when user-defined conditions occur
  *
- * `#ProgramSignal2Exception` represents `SIGUSR1`, the signal sent to a
+ * #ProgramSignal2Exception represents `SIGUSR1`, the signal sent to a
  * process to indicate user-defined conditions.
  *
  * @par     Extends:
@@ -2608,10 +2608,10 @@ e4c_context_is_ready(
  *          default mapping.
  *
  * This function begins the current exception context to be used by the program
- * (or current thread), until `#e4c_context_end` is called.
+ * (or current thread), until #e4c_context_end is called.
  *
  * The signal handling system can be initialized automatically with the
- * [default signal mappings](@ref e4c_default_signal_mappings) by passing
+ * [default signal mappings](#e4c_default_signal_mappings) by passing
  * `handle_signals=true`. This is equivalent to:
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
@@ -2622,17 +2622,17 @@ e4c_context_is_ready(
  * Note that the behavior of the standard `signal` function might be undefined
  * for a multithreaded program, so use the signal handling system with caution.
  *
- * The convenience function `#e4c_print_exception` will be used as the default
+ * The convenience function #e4c_print_exception will be used as the default
  * *uncaught handler*. It will be called in the event of an uncaught exception,
  * before exiting the program or thread. This handler can be set through the
- * function `#e4c_context_set_handlers`.
+ * function #e4c_context_set_handlers.
  *
  * @pre
  *   - Once `e4c_context_begin` is called, the program (or thread) **must** call
  *     `e4c_context_end` before exiting.
  *   - Calling `e4c_context_begin` *twice in a row* is considered a programming
  *     error, and therefore the program (or thread) will exit abruptly.
- *     Nevertheless, `#e4c_context_begin` can be called several times *if, and
+ *     Nevertheless, #e4c_context_begin can be called several times *if, and
  *     only if*, `e4c_context_end` is called in between.
  *
  * @see     #e4c_context_end
@@ -2708,9 +2708,9 @@ e4c_context_end(
  * system. For example, you can specify what needs to be done when a thrown
  * exception is not caught (and thus, the program or thread is about to end) by
  * calling `e4c_context_set_handlers` with your own [uncaught handler]
- * (@ref e4c_uncaught_handler).
+ * (#e4c_uncaught_handler).
  *
- * You can also control the [custom data](@ref e4c_exception::custom_data)
+ * You can also control the [custom data](#e4c_exception::custom_data)
  * attached to any new exception by specifying any or all of these:
  *
  *   - The *initial value* to be assigned to the `custom_data`
@@ -2775,7 +2775,7 @@ e4c_context_set_handlers(
  *   - A program (or thread) **must** begin an exception context prior to
  *     calling `e4c_context_set_signal_mappings`. Such programming error will
  *     lead to an abrupt exit of the program (or thread).
- *   - `mappings` **must** be terminated by `#E4C_NULL_SIGNAL_MAPPING`.
+ *   - `mappings` **must** be terminated by #E4C_NULL_SIGNAL_MAPPING.
  *
  * @see     #e4c_context_get_signal_mappings
  * @see     #e4c_signal_mapping
@@ -2841,7 +2841,7 @@ e4c_context_get_signal_mappings(
  *
  * The status of the current block can be obtained any time, provided that the
  * exception context has begun at the time of the function call. However, it is
- * sensible to call this function only during the execution of `#finally`
+ * sensible to call this function only during the execution of #E4C_FINALLY
  * blocks.
  *
  * @pre
@@ -2850,7 +2850,7 @@ e4c_context_get_signal_mappings(
  *     exit of the program (or thread).
  *
  * @see     #e4c_status
- * @see     #finally
+ * @see     #E4C_FINALLY
  */
 /*@unused@*/
 e4c_status
@@ -2875,7 +2875,7 @@ e4c_get_status(
  * This function returns a pointer to the exception that was thrown in the
  * surrounding *exception-aware* block, if any; otherwise `NULL`.
  *
- * The function `#e4c_is_instance_of` will determine if the thrown exception is
+ * The function #e4c_is_instance_of will determine if the thrown exception is
  * an instance of any of the defined exception types. The `type` of the thrown
  * exception can also be compared for an exact type match.
  *
@@ -2894,14 +2894,14 @@ e4c_get_status(
  *
  * The thrown exception can be obtained any time, provided that the exception
  * context has begun at the time of the function call. However, it is sensible
- * to call this function only during the execution of `#finally` or `#catch`
+ * to call this function only during the execution of #E4C_FINALLY or #E4C_CATCH
  * blocks.
  *
- * Moreover, a pointer to the thrown exception obtained *inside* a `#finally`
- * or `#catch` block **must not** be used *outside* these blocks.
+ * Moreover, a pointer to the thrown exception obtained *inside* a #E4C_FINALLY
+ * or #E4C_CATCH block **must not** be used *outside* these blocks.
  *
  * The exception system objects are dinamically allocated and deallocated, as
- * the program enters or exits `#try`... `#catch`... `#finally` blocks. While
+ * the program enters or exits #E4C_TRY... #E4C_CATCH... #E4C_FINALLY blocks. While
  * it would be legal to *copy* the thrown exception and access to its `name`
  * and `message` outside these blocks, care should be taken in order not to
  * dereference the `cause` of the exception, unless it is a **deep copy**
@@ -2914,9 +2914,9 @@ e4c_get_status(
  *
  * @see     #e4c_exception
  * @see     #e4c_is_instance_of
- * @see     #throw
- * @see     #catch
- * @see     #finally
+ * @see     #E4C_THROW
+ * @see     #E4C_CATCH
+ * @see     #E4C_FINALLY
  */
 /*@unused@*/
 /*@observer@*/ /*@relnull@*/
@@ -2979,12 +2979,12 @@ e4c_library_version(
  *          A previously defined type of exceptions
  * @return  Whether the specified exception is an instance of the given type
  *
- * `#e4c_is_instance_of` can be used to determine if a thrown exception **is an
+ * #e4c_is_instance_of can be used to determine if a thrown exception **is an
  * instance of** a given exception type.
  *
- * This function is intended to be used in a `#catch` block, or in a `#finally`
+ * This function is intended to be used in a #E4C_CATCH block, or in a #E4C_FINALLY
  * block provided that some exception was actually thrown (i.e.
- * `#e4c_get_status` returs `#e4c_failed` or `#e4c_recovered`).
+ * #e4c_get_status returs #e4c_failed or #e4c_recovered).
  *
  * This function will return `false` if either `instance` or `type` are
  * `NULL`.
@@ -3028,7 +3028,7 @@ e4c_is_instance_of(
  *          The uncaught exception
  *
  * This is a convenience function for showing an error message through the
- * standard error output. It can be passed to `#e4c_context_set_handlers` as
+ * standard error output. It can be passed to #e4c_context_set_handlers as
  * the handler for uncaught exceptions. Will be used by default, unless
  * otherwise set up.
  *
@@ -3073,7 +3073,7 @@ e4c_print_exception(
  * This is a convenience function for showing an ASCII graph representing an
  * exception type's hierarchy through the standard error output.
  *
- * For example, the output for `#ProgramSignal2Exception` would be:
+ * For example, the output for #ProgramSignal2Exception would be:
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
