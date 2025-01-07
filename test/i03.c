@@ -44,7 +44,7 @@ TEST_CASE{
 
     }E4C_CATCH(RuntimeException){
 
-        reacquire(3);
+        E4C_REACQUIRE(3);
     }
 
     e4c_context_end();

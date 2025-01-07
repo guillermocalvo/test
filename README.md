@@ -18,10 +18,10 @@
 This library provides you with a simple set of keywords (*macros*, actually)
 which map the semantics of exception handling you're probably already used to:
 
-- `try`
-- `catch`
-- `finally`
-- `throw`
+- #E4C_TRY
+- #E4C_CATCH
+- #E4C_FINALLY
+- #E4C_THROW
 
 You can use exceptions in C by writing `try/catch/finally` blocks:
 
@@ -37,11 +37,11 @@ You can use exceptions in C by writing `try/catch/finally` blocks:
             throw(NotEnoughMemoryException, "Could not allocate buffer.");
         }
 
-        try{
+        E4C_TRY {
             foo = get_user_input(buffer, 1024);
-        }catch(BadUserInputException){
+        } E4C_CATCH(BadUserInputException) {
             foo = 123;
-        }finally{
+        } E4C_FINALLY {
             free(buffer);
         }
 
@@ -87,15 +87,15 @@ with several exceptions:
 
     ...
 
-    try{
+    E4C_TRY {
         int color = chooseColor();
         if(color == 0xff0000) throw(RedException, "I don't like it.");
         if(color == 0x00ff00) throw(GreenException, NULL);
         if(color == 0x0000ff) throw(BlueException, "It's way too blue.");
         doSomething(color);
-    }catch(GreenException){
+    } E4C_CATCH(GreenException) {
         printf("You cannot use green.");
-    }catch(ColorException){
+    } E4C_CATCH(ColorException) {
         const e4c_exception * e = e4c_get_exception();
         printf("You cannot use that color: %s (%s).", e->name, e->message);
     }
@@ -110,19 +110,19 @@ handler, the second block will in fact be **unreachable**.
 
 There are other keywords related to resource handling:
 
-- `with... use`
-- `using`
+- #E4C_WITH ... #E4C_USE
+- #E4C_USING
 
 They allow you to express the *Dispose Pattern* in your code:
 
 ```c
     /* syntax #1 */
     FOO f;
-    with(f, e4c_dispose_FOO) f = e4c_acquire_FOO(foo, bar); use do_something(f);
+    E4C_WITH(f, e4c_dispose_FOO) f = e4c_acquire_FOO(foo, bar); use do_something(f);
 
     /* syntax #2 (relies on 'e4c_acquire_BAR' and 'e4c_dispose_BAR') */
     BAR bar;
-    using(BAR, bar, ("BAR", 123) ){
+    E4C_USING(BAR, bar, ("BAR", 123) ){
         do_something_else(bar);
     }
 
@@ -146,9 +146,9 @@ catch `BadPointerException`:
 ```c
     int * pointer = NULL;
 
-    try{
+    E4C_TRY {
         int oops = *pointer;
-    }catch(BadPointerException){
+    } E4C_CATCH(BadPointerException) {
         printf("No problem ;-)");
     }
 ```

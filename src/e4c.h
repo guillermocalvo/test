@@ -12,23 +12,12 @@
  * This header file needs to be included in order to be able to use any of the
  * exception handling system keywords:
  *
- *   - `#try`
- *   - `#catch`
- *   - `#finally`
- *   - `#throw`
- *   - `#with`
- *   - `#using`
- *
- * In order to stop defining these keywords, there exists a `E4C_NOKEYWORDS`
- * *compile-time* parameter. When the keywords are not defined, the next set of
- * alternative macros can be used to achieve the same functionality:
- *
- *   - `E4C_TRY`
- *   - `E4C_CATCH`
- *   - `E4C_FINALLY`
- *   - `E4C_THROW`
- *   - `E4C_WITH`
- *   - `E4C_USING`
+ *   - #E4C_TRY
+ *   - #E4C_CATCH
+ *   - #E4C_FINALLY
+ *   - #E4C_THROW
+ *   - #E4C_WITH
+ *   - #E4C_USING
  *
  * @section license License
  *
@@ -179,14 +168,8 @@
 
 # ifndef NDEBUG
 #   define E4C_INFO_                    __FILE__, __LINE__, __func__
-#   define E4C_ASSERT(condition) ( \
-        (condition) \
-        ? (void)0 \
-        : E4C_THROW(AssertionException, "Assertion failed: " #condition) \
-    )
 # else
 #   define E4C_INFO_                    NULL, 0, NULL
-#   define E4C_ASSERT(ignore)           ( (void)0 )
 # endif
 
 
@@ -201,43 +184,6 @@
 # define E4C_FRAME_LOOP_(stage) \
     if(E4C_CONTINUATION_CREATE_(e4c_frame_first_stage_(stage,E4C_INFO_)) >= 0) \
         while( e4c_frame_next_stage_() )
-
-# define E4C_TRY \
-    E4C_FRAME_LOOP_(e4c_acquiring_) \
-    if( ( e4c_frame_get_stage_(E4C_INFO_) == e4c_trying_ ) \
-        && e4c_frame_next_stage_() )
-    /* simple optimization: e4c_frame_next_stage_ will avoid disposing stage */
-
-# define E4C_CATCH(exception_type) \
-    else if( e4c_frame_catch_(&exception_type, E4C_INFO_) )
-
-# define E4C_FINALLY \
-    else if( e4c_frame_get_stage_(E4C_INFO_) == e4c_finalizing_ )
-
-# define E4C_THROW(exception_type, message) \
-    e4c_exception_throw_verbatim_(&exception_type, E4C_INFO_, message )
-
-# define E4C_WITH(resource, dispose) \
-    E4C_FRAME_LOOP_(e4c_beginning_) \
-    if( e4c_frame_get_stage_(E4C_INFO_) == e4c_disposing_ ){ \
-        dispose( \
-            /*@-usedef@*/ (resource) /*@=usedef@*/, \
-            (e4c_get_status() == e4c_failed) \
-        ); \
-    }else if( e4c_frame_get_stage_(E4C_INFO_) == e4c_acquiring_ ){
-    /*
-     * Splint detects resource being used before it is defined,
-     * but we *really* do define it before using, so we need to
-     * disable this check (usedef) for this specific parameter.
-     */
-
-# define E4C_USE \
-    }else if( e4c_frame_get_stage_(E4C_INFO_) == e4c_trying_ )
-
-# define E4C_USING(type, resource, args) \
-    E4C_WITH( (resource), e4c_dispose_##type){ \
-        (resource) = e4c_acquire_##type args; \
-    }E4C_USE
 
 # define E4C_REUSING_CONTEXT(status, on_failure) \
     \
@@ -271,34 +217,6 @@
         e4c_context_is_ready(); \
         e4c_context_end() \
     )
-
-# define E4C_THROWF(exception_type, format, ...) \
-        e4c_exception_throw_format_( \
-            &exception_type, E4C_INFO_, format, __VA_ARGS__ \
-        )
-
-# define E4C_RETHROW(message) \
-    e4c_exception_throw_verbatim_( \
-        ( \
-            e4c_get_exception() == NULL \
-            ? &NullPointerException \
-            : e4c_get_exception()->type \
-        ), \
-        E4C_INFO_, message \
-    )
-
-# define E4C_RETHROWF(format, ...) \
-        e4c_exception_throw_format_( \
-            ( e4c_get_exception() == NULL ? NULL : e4c_get_exception()->type), \
-            E4C_INFO_, format, __VA_ARGS__ \
-        )
-
-# define E4C_RETRY(max_retry_attempts) \
-    e4c_frame_repeat_(max_retry_attempts, e4c_acquiring_, E4C_INFO_)
-
-# define E4C_REACQUIRE(max_reacquire_attempts) \
-    e4c_frame_repeat_(max_reacquire_attempts, e4c_beginning_, E4C_INFO_)
-
 
 /**
  * @name Exception handling keywords
@@ -385,9 +303,10 @@
  * @see     #e4c_status
  * @see     #e4c_get_status
  */
-# ifndef E4C_NOKEYWORDS
-# define try E4C_TRY
-# endif
+#define E4C_TRY                                                             \
+  E4C_FRAME_LOOP_(e4c_acquiring_)                                           \
+  if (e4c_frame_get_stage_(E4C_INFO_) == e4c_trying_ && e4c_frame_next_stage_() )
+    /* simple optimization: e4c_frame_next_stage_ will avoid disposing stage */
 
 /**
  * Introduces a block of code capable of handling a specific type of exceptions
@@ -471,9 +390,8 @@
  * @see     #e4c_exception
  * @see     #e4c_is_instance_of
  */
-# ifndef E4C_NOKEYWORDS
-# define catch(exception_type) E4C_CATCH(exception_type)
-# endif
+#define E4C_CATCH(exception_type)                                           \
+  else if (e4c_frame_catch_(&exception_type, E4C_INFO_))
 
 /**
  * Introduces a block of code responsible for cleaning up the previous
@@ -526,9 +444,8 @@
  * @see     #e4c_get_status
  * @see     #e4c_status
  */
-# ifndef E4C_NOKEYWORDS
-# define finally E4C_FINALLY
-# endif
+#define E4C_FINALLY                                                         \
+  else if (e4c_frame_get_stage_(E4C_INFO_) == e4c_finalizing_)
 
 /**
  * Repeats the previous `#try` (or `#use`) block entirely
@@ -618,9 +535,8 @@
  * @see     #try
  * @see     #use
  */
-# ifndef E4C_NOKEYWORDS
-#   define retry(max_retry_attempts) E4C_RETRY(max_retry_attempts)
-# endif
+#define E4C_RETRY(max_retry_attempts)                                       \
+    e4c_frame_repeat_(max_retry_attempts, e4c_acquiring_, E4C_INFO_)
 
 /**
  * Signals an exceptional situation represented by an exception object
@@ -658,10 +574,8 @@
  * @see     #e4c_uncaught_handler
  * @see     #e4c_get_exception
  */
-# ifndef E4C_NOKEYWORDS
-# define throw(exception_type, message) \
-    E4C_THROW(exception_type, message)
-# endif
+#define E4C_THROW(exception_type, message)                                  \
+  e4c_exception_throw_verbatim_(&exception_type, E4C_INFO_, message )
 
 /**
  * Throws again the currently thrown exception, with a new message
@@ -698,9 +612,12 @@
  * @see     #throw
  * @see     #rethrowf
  */
-# ifndef E4C_NOKEYWORDS
-#   define rethrow(message) E4C_RETHROW(message)
-# endif
+#define E4C_RETHROW(message)                                                \
+  e4c_exception_throw_verbatim_(                                            \
+    (e4c_get_exception() == NULL ? &NullPointerException : e4c_get_exception()->type), \
+    E4C_INFO_,                                                              \
+    message                                                                 \
+  )
 
 /** @} */
 
@@ -804,9 +721,19 @@
  * @see     #use
  * @see     #using
  */
-# ifndef E4C_NOKEYWORDS
-# define with(resource, dispose) E4C_WITH(resource, dispose)
-# endif
+#define E4C_WITH(resource, dispose)                                         \
+  E4C_FRAME_LOOP_(e4c_beginning_)                                           \
+  if (e4c_frame_get_stage_(E4C_INFO_) == e4c_disposing_) {                  \
+  dispose(                                                                  \
+    /*@-usedef@*/ (resource) /*@=usedef@*/,                                 \
+    (e4c_get_status() == e4c_failed)                                        \
+  );                                                                        \
+  } else if( e4c_frame_get_stage_(E4C_INFO_) == e4c_acquiring_ ) {
+  /*
+   * Splint detects `resource` being used before it is defined,
+   * but we *really* do define it before using, so we need to
+   * disable this check (usedef) for this specific parameter.
+   */
 
 /**
  * Closes a block of code with automatic disposal of a resource
@@ -828,9 +755,8 @@
  *
  * @see     #with
  */
-# ifndef E4C_NOKEYWORDS
-# define use E4C_USE
-# endif
+#define E4C_USE                                                             \
+  } else if (e4c_frame_get_stage_(E4C_INFO_) == e4c_trying_)
 
 /**
  * Introduces a block of code with automatic acquisition and disposal of a
@@ -866,9 +792,10 @@
  *
  * @see     #with
  */
-# ifndef E4C_NOKEYWORDS
-# define using(type, resource, args) E4C_USING(type, resource, args)
-# endif
+#define E4C_USING(type, resource, args)                                     \
+  E4C_WITH((resource), e4c_dispose_##type) {                                \
+    (resource) = e4c_acquire_##type args;                                   \
+  } E4C_USE
 
 /**
  * Repeats the previous `#with` block entirely
@@ -939,10 +866,8 @@
  * @see     #with
  * @see     #use
  */
-# ifndef E4C_NOKEYWORDS
-#   define reacquire(max_reacquire_attempts) \
-        E4C_REACQUIRE(max_reacquire_attempts)
-# endif
+#define E4C_REACQUIRE(max_reacquire_attempts)                               \
+  e4c_frame_repeat_(max_reacquire_attempts, e4c_beginning_, E4C_INFO_)
 
 /** @} */
 
@@ -1422,16 +1347,17 @@
  *
  * @see     #AssertionException
  */
-# ifndef E4C_NOKEYWORDS
-# ifdef assert
-    /* macro assert is already defined (probably assert.h was included) */
-#   error "Please define E4C_NOKEYWORDS at compiler level " \
-"in order to prevent exceptions4c from defining the assert macro."
-# endif
+#ifndef NDEBUG
 /*@notfunction@*/
-#   define assert(condition) \
-        E4C_ASSERT(condition)
-# endif
+#define E4C_ASSERT(condition) (                                             \
+    (condition)                                                             \
+    ? (void) 0                                                              \
+    : E4C_THROW(AssertionException, "Assertion failed: " #condition)        \
+  )
+#else
+#define E4C_ASSERT(ignore)                                                  \
+  ( (void)0 )
+#endif
 
 /**
  * Throws an exception with a formatted message
@@ -1480,11 +1406,13 @@
  * @see     #throw
  * @see     #rethrowf
  */
-# ifndef E4C_NOKEYWORDS
-#   define throwf(exception_type, format, ...) \
-        \
-        E4C_THROWF( (exception_type), (format), __VA_ARGS__ )
-# endif
+#define E4C_THROWF(exception_type, format, ...)                             \
+  e4c_exception_throw_format_(                                              \
+    &exception_type,                                                        \
+    E4C_INFO_,                                                              \
+    (format),                                                               \
+    __VA_ARGS__                                                             \
+  )
 
 /**
  * Throws again the currently thrown exception, with a new, formatted message
@@ -1531,11 +1459,13 @@
  * @see     #rethrow
  * @see     #throwf
  */
-# ifndef E4C_NOKEYWORDS
-#   define rethrowf(format, ...) \
-        \
-        E4C_RETHROWF( (format), __VA_ARGS__ )
-# endif
+#define E4C_RETHROWF(format, ...)                                           \
+  e4c_exception_throw_format_(                                              \
+  (e4c_get_exception() == NULL ? NULL : e4c_get_exception()->type),         \
+  E4C_INFO_,                                                                \
+  (format),                                                                 \
+  __VA_ARGS__                                                               \
+)
 
 
 /**

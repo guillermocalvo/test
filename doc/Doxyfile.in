@@ -66,22 +66,9 @@ EXCLUDE_SYMBOLS        = e4c_frame_stage_ \
                          E4C_INFO_LINE_ \
                          E4C_MANGLE_ \
                          E4C_PASTE_ \
-                         E4C_CATCH \
-                         E4C_TRY \
-                         E4C_FINALLY \
-                         E4C_REACQUIRE \
-                         E4C_ASSERT \
-                         E4C_RETHROW \
-                         E4C_RETHROWF \
-                         E4C_RETRY \
                          E4C_REUSING_CONTEXT \
-                         E4C_THROW \
-                         E4C_THROWF \
                          E4C_UNREACHABLE_RETURN_ \
-                         E4C_USE \
-                         E4C_USING \
                          E4C_USING_CONTEXT \
-                         E4C_WITH \
                          e4c_status_ \
                          _ \
                          e4c_beginning_ \

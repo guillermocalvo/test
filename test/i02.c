@@ -33,7 +33,7 @@ TEST_CASE{
 
     }E4C_FINALLY{
 
-        retry(3);
+        E4C_RETRY(3);
     }
 
     e4c_context_end();

@@ -18,12 +18,12 @@ TEST_CASE{
 
     e4c_context_begin(false);
 
-    try{
+    E4C_TRY {
 
         E4C_THROW(RuntimeException, NULL);
 
     /* Never pass NULL to a catch block! */
-    }catch(  *( (e4c_exception_type *)NULL )  ){
+    } E4C_CATCH(  *( (e4c_exception_type *)NULL )  ) {
 
         THIS_SHOULD_NOT_HAPPEN;
     }
