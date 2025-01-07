@@ -1804,8 +1804,7 @@
  * @see     #throw
  * @see     #catch
  */
-typedef struct e4c_exception_type_ e4c_exception_type;
-struct e4c_exception_type_ {
+typedef struct e4c_exception_type_struct {
 
     /** The name of this exception type */
     /*@observer@*/ /*@notnull@*/
@@ -1817,8 +1816,8 @@ struct e4c_exception_type_ {
 
     /** The supertype of this exception type */
     /*@shared@*/ /*@notnull@*/
-    const e4c_exception_type *      supertype;
-};
+    const struct e4c_exception_type_struct * supertype;
+} e4c_exception_type;
 
 /**
  * Represents an instance of an exception type
@@ -1857,8 +1856,7 @@ struct e4c_exception_type_ {
  * @see     #RuntimeException
  * @see     #AssertionException
  */
-typedef struct e4c_exception_ e4c_exception;
-struct e4c_exception_ {
+typedef struct e4c_exception_struct {
 
     /* This field is undocumented on purpose and reserved for internal use */
     int                             _;
@@ -1891,12 +1889,12 @@ struct e4c_exception_ {
 
     /** The cause of this exception */
     /*@only@*/ /*@null@*/
-    e4c_exception *                 cause;
+    struct e4c_exception_struct *   cause;
 
     /** Custom data associated to this exception */
     /*@shared@*/ /*@null@*/
     void *                          custom_data;
-};
+} e4c_exception;
 
 /**
  * Represents a map between a signal and an exception
@@ -1988,8 +1986,7 @@ struct e4c_exception_ {
  * @see     #E4C_IGNORE_SIGNAL
  * @see     #e4c_default_signal_mappings
  */
-typedef struct e4c_signal_mapping_ e4c_signal_mapping;
-struct e4c_signal_mapping_ {
+typedef struct {
 
     /** The signal to be converted */
     int                                 signal_number;
@@ -1998,7 +1995,7 @@ struct e4c_signal_mapping_ {
     /*@dependent@*/ /*@null@*/
     const e4c_exception_type * const    exception_type;
 
-};
+} e4c_signal_mapping;
 
 /**
  * Represents the completeness of a code block aware of exceptions
@@ -2031,7 +2028,7 @@ struct e4c_signal_mapping_ {
  * @see     #e4c_get_status
  * @see     #finally
  */
-enum e4c_status_ {
+typedef enum {
 
     /** There were no exceptions */
     e4c_succeeded,
@@ -2041,8 +2038,7 @@ enum e4c_status_ {
 
     /** There was an exception and it wasn't caught */
     e4c_failed
-};
-typedef enum e4c_status_ e4c_status;
+} e4c_status;
 
 /**
  * Represents a function which will be executed in the event of an uncaught
