@@ -4,7 +4,7 @@
  *
  * exceptions4c source code file
  *
- * @version     3.0
+ * @version     4.0
  * @author      Copyright (c) 2016 Guillermo Calvo
  *
  * This is free software: you can redistribute it and/or modify it under the
@@ -542,7 +542,7 @@ E4C_DEFINE_EXCEPTION(ContextNotEnded,                   DESC_NOT_ENDED,         
  */
 
 /*@-redecl@*/
-long
+int
 e4c_library_version(
     void
 )
@@ -2638,9 +2638,9 @@ static E4C_INLINE void _e4c_library_fatal_error(const e4c_exception_type * excep
     /*@=noeffectuncon@*/
 }
 
-long e4c_library_version(void) {
+int e4c_library_version(void) {
 
-    return (long) E4C_VERSION_NUMBER;
+    return EXCEPTIONS4C_VERSION;
 }
 
 # ifdef E4C_THREADSAFE

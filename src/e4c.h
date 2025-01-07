@@ -4,7 +4,7 @@
  *
  * exceptions4c header file
  *
- * @version     3.0
+ * @version     4.0
  * @author      Copyright (c) 2016 Guillermo Calvo
  *
  * @section e4c_h exceptions4c header file
@@ -49,12 +49,12 @@
  */
 
 
-# ifndef EXCEPTIONS4C
-# define EXCEPTIONS4C
+# ifndef EXCEPTIONS4C_VERSION
 
-
-# define E4C_VERSION_(version)          version(3, 0, 6)
-
+/**
+ * Returns the major version number of this library.
+ */
+# define EXCEPTIONS4C_VERSION 4
 
 # if !defined(E4C_THREADSAFE) && ( \
         defined(_THREAD_SAFE) \
@@ -275,29 +275,6 @@
 # define E4C_PASTE_(x, y, z)            x ## _ ## y ## _ ## z
 # define E4C_MANGLE_(pre, id, post)     E4C_PASTE_(pre, id, post)
 # define E4C_AUTO_(id)                  E4C_MANGLE_(_implicit, id, __LINE__)
-
-
-# ifdef E4C_THREADSAFE
-#   define E4C_VERSION_THREADSAFE_          1
-#   define E4C_VERSION_THREADSAFE_STRING_   " (multi-thread)"
-# else
-#   define E4C_VERSION_THREADSAFE_          0
-#   define E4C_VERSION_THREADSAFE_STRING_   " (single-thread)"
-# endif
-
-
-# define E4C_VERSION_STRING_(major, minor, revision) \
-    #major "." #minor "." #revision E4C_VERSION_THREADSAFE_STRING_
-# define E4C_VERSION_NUMBER_(major, minor, revision) ( \
-    ( (long)E4C_VERSION_THREADSAFE_ * 10000000L) +  \
-    ( (long)major                   * 1000000L) +   \
-    ( (long)minor                   * 1000L) +      \
-    ( (long)revision                * 1L)           \
-)
-# define E4C_VERSION_MAJOR_(major, minor, revision) ( (int)major )
-# define E4C_VERSION_MINOR_(major, minor, revision) ( (int)minor )
-# define E4C_VERSION_REVISION_(major, minor, revision) ( (int)revision )
-
 
 /*
  * These undocumented macros hide implementation details from documentation.
@@ -1063,120 +1040,6 @@
  *
  * @{
  */
-
-/**
- * Provides the library version number
- *
- * The library version number is a `long` value which expresses:
- *
- *   - library thread mode (either *single-thread* or *multi-thread*)
- *   - library *major* version number
- *   - library *minor* version number
- *   - library *revision* number
- *
- * The multi-thread (or *thread-safe*) mode can be enabled by compiling the
- * library with the `E4C_THREADSAFE` *compile-time* parameter.
- *
- * The formula to encode these version numbers into a single `long` value is:
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   THREADSAFE * 10000000 + MAJOR * 1000000 + MINOR * 1000 + REVISION
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * These numbers can be obtained separately through the next macros:
- *
- *   - `#E4C_VERSION_THREADSAFE`
- *   - `#E4C_VERSION_MAJOR`
- *   - `#E4C_VERSION_MINOR`
- *   - `#E4C_VERSION_REVISION`
- *
- * The library version number can be also obtained as a string literal in the
- * format "MAJOR.MINOR.REVISION (THREADSAFE)" through the macro
- * `#E4C_VERSION_STRING`.
- *
- * @note
- * This version number can be considered as the *compile-time* library version
- * number, as opposed to the *run-time* library version number (associated with
- * the actual, compiled library). This *run-time* version number can be obtained
- * through the function `#e4c_library_version`.
- *
- * @remark
- * The library **must** be compiled with the corresponding header (i.e. library
- * version number should be equal to header version number).
- *
- * @see     #e4c_library_version
- * @see     #E4C_VERSION_THREADSAFE
- * @see     #E4C_VERSION_MAJOR
- * @see     #E4C_VERSION_MINOR
- * @see     #E4C_VERSION_REVISION
- * @see     #E4C_VERSION_STRING
- */
-# define E4C_VERSION_NUMBER \
-    \
-    E4C_VERSION_(E4C_VERSION_NUMBER_)
-
-/**
- * Provides the library thread mode (either single-thread or multi-thread)
- *
- * When the library is compiled with the `E4C_THREADSAFE` *compile-time*
- * parameter, `#E4C_VERSION_THREADSAFE` will yield the `int` value `1` (meaning
- * *multi-thread* mode), otherwise it will yield the `int` value `0` (meaning
- * *single-thread* mode).
- *
- * @see     #E4C_VERSION_NUMBER
- */
-# define E4C_VERSION_THREADSAFE \
-    \
-    E4C_VERSION_THREADSAFE_
-
-/**
- * Provides the library major version number
- *
- * The library major version number is an `int` value which is incremented from
- * one release to another when there are **significant changes in
- * functionality**.
- *
- * @see     #E4C_VERSION_NUMBER
- */
-# define E4C_VERSION_MAJOR \
-    \
-    E4C_VERSION_(E4C_VERSION_MAJOR_)
-
-/**
- * Provides the library minor version number
- *
- * The library minor version number is an `int` value which is incremented from
- * one release to another when **only minor features or significant fixes have
- * been added**.
- *
- * @see     #E4C_VERSION_NUMBER
- */
-# define E4C_VERSION_MINOR \
-    \
-    E4C_VERSION_(E4C_VERSION_MINOR_)
-
-/**
- * Provides the library revision number
- *
- * The library revision number is an `int` value which is incremented from one
- * release to another when **minor bugs are fixed**.
- *
- * @see     #E4C_VERSION_NUMBER
- */
-# define E4C_VERSION_REVISION \
-    \
-    E4C_VERSION_(E4C_VERSION_REVISION_)
-
-/**
- * Provides the library version number as a string literal
- *
- * The format of the string literal is: "MAJOR.MINOR.REVISION (THREADSAFE)".
- *
- * @see     #E4C_VERSION_NUMBER
- */
-# define E4C_VERSION_STRING \
-    \
-    E4C_VERSION_(E4C_VERSION_STRING_)
 
 /**
  * Provides the maximum length (in bytes) of an exception message
@@ -3258,12 +3121,12 @@ e4c_get_exception(
  */
 
 /**
- * Gets the library version number
+ * Gets the library major version number
  *
- * @return  The version number associated with the library
+ * @return  The major version number associated with the library
  *
- * This function provides the same information as the `#E4C_VERSION_NUMBER`
- * macro, but the returned version number is associated with the actual,
+ * This function provides the same information as #EXCEPTIONS4C_VERSION,
+ * but the returned version number is associated with the actual,
  * compiled library.
  *
  * @note
@@ -3275,11 +3138,11 @@ e4c_get_exception(
  * The library **must** be compiled with the corresponding header (i.e. library
  * version number should be equal to header version number).
  *
- * @see     #E4C_VERSION_NUMBER
+ * @see     #EXCEPTIONS4C_VERSION
  */
 /*@unused@*/
 extern
-long
+int
 e4c_library_version(
     void
 )

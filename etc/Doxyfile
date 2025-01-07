@@ -855,14 +855,6 @@ EXCLUDE_SYMBOLS        = e4c_frame_stage_ \
                          E4C_USE \
                          E4C_USING \
                          E4C_USING_CONTEXT \
-                         E4C_VERSION_ \
-                         E4C_VERSION_MAJOR_ \
-                         E4C_VERSION_MINOR_ \
-                         E4C_VERSION_NUMBER_ \
-                         E4C_VERSION_REVISION_ \
-                         E4C_VERSION_STRING_ \
-                         E4C_VERSION_THREADSAFE_ \
-                         E4C_VERSION_THREADSAFE_STRING_ \
                          E4C_WITH \
                          e4c_status_ \
                          _ \
