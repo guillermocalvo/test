@@ -469,7 +469,7 @@ E4C_DEFINE_EXCEPTION(ContextNotEnded,                   DESC_NOT_ENDED,         
 static void _e4c_library_initialize(void);
 static void _e4c_library_finalize(void);
 static void _e4c_library_handle_signal(int signal_number);
-static inline noreturn void _e4c_library_fatal_error(
+static noreturn void _e4c_library_fatal_error(
     const e4c_exception_type *  exception_type,
     const char *                message,
     const char *                file,
@@ -480,32 +480,32 @@ static inline noreturn void _e4c_library_fatal_error(
 
 # ifdef E4C_THREADSAFE
 
-static inline e4c_environment * _e4c_environment_allocate(int line, const char * function);
-static inline void _e4c_environment_deallocate(e4c_environment * environment);
-static inline void _e4c_environment_initialize(e4c_environment * environment, e4c_uncaught_handler uncaught_handler);
-static inline void _e4c_environment_add(e4c_environment * environment);
+static e4c_environment * _e4c_environment_allocate(int line, const char * function);
+static void _e4c_environment_deallocate(e4c_environment * environment);
+static void _e4c_environment_initialize(e4c_environment * environment, e4c_uncaught_handler uncaught_handler);
+static void _e4c_environment_add(e4c_environment * environment);
 static e4c_environment * _e4c_environment_remove(void);
 static e4c_environment * _e4c_environment_get_current(void);
 
-static inline e4c_context * _e4c_context_get_current(void);
+static e4c_context * _e4c_context_get_current(void);
 
 # endif
 
-static inline void _e4c_context_initialize(e4c_context * context, e4c_uncaught_handler uncaught_handler);
+static void _e4c_context_initialize(e4c_context * context, e4c_uncaught_handler uncaught_handler);
 static void _e4c_context_set_signal_handlers(e4c_context * context, const e4c_signal_mapping * mappings);
 static void _e4c_context_at_uncaught_exception(e4c_context * context, const e4c_exception * exception);
 static noreturn void _e4c_context_propagate(e4c_context * context, e4c_exception * exception);
 
-static inline e4c_frame * _e4c_frame_allocate(int line, const char * function);
-static inline void _e4c_frame_deallocate(e4c_frame * frame, e4c_finalize_handler finalize_handler);
-static inline void _e4c_frame_initialize(e4c_frame * frame, e4c_frame * previous, e4c_frame_stage stage);
-static inline void _e4c_print_exception_type(const e4c_exception_type *  exception_type);
-static inline int _e4c_print_exception_type_node(const e4c_exception_type * exception_type);
-static inline bool _e4c_exception_type_extends(const e4c_exception_type * child, const e4c_exception_type * parent);
+static e4c_frame * _e4c_frame_allocate(int line, const char * function);
+static void _e4c_frame_deallocate(e4c_frame * frame, e4c_finalize_handler finalize_handler);
+static void _e4c_frame_initialize(e4c_frame * frame, e4c_frame * previous, e4c_frame_stage stage);
+static void _e4c_print_exception_type(const e4c_exception_type *  exception_type);
+static int _e4c_print_exception_type_node(const e4c_exception_type * exception_type);
+static bool _e4c_exception_type_extends(const e4c_exception_type * child, const e4c_exception_type * parent);
 
-static inline e4c_exception * _e4c_exception_allocate(int line, const char * function);
-static inline void _e4c_exception_deallocate(e4c_exception * exception, e4c_finalize_handler finalize_handler);
-static inline void _e4c_exception_initialize(
+static e4c_exception * _e4c_exception_allocate(int line, const char * function);
+static void _e4c_exception_deallocate(e4c_exception * exception, e4c_finalize_handler finalize_handler);
+static void _e4c_exception_initialize(
     e4c_exception *             exception,
     const e4c_exception_type *  exception_type,
     bool                        set_message,
@@ -515,8 +515,8 @@ static inline void _e4c_exception_initialize(
     const char *                function,
     int                         error_number
 );
-static inline void _e4c_exception_set_cause(e4c_exception * exception, e4c_exception * cause);
-static inline e4c_exception * _e4c_exception_throw(
+static void _e4c_exception_set_cause(e4c_exception * exception, e4c_exception * cause);
+static e4c_exception * _e4c_exception_throw(
     e4c_frame *                 frame,
     const e4c_exception_type *  exception_type,
     const char *                file,
@@ -526,7 +526,7 @@ static inline e4c_exception * _e4c_exception_throw(
     bool                        set_message,
     const char *                message
 );
-static inline void _e4c_print_exception(const e4c_exception * exception);
+static void _e4c_print_exception(const e4c_exception * exception);
 
 
 
@@ -665,7 +665,7 @@ static void _e4c_library_handle_signal(int signal_number) {
     INTERNAL_ERROR(DESC_NO_MAPPING, "_e4c_library_handle_signal");
 }
 
-static inline void _e4c_library_fatal_error(const e4c_exception_type * exception_type, const char * message, const char * file, int line, const char * function, int error_number) {
+static void _e4c_library_fatal_error(const e4c_exception_type * exception_type, const char * message, const char * file, int line, const char * function, int error_number) {
 
     e4c_exception exception;
 
@@ -712,7 +712,7 @@ static e4c_environment * _e4c_environment_get_current(void){
     return environment;
 }
 
-static inline e4c_environment * _e4c_environment_allocate(int line, const char * function){
+static e4c_environment * _e4c_environment_allocate(int line, const char * function){
 
     e4c_environment * environment;
 
@@ -727,7 +727,7 @@ static inline e4c_environment * _e4c_environment_allocate(int line, const char *
     MEMORY_ERROR(DESC_MALLOC_CONTEXT, line, function);
 }
 
-static inline void _e4c_environment_deallocate(e4c_environment * environment){
+static void _e4c_environment_deallocate(e4c_environment * environment){
 
     if(environment != NULL){
 
@@ -748,7 +748,7 @@ static void _e4c_environment_initialize(e4c_environment * environment, e4c_uncau
     _e4c_context_initialize(&environment->context, uncaught_handler);
 }
 
-static inline void _e4c_environment_add(e4c_environment * environment){
+static void _e4c_environment_add(e4c_environment * environment){
 
     /* assert: environment != NULL */
 
@@ -797,7 +797,7 @@ static e4c_environment * _e4c_environment_remove(void){
 /* CONTEXT
  ================================================================ */
 
-static inline void _e4c_context_initialize(e4c_context * context, e4c_uncaught_handler uncaught_handler) {
+static void _e4c_context_initialize(e4c_context * context, e4c_uncaught_handler uncaught_handler) {
 
     context->uncaught_handler   = uncaught_handler;
     context->signal_mappings    = NULL;
@@ -852,7 +852,7 @@ static void _e4c_context_propagate(e4c_context * context, e4c_exception * except
 
 # ifdef E4C_THREADSAFE
 
-static inline e4c_context * _e4c_context_get_current(void){
+static e4c_context * _e4c_context_get_current(void){
 
     e4c_environment * environment = _e4c_environment_get_current();
 
@@ -1160,7 +1160,7 @@ e4c_continuation * e4c_frame_first_stage_(e4c_frame_stage stage, const char * fi
     return &(new_frame->continuation);
 }
 
-static inline void _e4c_frame_initialize(e4c_frame * frame, e4c_frame * previous, e4c_frame_stage stage) {
+static void _e4c_frame_initialize(e4c_frame * frame, e4c_frame * previous, e4c_frame_stage stage) {
 
     frame->previous             = previous;
     frame->stage                = stage;
@@ -1172,7 +1172,7 @@ static inline void _e4c_frame_initialize(e4c_frame * frame, e4c_frame * previous
     /* jmp_buf is an implementation-defined type */
 }
 
-static inline e4c_frame * _e4c_frame_allocate(int line, const char * function) {
+static e4c_frame * _e4c_frame_allocate(int line, const char * function) {
 
     e4c_frame * frame;
 
@@ -1186,7 +1186,7 @@ static inline e4c_frame * _e4c_frame_allocate(int line, const char * function) {
     return frame;
 }
 
-static inline void _e4c_frame_deallocate(e4c_frame * frame, e4c_finalize_handler finalize_handler) {
+static void _e4c_frame_deallocate(e4c_frame * frame, e4c_finalize_handler finalize_handler) {
 
     if (frame != NULL) {
 
@@ -1441,7 +1441,7 @@ e4c_status e4c_get_status(void) {
 /* EXCEPTION TYPE
  ================================================================ */
 
-static inline bool _e4c_exception_type_extends(const e4c_exception_type * temp, const e4c_exception_type * parent) {
+static bool _e4c_exception_type_extends(const e4c_exception_type * temp, const e4c_exception_type * parent) {
 
     /* assert: child != parent */
     /* assert: child != NULL */
@@ -1473,7 +1473,7 @@ bool e4c_is_instance_of(const e4c_exception * instance, const e4c_exception_type
     return _e4c_exception_type_extends(instance->type, exception_type);
 }
 
-static inline int _e4c_print_exception_type_node(const e4c_exception_type * exception_type) {
+static int _e4c_print_exception_type_node(const e4c_exception_type * exception_type) {
 
     int deep = -1;
 
@@ -1491,7 +1491,7 @@ static inline int _e4c_print_exception_type_node(const e4c_exception_type * exce
     return deep + 1;
 }
 
-static inline void _e4c_print_exception_type(const e4c_exception_type * exception_type) {
+static void _e4c_print_exception_type(const e4c_exception_type * exception_type) {
 
     const char *    separator   = "________________________________________________________________";
 
@@ -1533,7 +1533,7 @@ const e4c_exception * e4c_get_exception(void) {
     return context->current_frame->thrown_exception;
 }
 
-static inline e4c_exception * _e4c_exception_throw(e4c_frame * frame, const e4c_exception_type * exception_type, const char * file, int line, const char * function, int error_number, bool set_message, const char * message) {
+static e4c_exception * _e4c_exception_throw(e4c_frame * frame, const e4c_exception_type * exception_type, const char * file, int line, const char * function, int error_number, bool set_message, const char * message) {
 
     e4c_exception *     new_exception;
 
@@ -1644,7 +1644,7 @@ void e4c_exception_throw_format_(const e4c_exception_type * exception_type, cons
     _e4c_context_propagate(context, new_exception);
 }
 
-static inline void _e4c_exception_initialize(e4c_exception * exception, const e4c_exception_type * exception_type, bool set_message, const char * message, const char * file, int line, const char * function, int error_number) {
+static void _e4c_exception_initialize(e4c_exception * exception, const e4c_exception_type * exception_type, bool set_message, const char * message, const char * file, int line, const char * function, int error_number) {
 
     /* assert: exception != NULL */
     /* assert: exception_type != NULL */
@@ -1674,7 +1674,7 @@ static inline void _e4c_exception_initialize(e4c_exception * exception, const e4
      */
 }
 
-static inline e4c_exception * _e4c_exception_allocate(int line, const char * function) {
+static e4c_exception * _e4c_exception_allocate(int line, const char * function) {
 
     e4c_exception * exception;
 
@@ -1690,7 +1690,7 @@ static inline e4c_exception * _e4c_exception_allocate(int line, const char * fun
     MEMORY_ERROR(DESC_MALLOC_EXCEPTION, line, function);
 }
 
-static inline void _e4c_exception_deallocate(e4c_exception * exception, e4c_finalize_handler finalize_handler) {
+static void _e4c_exception_deallocate(e4c_exception * exception, e4c_finalize_handler finalize_handler) {
 
     if (exception != NULL) {
 
@@ -1709,7 +1709,7 @@ static inline void _e4c_exception_deallocate(e4c_exception * exception, e4c_fina
     }
 }
 
-static inline void _e4c_exception_set_cause(e4c_exception * exception, e4c_exception * cause) {
+static void _e4c_exception_set_cause(e4c_exception * exception, e4c_exception * cause) {
 
     /* assert: exception != NULL */
     /* assert: cause != NULL */
