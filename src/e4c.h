@@ -94,26 +94,6 @@
 /*@-exportany@*/
 
 
-/* C99 features */
-# if defined(_ISOC99_SOURCE) \
-    ||  defined(_GNU_SOURCE) \
-    ||  ( defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) )
-
-#   ifndef HAVE_C99_VARIADIC_MACROS
-#       define HAVE_C99_VARIADIC_MACROS
-#   endif
-
-#   ifndef HAVE_C99_VSNPRINTF
-#       define HAVE_C99_VSNPRINTF
-#   endif
-
-#   ifndef HAVE_C99_SNPRINTF
-#       define HAVE_C99_SNPRINTF
-#   endif
-
-# endif
-
-
 /* POSIX features */
 # if defined(_POSIX_C_SOURCE) \
     ||  defined(_POSIX_SOURCE) \
@@ -292,12 +272,10 @@
         e4c_context_end() \
     )
 
-# ifdef HAVE_C99_VARIADIC_MACROS
-#   define E4C_THROWF(exception_type, format, ...) \
+# define E4C_THROWF(exception_type, format, ...) \
         e4c_exception_throw_format_( \
             &exception_type, E4C_INFO_, format, __VA_ARGS__ \
         )
-# endif
 
 # define E4C_RETHROW(message) \
     e4c_exception_throw_verbatim_( \
@@ -309,13 +287,11 @@
         E4C_INFO_, message \
     )
 
-# ifdef HAVE_C99_VARIADIC_MACROS
-#   define E4C_RETHROWF(format, ...) \
+# define E4C_RETHROWF(format, ...) \
         e4c_exception_throw_format_( \
             ( e4c_get_exception() == NULL ? NULL : e4c_get_exception()->type), \
             E4C_INFO_, format, __VA_ARGS__ \
         )
-# endif
 
 # define E4C_RETRY(max_retry_attempts) \
     e4c_frame_repeat_(max_retry_attempts, e4c_acquiring_, E4C_INFO_)
@@ -1487,11 +1463,6 @@
  *   - Variadic macros
  *   - Buffer-safe function `vsnprintf`
  *
- * In order not to create compatibility issues, this macro will only be defined
- * when the `__STDC_VERSION__` *compile-time* parameter is defined as a `long`
- * value *greater than or equal to* `199901L`, or when
- * `HAVE_C99_VARIADIC_MACROS` is defined.
- *
  * The semantics of this keyword are the same as for `throw`.
  *
  * @pre
@@ -1509,7 +1480,7 @@
  * @see     #throw
  * @see     #rethrowf
  */
-# if !defined(E4C_NOKEYWORDS) && defined(HAVE_C99_VARIADIC_MACROS)
+# ifndef E4C_NOKEYWORDS
 #   define throwf(exception_type, format, ...) \
         \
         E4C_THROWF( (exception_type), (format), __VA_ARGS__ )
@@ -1543,11 +1514,6 @@
  *   - Variadic macros
  *   - Buffer-safe function `vsnprintf`
  *
- * In order not to create compatibility issues, this macro will only be defined
- * when the `__STDC_VERSION__` *compile-time* parameter is defined as a `long`
- * value *greater than or equal to* `199901L`, or when
- * `HAVE_C99_VARIADIC_MACROS` is defined.
- *
  * The semantics of this keyword are the same as for `throw`.
  *
  * @pre
@@ -1565,7 +1531,7 @@
  * @see     #rethrow
  * @see     #throwf
  */
-# if !defined(E4C_NOKEYWORDS) && defined(HAVE_C99_VARIADIC_MACROS)
+# ifndef E4C_NOKEYWORDS
 #   define rethrowf(format, ...) \
         \
         E4C_RETHROWF( (format), __VA_ARGS__ )
@@ -3359,8 +3325,6 @@ e4c_exception_throw_verbatim_(
 @*/
 E4C_NO_RETURN;
 
-# if defined(HAVE_C99_VSNPRINTF) || defined(HAVE_VSNPRINTF)
-
 /*@unused@*/ /*@noreturn@*/
 void
 e4c_exception_throw_format_(
@@ -3387,8 +3351,6 @@ e4c_exception_throw_format_(
     internalState
 @*/
 E4C_NO_RETURN;
-
-# endif
 
 /*@=exportany@*/
 

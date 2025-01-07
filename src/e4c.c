@@ -76,13 +76,7 @@
 
 # define ref_count                      _
 
-# if    defined(HAVE_C99_SNPRINTF) \
-    ||  defined(HAVE_SNPRINTF) \
-    ||  defined(S_SPLINT_S)
-#   define VERBATIM_COPY(dst, src) (void)snprintf(dst, (size_t)E4C_EXCEPTION_MESSAGE_SIZE, "%s", src)
-# else
-#   define VERBATIM_COPY(dst, src) (void)sprintf(dst, "%.*s", (int)E4C_EXCEPTION_MESSAGE_SIZE - 1, src)
-# endif
+# define VERBATIM_COPY(dst, src) (void)snprintf(dst, (size_t)E4C_EXCEPTION_MESSAGE_SIZE, "%s", src)
 
 # define DESC_MALLOC_EXCEPTION      "Could not create a new exception."
 # define DESC_MALLOC_FRAME          "Could not create a new exception frame."
@@ -2198,8 +2192,6 @@ e4c_exception_throw_verbatim_(
 E4C_NO_RETURN;
 /*@=redecl@*/
 
-# if defined(HAVE_C99_VSNPRINTF) || defined(HAVE_VSNPRINTF)
-
 /*@-redecl@*/
 /*@noreturn@*/
 void
@@ -2265,8 +2257,6 @@ e4c_exception_throw_format_(
 # endif
 E4C_NO_RETURN;
 /*@=redecl@*/
-
-# endif
 
 static E4C_INLINE
 /*@out@*/
@@ -3585,8 +3575,6 @@ void e4c_exception_throw_verbatim_(const e4c_exception_type * exception_type, co
     MISUSE_ERROR(ContextHasNotBegunYet, "e4c_exception_throw_verbatim_: " DESC_NOT_BEGUN_YET, file, line, function);
 }
 
-# if defined(HAVE_C99_VSNPRINTF) || defined(HAVE_VSNPRINTF)
-
 void e4c_exception_throw_format_(const e4c_exception_type * exception_type, const char * file, int line, const char * function, const char * format, ...){
 
     int                 error_number;
@@ -3633,8 +3621,6 @@ void e4c_exception_throw_format_(const e4c_exception_type * exception_type, cons
     /* propagate the exception up the call stack */
     _e4c_context_propagate(context, new_exception);
 }
-
-# endif
 
 static E4C_INLINE void _e4c_exception_initialize(e4c_exception * exception, const e4c_exception_type * exception_type, bool set_message, const char * message, const char * file, int line, const char * function, int error_number) {
 
