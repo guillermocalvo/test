@@ -112,6 +112,12 @@
 #include <stdbool.h>
 #endif
 
+#ifdef S_SPLINT_S
+#define noreturn /*@noreturn@*/
+#else
+#include <stdnoreturn.h>
+#endif
+
 /*
  * The E4C_INVALID_SIGNAL_NUMBER_ compile-time parameter
  * could be defined in order to work with some specific compiler.
@@ -119,38 +125,6 @@
 # ifndef E4C_INVALID_SIGNAL_NUMBER_
 
 #   define E4C_INVALID_SIGNAL_NUMBER_   -1
-
-# endif
-
-
-/*
- * The E4C_NO_RETURN_ compile-time parameter
- * could be defined in order to work with some specific compiler.
- */
-# ifdef E4C_NO_RETURN_
-#   define E4C_UNREACHABLE_RETURN_(value)       ( (void)0 )
-#   define E4C_UNREACHABLE_VOID_RETURN_         ( (void)0 )
-
-# elif defined(__GNUC__)
-#   define E4C_NO_RETURN_                       __attribute__ ((noreturn))
-#   define E4C_UNREACHABLE_RETURN_(value)       ( (void)0 )
-#   define E4C_UNREACHABLE_VOID_RETURN_         ( (void)0 )
-
-# elif defined(S_SPLINT_S)
-#   define E4C_NO_RETURN_
-#   define E4C_UNREACHABLE_RETURN_(value) \
-        /*@-unreachable@*/ /*@-noeffect@*/ \
-        ( (void)0 ) \
-        /*@=unreachable@*/ /*@=noeffect@*/
-#   define E4C_UNREACHABLE_VOID_RETURN_ \
-        /*@-unreachable@*/ /*@-noeffect@*/ \
-        ( (void)0 ) \
-        /*@=unreachable@*/ /*@=noeffect@*/
-
-# else
-#   define E4C_NO_RETURN_
-#   define E4C_UNREACHABLE_RETURN_(value)       return(value)
-#   define E4C_UNREACHABLE_VOID_RETURN_         return
 
 # endif
 
@@ -1117,136 +1091,6 @@
  * @see     #e4c_exception
  */
 # define E4C_ON_FAILURE(handler) handler( e4c_get_exception() )
-
-/**
- * Marks a function which never returns
- *
- * This macro helps both developer and compiler to assume that the marked
- * function will not return the control to its caller (unless by throwing an
- * exception).
- *
- * @note
- * It does not make sense for these functions to have a return type other than
- * `void`.
- *
- * For example, a function `f1` that **always** throws an exception, could be
- * marked with this macro:
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   void f1(int foo) E4C_NO_RETURN;
- *   // ...
- *   void f1(int foo){
- *       if(foo == 1){
- *           throw(MyException1, "foo is one.");
- *       }
- *       throw(MyException2, "foo is not one.");
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * Then, if another function tested a condition and then called `f1`, it
- * wouldn't need to return anything witnin the `if` branch, nor consider the
- * `else` branch of the test:
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   int f2(int bar, int foo){
- *
- *       if(bar == 0){
- *           f1(foo);
- *           // return(-1);
- *       }// else
- *
- *       return(123);
- *
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * If the compiler supports this macro, it could optimize the program and avoid
- * spurious warnings of uninitialized variables.
- *
- * @see     #E4C_UNREACHABLE_RETURN
- */
-# define E4C_NO_RETURN \
-    \
-    E4C_NO_RETURN_
-
-/**
- * Simulates a function return
- *
- * @param   value
- *          The value that would be returned if the statement took place.
- *
- * This macro ensures portability on compilers which don't support functions
- * that never return.
- *
- * It may be used after calling a function marked as #E4C_NO_RETURN, so that
- * the compiler will not complain about *control reaching end of non-void
- * function*. For example:
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   void f1(int foo) E4C_NO_RETURN;
- *
- *   int f3(int bar, int foo){
- *
- *       if(bar != 0){
- *           return(123);
- *       }
- *
- *       f1(123);
- *
- *       E4C_UNREACHABLE_RETURN(-1);
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * This macro will become an actual `return`  statement if the compiler does not
- * support `E4C_NO_RETURN`, even though it will never be reached (because the
- * called function won't actually return control).
- *
- * @see     #E4C_NO_RETURN
- * @see     #E4C_UNREACHABLE_VOID_RETURN
- */
-# define E4C_UNREACHABLE_RETURN(value) \
-    \
-    E4C_UNREACHABLE_RETURN_(value)
-
-/**
- * Simulates a function void return
- *
- * This macro ensures portability on static source code analyzers which don't
- * support functions that never return.
- *
- * It may be used after calling a function marked as #E4C_NO_RETURN, so that
- * the analyzer will not complain about spurious errors. For example, if we
- * didn't use `E4C_UNREACHABLE_VOID_RETURN` here, some analyzers might complain
- * about *possible null pointer dereference* at line `foo = *bar`, because they
- * are not aware that function call `f1(321);` will never return control:
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   void f1(int foo) E4C_NO_RETURN;
- *
- *   void f3(int * bar){
- *
- *       int foo;
- *
- *       if(bar == NULL){
- *           f1(321);
- *           E4C_UNREACHABLE_VOID_RETURN;
- *       }
- *
- *       foo = *bar;
- *       printf("value: %d", foo);
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * This macro will become an actual `return`  statement if the compiler does not
- * support `E4C_NO_RETURN`, even though it will never be reached (because the
- * called function won't actually return control).
- *
- * @see     #E4C_NO_RETURN
- * @see     #E4C_UNREACHABLE_RETURN
- */
-# define E4C_UNREACHABLE_VOID_RETURN \
-    \
-    E4C_UNREACHABLE_VOID_RETURN_
 
 /** @} */
 
@@ -3229,7 +3073,8 @@ e4c_frame_repeat_(
 @*/
 ;
 
-/*@unused@*/ /*@noreturn@*/
+/*@unused@*/
+noreturn
 void
 e4c_exception_throw_verbatim_(
     /*@shared@*/ /*@notnull@*/
@@ -3253,9 +3098,10 @@ e4c_exception_throw_verbatim_(
     fileSystem,
     internalState
 @*/
-E4C_NO_RETURN;
+;
 
-/*@unused@*/ /*@noreturn@*/
+/*@unused@*/
+noreturn
 void
 e4c_exception_throw_format_(
     /*@shared@*/ /*@notnull@*/
@@ -3280,7 +3126,7 @@ e4c_exception_throw_format_(
     fileSystem,
     internalState
 @*/
-E4C_NO_RETURN;
+;
 
 /*@=exportany@*/
 
