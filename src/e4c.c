@@ -150,10 +150,9 @@
 # define WHEN_SIGNAL(signal_id) \
     case signal_id: \
         signal_name = signal_name_##signal_id; \
-        /*@switchbreak@*/ break;
+        break;
 
 # define DEFINE_SIGNAL_NAME(signal_id) \
-    /*@unchecked@*/ /*@observer@*/ \
     static const char * signal_name_##signal_id = #signal_id
 
 # ifdef SIGALRM
@@ -305,11 +304,9 @@ typedef struct e4c_continuation_ e4c_continuation;
 
 typedef struct e4c_frame_ e4c_frame;
 struct e4c_frame_ {
-    /*@only@*/ /*@null@*/
     e4c_frame *                 previous;
     e4c_frame_stage             stage;
     bool                        uncaught;
-    /*@only@*/ /*@null@*/
     e4c_exception *             thrown_exception;
     int                         retry_attempts;
     int                         reacquire_attempts;
@@ -318,17 +315,11 @@ struct e4c_frame_ {
 
 typedef struct e4c_context_ e4c_context;
 struct e4c_context_ {
-    /*@only@*/ /*@null@*/
     e4c_frame *                 current_frame;
-    /*@dependent@*/ /*@null@*/
     const e4c_signal_mapping *  signal_mappings;
-    /*@shared@*/ /*@null@*/
     e4c_uncaught_handler        uncaught_handler;
-    /*@shared@*/ /*@null@*/
     void *                      custom_data;
-    /*@shared@*/ /*@null@*/
     e4c_initialize_handler      initialize_handler;
-    /*@shared@*/ /*@null@*/
     e4c_finalize_handler        finalize_handler;
 };
 
@@ -337,14 +328,12 @@ struct e4c_context_ {
 typedef struct e4c_environment_ e4c_environment;
 struct e4c_environment_{
     THREAD_TYPE                 self;
-    /*@owned@*/ /*@null@*/
     e4c_environment *           next;
     e4c_context                 context;
 };
 
 typedef struct e4c_environment_collection_ e4c_environment_collection;
 struct e4c_environment_collection_{
-    /*@owned@*/ /*@null@*/
     e4c_environment *           first;
 };
 
@@ -354,54 +343,37 @@ struct e4c_environment_collection_{
 
 
 /** flag to signal a critical error in the exception system */
-static volatile
-bool
-fatal_error_flag = false;
+static volatile bool fatal_error_flag = false;
 
 /** flag to determine if the exception system is initialized */
-static volatile
-bool
-is_initialized = false;
+static volatile bool is_initialized = false;
 
 /** flag to determine if the exception system is finalized */
-static volatile
-bool
-is_finalized = false;
+static volatile bool is_finalized = false;
 
 # ifdef E4C_THREADSAFE
 
 /** collection of environments (one per thread) */
-static
-e4c_environment_collection
-environment_collection = { NULL };
+static e4c_environment_collection environment_collection = { NULL };
 
 /** mutex to control access to global variable is_initialized */
-/*@unchecked@*/
 MUTEX_DEFINE(is_initialized_mutex)
 
 /** mutex to control access to global variable environment_collection */
-/*@unchecked@*/
 MUTEX_DEFINE(environment_collection_mutex)
 
 # else
 
 /** main exception context of the program */
-static
-e4c_context
-main_context = {NULL, NULL, NULL, NULL, NULL, NULL};
+static e4c_context main_context = {NULL, NULL, NULL, NULL, NULL, NULL};
 
 /** pointer to the current exception context */
-static
-/*@null@*/
-e4c_context *
-current_context = NULL;
+static e4c_context * current_context = NULL;
 
 # endif
 
 /** symbolic signal names */
-static
-/*@unchecked@*/ /*@observer@*/
-const char *
+static const char *
 signal_name_UNKNOWN = "{unknown signal}";
 DEFINE_SIGNAL_NAME(SIGABRT);
 DEFINE_SIGNAL_NAME(SIGFPE);
@@ -494,1020 +466,67 @@ E4C_DEFINE_EXCEPTION(ContextNotEnded,                   DESC_NOT_ENDED,         
 
 
 
-/*
- * LIBRARY
- *
- *     PUBLIC
- *         e4c_library_version
- *
- *     PRIVATE
- *         _e4c_library_initialize
- *         _e4c_library_finalize
- *         _e4c_library_handle_signal
- *         _e4c_library_fatal_error
- *
- */
-
-static
-void
-_e4c_library_initialize(
-    void
-)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-    internalState,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    is_finalized,
-    is_initialized
-@*/
-# else
-/*@globals
-    internalState,
-
-    is_finalized,
-    is_initialized
-@*/
-/*@modifies
-    internalState,
-
-    is_finalized,
-    is_initialized
-@*/
-# endif
-;
-
-static
-void
-_e4c_library_finalize(
-    void
-)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-    internalState,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ContextNotEnded,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    fatal_error_flag,
-    is_finalized
-@*/
-# else
-/*@globals
-    fileSystem,
-    internalState,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-
-    ContextNotEnded,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    fatal_error_flag,
-    is_finalized
-@*/
-# endif
-;
-
-static
-void
-_e4c_library_handle_signal(
-    int                         signal_number
-)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-    internalState,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ExceptionSystemFatalError,
-    ContextHasNotBegunYet,
-    NotEnoughMemoryException,
-    NullPointerException
-@*/
-/*@modifies
-    fileSystem,
-    internalState
-@*/
-# else
-/*@globals
-    fileSystem,
-    internalState,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    ExceptionSystemFatalError,
-    ContextHasNotBegunYet,
-    NotEnoughMemoryException,
-    NullPointerException
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    current_context->current_frame,
-    current_context->custom_data
-@*/
-# endif
-;
-
-static inline
-noreturn
-void
-_e4c_library_fatal_error(
-    /*@in@*/ /*@shared@*/ /*@notnull@*/
+static void _e4c_library_initialize(void);
+static void _e4c_library_finalize(void);
+static void _e4c_library_handle_signal(int signal_number);
+static inline noreturn void _e4c_library_fatal_error(
     const e4c_exception_type *  exception_type,
-    /*@observer@*/ /*@temp@*/ /*@null@*/
     const char *                message,
-    /*@observer@*/ /*@null@*/
     const char *                file,
     int                         line,
-    /*@observer@*/ /*@null@*/
     const char *                function,
     int                         error_number
-)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-    internalState,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# else
-/*@globals
-    fileSystem,
-    internalState,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# endif
-;
+);
 
 # ifdef E4C_THREADSAFE
 
-/*
- * ENVIRONMENT
- *
- *     PRIVATE
- *         _e4c_environment_allocate
- *         _e4c_environment_deallocate
- *         _e4c_environment_initialize
- *         _e4c_environment_add
- *         _e4c_environment_remove
- *         _e4c_environment_get_current
- *
- */
+static inline e4c_environment * _e4c_environment_allocate(int line, const char * function);
+static inline void _e4c_environment_deallocate(e4c_environment * environment);
+static inline void _e4c_environment_initialize(e4c_environment * environment, e4c_uncaught_handler uncaught_handler);
+static inline void _e4c_environment_add(e4c_environment * environment);
+static e4c_environment * _e4c_environment_remove(void);
+static e4c_environment * _e4c_environment_get_current(void);
 
-static inline
-/*@out@*/
-e4c_environment *
-_e4c_environment_allocate(
-    int                         line,
-    /*@in@*/ /*@observer@*/ /*@notnull@*/
-    const char *                function
-)
-/*@globals
-    fileSystem,
-    internalState,
-
-    environment_collection,
-    environment_collection_mutex,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-    fatal_error_flag,
-
-    NotEnoughMemoryException,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-;
-
-static inline
-void
-_e4c_environment_deallocate(
-    /*@only@*/ /*@null@*/
-    e4c_environment *           environment
-)
-/*@releases
-    environment
-@*/
-/*@modifies
-    environment
-@*/
-;
-
-static inline
-void
-_e4c_environment_initialize(
-    /*@notnull@*/ /*@out@*/
-    e4c_environment *           environment,
-    /*@shared@*/ /*@null@*/
-    e4c_uncaught_handler        uncaught_handler
-)
-/*@globals
-    fileSystem,
-    internalState,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ExceptionSystemFatalError,
-    NotEnoughMemoryException
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    environment
-@*/
-;
-
-static inline
-void
-_e4c_environment_add(
-    /*@notnull@*/ /*@keep@*/
-    e4c_environment *           environment
-)
-/*@requires isnull environment->next @*/
-/*@globals
-    fileSystem,
-    internalState,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    environment_collection,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    environment,
-    environment->next
-@*/
-;
-
-static
-/*@null@*/ /*@only@*/
-e4c_environment *
-_e4c_environment_remove(
-    void
-)
-/*@globals
-    fileSystem,
-    internalState,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    environment_collection,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-;
-
-static
-/*@dependent@*/ /*@null@*/
-e4c_environment *
-_e4c_environment_get_current(
-    void
-)
-/*@globals
-    fileSystem,
-    internalState,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-;
+static inline e4c_context * _e4c_context_get_current(void);
 
 # endif
 
-/*
- * CONTEXT
- *
- *     PUBLIC
- *         e4c_context_begin
- *         e4c_context_end
- *         e4c_context_is_ready
- *         e4c_context_get_signal_mappings
- *         e4c_context_set_signal_mappings
- *         e4c_context_set_handlers
- *
- *     PRIVATE
- *         _e4c_context_initialize
- *         _e4c_context_set_signal_handlers
- *         _e4c_context_at_uncaught_exception
- *         _e4c_context_propagate
- *         _e4c_context_get_current (multi-thread only)
- *
- */
+static inline void _e4c_context_initialize(e4c_context * context, e4c_uncaught_handler uncaught_handler);
+static void _e4c_context_set_signal_handlers(e4c_context * context, const e4c_signal_mapping * mappings);
+static void _e4c_context_at_uncaught_exception(e4c_context * context, const e4c_exception * exception);
+static noreturn void _e4c_context_propagate(e4c_context * context, e4c_exception * exception);
 
-static inline
-void
-_e4c_context_initialize(
-    /*@out@*/ /*@notnull@*/
-    e4c_context *               context,
-    /*@shared@*/ /*@null@*/
-    e4c_uncaught_handler        uncaught_handler
-)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-    internalState,
+static inline e4c_frame * _e4c_frame_allocate(int line, const char * function);
+static inline void _e4c_frame_deallocate(e4c_frame * frame, e4c_finalize_handler finalize_handler);
+static inline void _e4c_frame_initialize(e4c_frame * frame, e4c_frame * previous, e4c_frame_stage stage);
+static inline void _e4c_print_exception_type(const e4c_exception_type *  exception_type);
+static inline int _e4c_print_exception_type_node(const e4c_exception_type * exception_type);
+static inline bool _e4c_exception_type_extends(const e4c_exception_type * child, const e4c_exception_type * parent);
 
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ExceptionSystemFatalError,
-    NotEnoughMemoryException
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    context
-@*/
-# else
-/*@globals
-    fileSystem,
-    internalState,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    ExceptionSystemFatalError,
-    NotEnoughMemoryException
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    context
-@*/
-# endif
-;
-
-static
-void
-_e4c_context_set_signal_handlers(
-    /*@in@*/ /*@temp@*/ /*@notnull@*/
-    e4c_context *               context,
-    /*@in@*/ /*@dependent@*/ /*@null@*/
-    const e4c_signal_mapping *  mappings
-)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-    internalState,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    context->signal_mappings
-@*/
-# else
-/*@globals
-    fileSystem,
-    internalState,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    context->signal_mappings
-@*/
-# endif
-;
-
-static
-void
-_e4c_context_at_uncaught_exception(
-    /*@in@*/ /*@temp@*/ /*@null@*/
-    e4c_context *               context,
-    /*@in@*/ /*@temp@*/ /*@notnull@*/
-    const e4c_exception *       exception
-)
-/*@globals
-    fileSystem,
-    internalState,
-
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-    internalState
-@*/
-;
-
-static
-noreturn
-void
-_e4c_context_propagate(
-    /*@in@*/ /*@notnull@*/
-    e4c_context *               context,
-    /*@in@*/ /*@only@*/ /*@notnull@*/
-    e4c_exception *             exception
-)
-/*@requires notnull context->current_frame@*/
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-    internalState,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    environment_collection,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    context->current_frame,
-    context->current_frame->thrown_exception
-@*/
-# else
-/*@globals
-    fileSystem,
-    internalState,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    context->current_frame,
-    context->current_frame->thrown_exception
-@*/
-# endif
-;
-
-# ifdef E4C_THREADSAFE
-
-static inline
-/*@dependent@*/ /*@null@*/
-e4c_context *
-_e4c_context_get_current(
-    void
-)
-/*@globals
-    fileSystem,
-    internalState,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-;
-
-# endif
-
-/*
- * FRAME
- *
- *     PUBLIC
- *         e4c_get_status
- *
- *     PROTECTED
- *         e4c_frame_first_stage_
- *         e4c_frame_next_stage_
- *         e4c_frame_get_stage_
- *         e4c_frame_catch_
- *         e4c_frame_repeat_
- *
- *     PRIVATE
- *         _e4c_frame_allocate
- *         _e4c_frame_deallocate
- *         _e4c_frame_initialize
- *
- */
-
-static inline
-/*@out@*/
-e4c_frame *
-_e4c_frame_allocate(
-    int                         line,
-    /*@in@*/ /*@observer@*/ /*@notnull@*/
-    const char *                function
-)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-    internalState,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ExceptionSystemFatalError,
-    NotEnoughMemoryException
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# else
-/*@globals
-    fileSystem,
-    internalState,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    ExceptionSystemFatalError,
-    NotEnoughMemoryException
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# endif
-;
-
-static inline
-void
-_e4c_frame_deallocate(
-    /*@only@*/ /*@null@*/
-    e4c_frame *                 frame,
-    /*@shared@*/ /*@null@*/
-    e4c_finalize_handler        finalize_handler
-)
-/*@releases
-    frame
-@*/
-/*@modifies
-    frame
-@*/
-;
-
-static inline
-void
-_e4c_frame_initialize(
-    /*@out@*/ /*@notnull@*/
-    e4c_frame *                 frame,
-    /*@only@*/ /*@in@*/ /*@null@*/
-    e4c_frame *                 previous,
-    e4c_frame_stage             stage
-)
-/*@ensures isnull frame->thrown_exception@*/
-/*@modifies
-    frame
-@*/
-;
-
-/*
- * EXCEPTION TYPE
- *
- *     PUBLIC
- *         e4c_print_exception_type
- *         e4c_is_instance_of
- *
- *     PRIVATE
- *         _e4c_print_exception_type
- *         _e4c_print_exception_type_node
- *         _e4c_exception_type_extends
- *
- */
-
-static inline
-int
-_e4c_print_exception_type_node(
-    /*@in@*/ /*@shared@*/ /*@notnull@*/
-    const e4c_exception_type *  exception_type
-)
-/*@globals
-    fileSystem
-@*/
-/*@modifies
-    fileSystem
-@*/
-;
-
-static inline
-bool
-_e4c_exception_type_extends(
-    /*@in@*/ /*@temp@*/ /*@notnull@*/
-    const e4c_exception_type *  child,
-    /*@in@*/ /*@temp@*/ /*@notnull@*/
-    const e4c_exception_type *  parent
-)
-/*@*/
-;
-
-/*
- * EXCEPTION
- *
- *     PUBLIC
- *         e4c_print_exception
- *         e4c_get_exception
- *
- *     PROTECTED
- *         e4c_exception_throw_verbatim_
- *         e4c_exception_throw_format_
- *
- *     PRIVATE
- *         _e4c_exception_allocate
- *         _e4c_exception_deallocate
- *         _e4c_exception_initialize
- *         _e4c_exception_set_cause
- *         _e4c_exception_throw
- *         _e4c_print_exception
- *
- */
-
-static inline
-/*@out@*/
-e4c_exception *
-_e4c_exception_allocate(
-    int                         line,
-    /*@in@*/ /*@observer@*/ /*@notnull@*/
-    const char *                function
-)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-    internalState,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ExceptionSystemFatalError,
-    NotEnoughMemoryException
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# else
-/*@globals
-    fileSystem,
-    internalState,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    ExceptionSystemFatalError,
-    NotEnoughMemoryException
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# endif
-;
-
-static inline
-void
-_e4c_exception_deallocate(
-    /*@only@*/ /*@null@*/
+static inline e4c_exception * _e4c_exception_allocate(int line, const char * function);
+static inline void _e4c_exception_deallocate(e4c_exception * exception, e4c_finalize_handler finalize_handler);
+static inline void _e4c_exception_initialize(
     e4c_exception *             exception,
-    /*@shared@*/ /*@null@*/
-    e4c_finalize_handler        finalize_handler
-)
-/*@releases
-    exception
-@*/
-/*@modifies
-    exception
-@*/
-;
-
-static inline
-void
-_e4c_exception_initialize(
-    /*@out@*/ /*@notnull@*/
-    e4c_exception *             exception,
-    /*@shared@*/ /*@notnull@*/
     const e4c_exception_type *  exception_type,
     bool                        set_message,
-    /*@observer@*/ /*@temp@*/ /*@null@*/
     const char *                message,
-    /*@observer@*/ /*@null@*/
     const char *                file,
     int                         line,
-    /*@observer@*/ /*@null@*/
     const char *                function,
     int                         error_number
-)
-/*@ensures isnull exception->cause@*/
-/*@modifies
-    exception
-@*/
-;
-
-static inline
-void
-_e4c_exception_set_cause(
-    /*@notnull@*/
-    e4c_exception *             exception,
-    /*@owned@*/ /*@notnull@*/
-    e4c_exception *             cause
-)
-/*@requires isnull exception->cause@*/
-/*@ensures notnull exception->cause@*/
-/*@modifies
-    cause,
-    exception
-@*/
-;
-
-static inline
-/*@only@*/ e4c_exception *
-_e4c_exception_throw(
-    /*@in@*/ /*@notnull@*/
+);
+static inline void _e4c_exception_set_cause(e4c_exception * exception, e4c_exception * cause);
+static inline e4c_exception * _e4c_exception_throw(
     e4c_frame *                 frame,
-    /*@in@*/ /*@shared@*/ /*@notnull@*/
     const e4c_exception_type *  exception_type,
-    /*@in@*/ /*@observer@*/ /*@null@*/
     const char *                file,
     int                         line,
-    /*@in@*/ /*@observer@*/ /*@null@*/
     const char *                function,
     int                         error_number,
     bool                        set_message,
-    /*@in@*/ /*@observer@*/ /*@temp@*/ /*@null@*/
     const char *                message
-)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-    internalState,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ExceptionSystemFatalError,
-    NotEnoughMemoryException,
-    NullPointerException
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    frame->thrown_exception
-@*/
-# else
-/*@globals
-    fileSystem,
-    internalState,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    ExceptionSystemFatalError,
-    NotEnoughMemoryException,
-    NullPointerException
-@*/
-/*@modifies
-    fileSystem,
-    internalState,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    frame->thrown_exception
-@*/
-# endif
-;
-
-static inline
-void
-_e4c_print_exception(
-    /*@in@*/ /*@temp@*/ /*@notnull@*/
-    const e4c_exception *       exception
-)
-# ifdef NDEBUG
-/*@globals
-    fileSystem
-@*/
-#else
-/*@globals
-    fileSystem,
-
-    ExceptionSystemFatalError
-@*/
-# endif
-/*@modifies
-    fileSystem
-@*/
-;
+);
+static inline void _e4c_print_exception(const e4c_exception * exception);
 
 
 
@@ -1610,7 +629,6 @@ static void _e4c_library_handle_signal(int signal_number) {
                 WHEN_SIGNAL_SIGUSR2
                 default:
                     signal_name = signal_name_UNKNOWN;
-                    /*@switchbreak@*/
                     break;
             }
 
@@ -1662,9 +680,7 @@ static inline void _e4c_library_fatal_error(const e4c_exception_type * exception
     /* records critical error so that MSG_AT_EXIT_ERROR will be printed too */
     fatal_error_flag = true;
 
-    /*@-noeffectuncon@*/
     STOP_EXECUTION;
-    /*@=noeffectuncon@*/
 }
 
 int e4c_library_version(void) {
@@ -1680,7 +696,6 @@ int e4c_library_version(void) {
 static e4c_environment * _e4c_environment_get_current(void){
 
     THREAD_TYPE         self        = THREAD_CURRENT;
-    /*@dependent@*/
     e4c_environment *   environment = NULL;
 
     MUTEX_LOCK(environment_collection_mutex, "_e4c_environment_get_current")
@@ -1819,9 +834,7 @@ static void _e4c_context_propagate(e4c_context * context, e4c_exception * except
 
         e4c_context_end();
 
-        /*@-noeffectuncon@*/
         STOP_EXECUTION;
-        /*@=noeffectuncon@*/
     }
 
     /* otherwise, we will jump to the upper frame */
@@ -1847,27 +860,7 @@ static inline e4c_context * _e4c_context_get_current(void){
 }
 
 /* e4c_context_begin (multi-thread) */
-void e4c_context_begin(bool handle_signals)
-/*@globals
-    e4c_default_signal_mappings,
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ContextAlreadyBegun,
-    ExceptionSystemFatalError,
-    NotEnoughMemoryException
-@*/
-/*@modifies
-    environment_collection,
-    is_finalized,
-    is_initialized,
-    fatal_error_flag
-@*/
-{
+void e4c_context_begin(bool handle_signals) {
 
     e4c_environment * environment;
 
@@ -1896,29 +889,7 @@ void e4c_context_begin(bool handle_signals)
 }
 
 /* e4c_context_end (multi-thread) */
-void e4c_context_end(void)
-/*@globals
-    fileSystem,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-
-    environment_collection,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-{
+void e4c_context_end(void) {
 
     e4c_context *       context;
     e4c_frame *         frame;
@@ -1959,27 +930,7 @@ void e4c_context_end(void)
 # else
 
 /* e4c_context_begin (single-thread) */
-void e4c_context_begin(bool handle_signals)
-/*@globals
-    current_context,
-    e4c_default_signal_mappings,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    main_context,
-
-    ContextAlreadyBegun,
-    ExceptionSystemFatalError,
-    NotEnoughMemoryException
-@*/
-/*@modifies
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    main_context
-@*/
-{
+void e4c_context_begin(bool handle_signals) {
 
     INITIALIZE_ONCE;
 
@@ -2004,27 +955,7 @@ void e4c_context_begin(bool handle_signals)
 }
 
 /* e4c_context_end (single-thread) */
-void e4c_context_end(void)
-/*@globals
-    fileSystem,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-{
+void e4c_context_end(void) {
 
     e4c_context *       context;
     e4c_frame *         frame;
@@ -2135,62 +1066,12 @@ static void _e4c_context_at_uncaught_exception(e4c_context * context, const e4c_
         handler = context->uncaught_handler;
 
         if (handler != NULL) {
-            /* TODO: find the proper way to make Splint happy */
-            /*@-noeffectuncon@*/
             handler(exception);
-            /*@=noeffectuncon@*/
         }
     }
 }
 
-void e4c_context_set_handlers(e4c_uncaught_handler uncaught_handler, void * custom_data, e4c_initialize_handler initialize_handler, e4c_finalize_handler finalize_handler)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-
-    environment_collection,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# else
-/*@globals
-    fileSystem,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-
-    current_context->custom_data,
-    current_context->finalize_handler,
-    current_context->initialize_handler,
-    current_context->uncaught_handler,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# endif
-{
+void e4c_context_set_handlers(e4c_uncaught_handler uncaught_handler, void * custom_data, e4c_initialize_handler initialize_handler, e4c_finalize_handler finalize_handler) {
 
     e4c_context * context;
 
@@ -2210,51 +1091,7 @@ void e4c_context_set_handlers(e4c_uncaught_handler uncaught_handler, void * cust
     }
 }
 
-void e4c_context_set_signal_mappings(const e4c_signal_mapping * mappings)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-
-    environment_collection,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# else
-/*@globals
-    fileSystem,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-
-    current_context->signal_mappings,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# endif
-{
+void e4c_context_set_signal_mappings(const e4c_signal_mapping * mappings) {
 
     e4c_context * context;
 
@@ -2268,50 +1105,7 @@ void e4c_context_set_signal_mappings(const e4c_signal_mapping * mappings)
     _e4c_context_set_signal_handlers(context, mappings);
 }
 
-const e4c_signal_mapping * e4c_context_get_signal_mappings(void)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-
-    environment_collection,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# else
-/*@globals
-    fileSystem,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# endif
-{
+const e4c_signal_mapping * e4c_context_get_signal_mappings(void) {
 
     e4c_context * context;
 
@@ -2326,33 +1120,7 @@ const e4c_signal_mapping * e4c_context_get_signal_mappings(void)
     MISUSE_ERROR(ContextHasNotBegunYet, "e4c_context_get_signal_mappings: " DESC_NOT_BEGUN_YET, NULL, 0, NULL);
 }
 
-bool e4c_context_is_ready(void)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# else
-/*@globals
-    current_context
-@*/
-# endif
-{
+bool e4c_context_is_ready(void) {
 
     return E4C_CONTEXT != NULL;
 }
@@ -2360,52 +1128,7 @@ bool e4c_context_is_ready(void)
 /* FRAME
  ================================================================ */
 
-e4c_continuation * e4c_frame_first_stage_(e4c_frame_stage stage, const char * file, int line, const char * function)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError,
-    NotEnoughMemoryException
-@*/
-/*@modifies
-    fileSystem,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# else
-/*@globals
-    fileSystem,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError,
-    NotEnoughMemoryException
-@*/
-/*@modifies
-    fileSystem,
-
-    current_context->current_frame,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# endif
-{
+e4c_continuation * e4c_frame_first_stage_(e4c_frame_stage stage, const char * file, int line, const char * function) {
 
     e4c_context *   context;
     e4c_frame *     current_frame;
@@ -2479,49 +1202,7 @@ static inline void _e4c_frame_deallocate(e4c_frame * frame, e4c_finalize_handler
     }
 }
 
-e4c_frame_stage e4c_frame_get_stage_(const char * file, int line, const char * function)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# else
-/*@globals
-    fileSystem,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# endif
-{
+e4c_frame_stage e4c_frame_get_stage_(const char * file, int line, const char * function) {
 
     e4c_context * context;
 
@@ -2538,52 +1219,7 @@ e4c_frame_stage e4c_frame_get_stage_(const char * file, int line, const char * f
     return context->current_frame->stage;
 }
 
-bool e4c_frame_catch_(const e4c_exception_type * exception_type, const char * file, int line, const char * function)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError,
-    NullPointerException
-@*/
-/*@modifies
-    fileSystem,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# else
-/*@globals
-    fileSystem,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError,
-    NullPointerException
-@*/
-/*@modifies
-    fileSystem,
-
-    current_context->current_frame,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# endif
-{
+bool e4c_frame_catch_(const e4c_exception_type * exception_type, const char * file, int line, const char * function) {
 
     e4c_context *   context;
     e4c_frame *     frame;
@@ -2631,45 +1267,7 @@ bool e4c_frame_catch_(const e4c_exception_type * exception_type, const char * fi
     MISUSE_ERROR(ContextHasNotBegunYet, "e4c_frame_catch_: " DESC_NOT_BEGUN_YET, file, line, function);
 }
 
-bool e4c_frame_next_stage_(void)
-# ifdef E4C_THREADSAFE
-/*@globals
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    AssertionException,
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    environment_collection,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# else
-/*@globals
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    AssertionException,
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    current_context->current_frame,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# endif
-{
+bool e4c_frame_next_stage_(void) {
 
     e4c_context *   context;
     e4c_frame *     frame;
@@ -2736,44 +1334,7 @@ bool e4c_frame_next_stage_(void)
     return false;
 }
 
-void e4c_frame_repeat_(int max_repeat_attempts, e4c_frame_stage stage, const char * file, int line, const char * function)
-# ifdef E4C_THREADSAFE
-/*@globals
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    AssertionException,
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# else
-/*@globals
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    AssertionException,
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    current_context->current_frame,
-    is_finalized,
-    is_initialized,
-    fatal_error_flag
-@*/
-# endif
-{
+void e4c_frame_repeat_(int max_repeat_attempts, e4c_frame_stage stage, const char * file, int line, const char * function) {
 
     e4c_context *       context;
     e4c_frame *         frame;
@@ -2817,7 +1378,6 @@ void e4c_frame_repeat_(int max_repeat_attempts, e4c_frame_stage stage, const cha
                 return;
             }
             frame->reacquire_attempts++;
-            /*@switchbreak@*/
             break;
 
         case e4c_acquiring_:
@@ -2826,7 +1386,6 @@ void e4c_frame_repeat_(int max_repeat_attempts, e4c_frame_stage stage, const cha
                 return;
             }
             frame->retry_attempts++;
-            /*@switchbreak@*/
             break;
 
         case e4c_trying_:
@@ -2850,49 +1409,7 @@ void e4c_frame_repeat_(int max_repeat_attempts, e4c_frame_stage stage, const cha
     E4C_CONTINUE(frame->continuation);
 }
 
-e4c_status e4c_get_status(void)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# else
-/*@globals
-    fileSystem,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# endif
-{
+e4c_status e4c_get_status(void) {
 
     e4c_context *   context;
     e4c_frame *     frame;
@@ -2930,7 +1447,6 @@ static inline bool _e4c_exception_type_extends(const e4c_exception_type * temp, 
     /* assert: child != NULL */
     /* assert: parent != NULL */
 
-    /*@shared@*/ /*@notnull@*/
     const e4c_exception_type * child = temp;
 
     for (; child->supertype != NULL && child->supertype != child; child = child->supertype) {
@@ -2944,9 +1460,7 @@ static inline bool _e4c_exception_type_extends(const e4c_exception_type * temp, 
     return false;
 }
 
-bool e4c_is_instance_of(const e4c_exception * instance, const e4c_exception_type * exception_type)
-/*@*/
-{
+bool e4c_is_instance_of(const e4c_exception * instance, const e4c_exception_type * exception_type) {
 
     if (instance == NULL || instance->type == NULL || exception_type == NULL) {
         return false;
@@ -2977,14 +1491,7 @@ static inline int _e4c_print_exception_type_node(const e4c_exception_type * exce
     return deep + 1;
 }
 
-static inline void _e4c_print_exception_type(const e4c_exception_type * exception_type)
-/*@globals
-    fileSystem
-@*/
-/*@modifies
-    fileSystem
-@*/
-{
+static inline void _e4c_print_exception_type(const e4c_exception_type * exception_type) {
 
     const char *    separator   = "________________________________________________________________";
 
@@ -2995,47 +1502,7 @@ static inline void _e4c_print_exception_type(const e4c_exception_type * exceptio
     fprintf(stderr, "%s\n", separator);
 }
 
-void e4c_print_exception_type(const e4c_exception_type * exception_type)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError,
-    NotEnoughMemoryException,
-    NullPointerException
-@*/
-/*@modifies
-    fileSystem
-@*/
-# else
-/*@globals
-    fileSystem,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError,
-    NotEnoughMemoryException,
-    NullPointerException
-@*/
-/*@modifies
-    fileSystem,
-
-    current_context->current_frame
-@*/
-# endif
-{
+void e4c_print_exception_type(const e4c_exception_type * exception_type) {
 
     if (exception_type == NULL) {
         e4c_exception_throw_verbatim_(&NullPointerException, __FILE__, __LINE__, __func__, "Null exception type.");
@@ -3049,51 +1516,7 @@ void e4c_print_exception_type(const e4c_exception_type * exception_type)
 /* EXCEPTION
  ================================================================ */
 
-const e4c_exception * e4c_get_exception(void)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-
-    environment_collection,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# else
-/*@globals
-    fileSystem,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError
-@*/
-/*@modifies
-    fileSystem,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# endif
-{
+const e4c_exception * e4c_get_exception(void) {
 
     e4c_context *   context;
 
@@ -3116,19 +1539,7 @@ static inline e4c_exception * _e4c_exception_throw(e4c_frame * frame, const e4c_
 
     /* convert NULL exception type to NPE */
     if (exception_type == NULL) {
-        /*
-         * Splint does not seem to like the next statement:
-         *
-         *     exception_type = &NullPointerException;
-         *
-         * "Clauses exit with exception_type referencing local
-         * storage in true branch, shared storage in continuation"
-         *
-         * That's why we are using a temporary variable (npe_type)
-         */
-        /*@shared@*/ /*@notnull@*/
-        const e4c_exception_type * npe_type = &NullPointerException;
-        exception_type = npe_type;
+        exception_type = &NullPointerException;
     }
 
     new_exception = _e4c_exception_allocate(__LINE__, "_e4c_exception_throw");
@@ -3148,56 +1559,7 @@ static inline e4c_exception * _e4c_exception_throw(e4c_frame * frame, const e4c_
     return new_exception;
 }
 
-void e4c_exception_throw_verbatim_(const e4c_exception_type * exception_type, const char * file, int line, const char * function, const char * message)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError,
-    NotEnoughMemoryException,
-    NullPointerException
-@*/
-/*@modifies
-    fileSystem,
-
-    environment_collection,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# else
-/*@globals
-    fileSystem,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError,
-    NotEnoughMemoryException,
-    NullPointerException
-@*/
-/*@modifies
-    fileSystem,
-
-    current_context,
-    current_context->current_frame,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# endif
-{
+void e4c_exception_throw_verbatim_(const e4c_exception_type * exception_type, const char * file, int line, const char * function, const char * message) {
 
     int                 error_number;
     e4c_context *       context;
@@ -3236,56 +1598,7 @@ void e4c_exception_throw_verbatim_(const e4c_exception_type * exception_type, co
     MISUSE_ERROR(ContextHasNotBegunYet, "e4c_exception_throw_verbatim_: " DESC_NOT_BEGUN_YET, file, line, function);
 }
 
-void e4c_exception_throw_format_(const e4c_exception_type * exception_type, const char * file, int line, const char * function, const char * format, ...)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError,
-    NotEnoughMemoryException,
-    NullPointerException
-@*/
-/*@modifies
-    fileSystem,
-
-    environment_collection,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# else
-/*@globals
-    fileSystem,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError,
-    NotEnoughMemoryException,
-    NullPointerException
-@*/
-/*@modifies
-    fileSystem,
-
-    current_context,
-    current_context->current_frame,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# endif
-{
+void e4c_exception_throw_format_(const e4c_exception_type * exception_type, const char * file, int line, const char * function, const char * format, ...) {
 
     int                 error_number;
     e4c_context *       context;
@@ -3388,10 +1701,7 @@ static inline void _e4c_exception_deallocate(e4c_exception * exception, e4c_fina
             _e4c_exception_deallocate(exception->cause, finalize_handler);
 
             if (finalize_handler != NULL) {
-                /* TODO: find the proper way to make Splint happy */
-                /*@-noeffectuncon@*/
                 finalize_handler(exception->custom_data);
-                /*@=noeffectuncon@*/
             }
 
             free(exception);
@@ -3458,55 +1768,7 @@ static void _e4c_print_exception(const e4c_exception * exception) {
     (void) fflush(stderr);
 }
 
-void e4c_print_exception(const e4c_exception * exception)
-# ifdef E4C_THREADSAFE
-/*@globals
-    fileSystem,
-
-    environment_collection,
-    environment_collection_mutex,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-    is_initialized_mutex,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError,
-    NotEnoughMemoryException,
-    NullPointerException
-@*/
-/*@modifies
-    fileSystem,
-
-    environment_collection,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# else
-/*@globals
-    fileSystem,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized,
-
-    ContextHasNotBegunYet,
-    ExceptionSystemFatalError,
-    NotEnoughMemoryException,
-    NullPointerException
-@*/
-/*@modifies
-    fileSystem,
-
-    current_context,
-    fatal_error_flag,
-    is_finalized,
-    is_initialized
-@*/
-# endif
-{
+void e4c_print_exception(const e4c_exception * exception) {
 
     if (exception == NULL) {
         e4c_exception_throw_verbatim_(&NullPointerException, __FILE__, __LINE__, __func__, "Null exception.");
