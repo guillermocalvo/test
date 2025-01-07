@@ -164,15 +164,6 @@
 #   define E4C_TRUE                     1
 # endif
 
-
-/*
- * Make sure we can use exceptions4c within C++.
- */
-# ifdef __cplusplus
-    extern "C" {
-# endif
-
-
 /*
  * The E4C_FUNCTION_NAME_ compile-time parameter
  * could be defined in order to work with some specific compiler.
@@ -3473,13 +3464,6 @@ e4c_exception_throw_format_(
 E4C_NO_RETURN;
 
 # endif
-
-/*
- * End of the extern "C" block.
- */
-#ifdef __cplusplus
-    }
-#endif
 
 /*@=exportany@*/
 
