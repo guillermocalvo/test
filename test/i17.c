@@ -26,10 +26,10 @@ TEST_CASE{
 
             }E4C_CATCH(CustomException){
 
-                e4c_exception_throw_verbatim_(&IllegalArgumentException, __FILE__, __LINE__, NULL, "First wrapper");
+                e4c_exception_throw_verbatim_(&NullPointerException, __FILE__, __LINE__, NULL, "First wrapper");
             }
 
-        }E4C_CATCH(IllegalArgumentException){
+        }E4C_CATCH(NullPointerException){
 
             e4c_exception_throw_verbatim_(&RuntimeException, __FILE__, __LINE__, "test_function", "Second wrapper");
         }
@@ -38,7 +38,7 @@ TEST_CASE{
 
         const e4c_exception * exception = e4c_get_exception();
 
-        TEST_ASSERT_EQUALS(exception->cause->type, &IllegalArgumentException);
+        TEST_ASSERT_EQUALS(exception->cause->type, &NullPointerException);
         TEST_ASSERT_EQUALS(exception->cause->cause->type, &CustomException);
 
         e4c_print_exception(exception);

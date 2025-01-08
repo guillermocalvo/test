@@ -1048,8 +1048,6 @@ typedef jmp_buf e4c_jump_buffer;
  *   - #RuntimeException
  *     - #NotEnoughMemoryException
  *     - #AssertionException
- *     - #IllegalArgumentException
- *     - #InputOutputException
  *     - #NullPointerException
  *
  * @see     #e4c_exception
@@ -1380,9 +1378,7 @@ enum e4c_frame_stage {
  *
  * @par     Direct known subexceptions:
  *          #NotEnoughMemoryException,
- *          #AssertionException,
- *          #IllegalArgumentException,
- *          #InputOutputException,
+ *          #NullPointerException
  */
 E4C_DECLARE_EXCEPTION(RuntimeException);
 
@@ -1396,18 +1392,6 @@ E4C_DECLARE_EXCEPTION(RuntimeException);
  *          #RuntimeException
  */
 E4C_DECLARE_EXCEPTION(NotEnoughMemoryException);
-
-/**
- * This exception is thrown when a function is passed an illegal or
- * inappropriate argument
- *
- * #IllegalArgumentException is thrown by a function when it detects that some
- * of the function parameters (passed by the caller) is unacceptable.
- *
- * @par     Extends:
- *          #RuntimeException
- */
-E4C_DECLARE_EXCEPTION(IllegalArgumentException);
 
 /**
  * This exception is thrown when an assertion does not hold
@@ -1425,35 +1409,13 @@ E4C_DECLARE_EXCEPTION(IllegalArgumentException);
 E4C_DECLARE_EXCEPTION(AssertionException);
 
 /**
- * This exception is thrown when an input/output error occurs
- *
- * #InputOutputException is the general type of exceptions produced by failed
- * or interrupted I/O operations.
- *
- * @par     Extends:
- *          #RuntimeException
- */
-E4C_DECLARE_EXCEPTION(InputOutputException);
-
-/**
  * This exception is thrown when an unexpected null pointer is found
  *
  * #NullPointerException is thrown when some part of the program gets a
  * pointer which was expected or required to contain a valid memory address.
  *
- * A *null* pointer exception is a special case of a *bad* pointer exception.
- * The difference between them is that #NullPointerException needs to be
- * thrown *explicitly* by some function, while #BadPointerException is
- * thrown *implicitly* by the signal handling system (if enabled).
- *
- * @note
- * Sometimes, a null pointer exception can also be considered as a special case
- * of an *illegal argument* exception.
- *
  * @par     Extends:
- *          #BadPointerException
- *
- * @see     #IllegalArgumentException
+ *          #RuntimeException
  */
 E4C_DECLARE_EXCEPTION(NullPointerException);
 

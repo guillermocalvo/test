@@ -111,9 +111,6 @@ E4C_DEFINE_EXCEPTION(AssertionException,                "Assertion failed.",    
 
 E4C_DEFINE_EXCEPTION(RuntimeException,                  "Runtime exception.",               RuntimeException);
 E4C_DEFINE_EXCEPTION(NotEnoughMemoryException,          "Not enough memory.",               RuntimeException);
-E4C_DEFINE_EXCEPTION(InputOutputException,              "Input/output exception.",          RuntimeException);
-E4C_DEFINE_EXCEPTION(IllegalArgumentException,          "Illegal argument.",                RuntimeException);
-
 E4C_DEFINE_EXCEPTION(NullPointerException,              "Null pointer.",                    RuntimeException);
 
 

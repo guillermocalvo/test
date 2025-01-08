@@ -5,8 +5,8 @@
 /**
  * Only one `catch` block will handle the exception
  *
- * This test starts a `try` block, throws `IllegalArgumentException` and
- * attempts to catch it with a `catch(IllegalArgumentException)` block, but
+ * This test starts a `try` block, throws `NullPointerException` and
+ * attempts to catch it with a `catch(NullPointerException)` block, but
  * there is a previous `catch(RuntimeException)` block which will eventually
  * handle it.
  *
@@ -20,13 +20,13 @@ TEST_CASE{
 
     E4C_TRY{
 
-        E4C_THROW(IllegalArgumentException, "I'm going to be caught by the first (generic) catch block.");
+        E4C_THROW(NullPointerException, "I'm going to be caught by the first (generic) catch block.");
 
     }E4C_CATCH(RuntimeException){
 
         caught1 = true;
 
-    }E4C_CATCH(IllegalArgumentException){
+    }E4C_CATCH(NullPointerException){
 
         caught2 = true;
     }

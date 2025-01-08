@@ -9,7 +9,7 @@ void aux(volatile bool * flag);
  * Leaking a *parent* exception
  *
  * This test starts a `try` block, throws `RuntimeException` and attempts to
- * catch it with a `catch(IllegalArgumentException)` block. This, obviously,
+ * catch it with a `catch(NullPointerException)` block. This, obviously,
  * won't work, so the exception will be left uncaught.
  *
  */
@@ -38,11 +38,11 @@ void aux(volatile bool * flag){
 
     E4C_TRY{
 
-        E4C_THROW(RuntimeException, "I am not an instance of IllegalArgumentException.");
+        E4C_THROW(RuntimeException, "I am not an instance of NullPointerException.");
 
-    }E4C_CATCH(IllegalArgumentException){
+    }E4C_CATCH(NullPointerException){
 
-        TEST_FAIL("Block `catch(IllegalArgumentException)` cannot handle a RuntimeException");
+        TEST_FAIL("Block `catch(NullPointerException)` cannot handle a RuntimeException");
 
     }E4C_FINALLY{
 

@@ -8,8 +8,8 @@ void aux(volatile bool * flag);
 /**
  * Leaking a *sibling* exception
  *
- * This test starts a `try` block, throws `IllegalArgumentException` and
- * attempts to catch it with a `catch(InputOutputException)` block. This,
+ * This test starts a `try` block, throws `NullPointerException` and
+ * attempts to catch it with a `catch(NotEnoughMemoryException)` block. This,
  * obviously, won't work, so the exception will be left uncaught.
  *
  */
@@ -27,7 +27,7 @@ TEST_CASE{
 
     }E4C_CATCH(RuntimeException){
 
-        TEST_ASSERT( e4c_get_exception()->type == &IllegalArgumentException );
+        TEST_ASSERT( e4c_get_exception()->type == &NullPointerException );
     }
 
     TEST_ASSERT(uncaught);
@@ -40,11 +40,11 @@ void aux(volatile bool * flag){
 
     E4C_TRY{
 
-        E4C_THROW(IllegalArgumentException, "I am not an instance of InputOutputException.");
+        E4C_THROW(NullPointerException, "I am not an instance of NotEnoughMemoryException.");
 
-    }E4C_CATCH(InputOutputException){
+    }E4C_CATCH(NotEnoughMemoryException){
 
-        TEST_FAIL("Block `catch(InputOutputException)` cannot handle an IllegalArgumentException");
+        TEST_FAIL("Block `catch(NotEnoughMemoryException)` cannot handle an NullPointerException");
 
     }E4C_FINALLY{
 
