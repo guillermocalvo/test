@@ -83,31 +83,6 @@ typedef jmp_buf e4c_jump_buffer;
     if(EXCEPTIONS4C_SET_JUMP(*e4c_frame_first_stage_(stage, E4C_DEBUG_INFO)) >= 0) \
         while( e4c_frame_next_stage_() )
 
-# define E4C_REUSING_CONTEXT(status, on_failure) \
-    \
-    volatile bool E4C_AUTO_(BEGIN) = !e4c_context_is_ready(); \
-    volatile bool E4C_AUTO_(DONE)  = false; \
-    \
-    if( E4C_AUTO_(BEGIN) ){ \
-        e4c_context_begin(); \
-        E4C_TRY{ \
-            goto E4C_AUTO_(PAYLOAD); \
-            E4C_AUTO_(CLEANUP): \
-            E4C_AUTO_(DONE) = true; \
-        }E4C_CATCH(RuntimeException){ \
-            (status) = (on_failure); \
-        } \
-        e4c_context_end(); \
-        E4C_AUTO_(DONE)     = true; \
-        E4C_AUTO_(BEGIN)    = false; \
-    } \
-    \
-    E4C_AUTO_(PAYLOAD): \
-    for(; !E4C_AUTO_(DONE) || E4C_AUTO_(BEGIN); E4C_AUTO_(DONE) = true) \
-        if( E4C_AUTO_(DONE) ){ \
-            goto E4C_AUTO_(CLEANUP); \
-        }else
-
 # define E4C_USING_CONTEXT \
     \
     for( \
@@ -777,206 +752,6 @@ typedef jmp_buf e4c_jump_buffer;
 #   define E4C_EXCEPTION_MESSAGE_SIZE 128
 # endif
 
-/**
- * Reuses an existing exception context, otherwise, begins a new one and then
- * ends it.
- *
- * @param   status
- *          The name of a previously defined variable, or lvalue, which will be
- *          assigned the specified failure value
- * @param   on_failure
- *          A constant value or expression that will be assigned to the
- *          specified *lvalue* in case of failure
- *
- * This macro lets library developers use the exception framework, regardless of
- * whether the library clients are unaware of the exception handling system. In
- * a nutshell, function libraries can use #E4C_TRY, #E4C_CATCH, #E4C_THROW, etc.
- * whether the client previously began an exception context or not.
- *
- * You **must not** use this macro unless you are implementing some
- * functionality which is to be called from another program, potentially unaware
- * of exceptions.
- *
- * When the block completes, the system returns to its previous status (if it
- * was required to open a new exception context, then it will be automatically
- * closed).
- *
- * This way, when an external function encounters an error, it may either throw
- * an exception (when the caller is aware of the exception system), or otherwise
- * return an error code (when the caller did not open an exception context).
- *
- * `e4c_reusing_context` takes two parameters:
- *
- *   - `status` (*lvalue*)
- *   - `on_failure` (*rvalue*)
- *
- * `status` **must** will be assigned `on_failure` **if, and only if**, an
- * exception is thrown inside the block. Needless to say, `on_failure` may be an
- * expression assignable to `status`.
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   int library_public_function(void * pointer, int number){
- *
- *       // We don't know where this function is going to be called from, so:
- *       //   - We cannot use "try", "throw", etc. right here, because the
- *       //     exception context COULD be uninitialized at this very moment.
- *       //   - We cannot call "e4c_context_begin" either, because the
- *       //     exception context COULD be already initialized.
- *       // If we have to make use of the exception handling system, we need
- *       // to "reuse" the existing exception context or "use" a new one.
- *
- *       volatile int status = STATUS_OK;
- *
- *       e4c_reusing_context(status, STATUS_ERROR){
- *
- *           // Now we can safely use "try", "throw", etc.
- *           if(pointer == NULL){
- *               throw(NullPointerException);
- *           }
- *
- *           library_private_function(pointer, number);
- *       }
- *
- *       return(status);
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * `status` will be left unmodified if the client (i.e. the function caller)
- * is *exception-aware*, or the block *completes* without an error (i.e. no
- * exception is thrown), so it **must** be properly initialized before returning
- * it.
- *
- * Please note that `status` doesn't have to be just a dichotomy (success or
- * failure). It can be a fine-grained value describing what exactly went wrong.
- * You can pass any expression to `e4c_reusing_context` as `on_failure`; it will
- * be evaluated when an exception is thrown:
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   int library_public_function(void * pointer, int number){
- *
- *       volatile int status = STATUS_OK;
- *       volatile bool flag = true;
- *
- *       e4c_reusing_context(status,(flag?STATUS_NULL_POINTER:STATUS_ERROR)){
- *
- *           if(pointer == NULL){
- *               throw(NullPointerException);
- *           }
- *
- *           flag = false;
- *
- *           library_private_function(pointer, number);
- *       }
- *
- *       return(status);
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * However, Most of the times you probably want to yield a different status
- * value depending on the specific exception being thrown. This can be easily
- * accomplished by making use of the macro #E4C_ON_FAILURE.
- *
- * Next, the semantics of `e4c_reusing_context` are explained, step by step:
- *
- *   - If there is an exception context at the time the block starts:
- *     1. The existing exception context will be reused.
- *     2. The code block will take place.
- *     3. If any exception is thrown during the execution of the block:
- *       * It will be **propagated** upwards to the caller.
- *       * The control will be transferred to the nearest surrounding block of
- *         code which is able to handle that exception.
- *   - If there is no exception context at the time the block starts:
- *     1. A new exception context will be begun.
- *     2. The code block will take place.
- *     3. If any exception is thrown during the execution of the block:
- *       * It will be **caught**.
- *       * `status` will be asigned the value of the expression `on_failure`.
- *
- * If you need to perform any cleanup, you should place it *inside* a
- * #E4C_FINALLY block.
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   ...
- *   e4c_reusing_context(status, STATUS_ERROR){
- *
- *       void * buffer = NULL;
- *       try{
- *           buffer = malloc(1024);
- *           ...
- *       }finally{
- *           free(buffer);
- *       }
- *   }
- *   ...
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * This macro only begins a new exception context **if there is no one, already
- * begun, to be used** whereas #e4c_using_context always attempts to begin a
- * new one.
- *
- * @pre
- *   - A block introduced by #e4c_reusing_context **must not** be exited
- *     through any of: `goto`, `break`, `continue` or `return` (but it is legal
- *     to #E4C_THROW an exception).
- * @post
- *   - A block introduced by `e4c_reusing_context` is guaranteed to take place
- *     *inside* an exception context.
- *
- * @see     #e4c_context_begin
- * @see     #e4c_context_end
- * @see     #e4c_context_is_ready
- * @see     #e4c_using_context
- * @see     #e4c_exception
- * @see     #E4C_ON_FAILURE
- */
-# define e4c_reusing_context(status, on_failure) \
-    E4C_REUSING_CONTEXT(status, on_failure)
-
-/**
- * Provides a means of parsing an exception to obtain a status value
- *
- * @param   handler
- *          The name of the parser function to be called
- *
- * This is a handy way to call a function when a #e4c_reusing_context block
- * fails. This function will be passed the current thrown exception; it is
- * expected to parse it and return a proper `status` value.
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   static int parse_exception(const e4c_exception * exception){
- *
- *       if(exception->type == &NotEnoughMemoryException){
- *           return(STATUS_MEMORY_ERROR);
- *       }else if( is_instance_of(exception, &MyException) ){
- *           return(STATUS_MY_ERROR);
- *       }
- *
- *       return(STATUS_ERROR);
- *   }
- *
- *   int library_public_function(void * pointer, int number){
- *
- *       volatile int status = STATUS_OK;
- *
- *       e4c_reusing_context(status, E4C_ON_FAILURE(parse_exception)){
- *
- *           if(pointer == NULL){
- *               throw(NullPointerException);
- *           }
- *
- *           library_private_function(pointer, number);
- *       }
- *
- *       return(status);
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * @see     #e4c_reusing_context
- * @see     #e4c_get_exception
- * @see     #e4c_exception
- */
-# define E4C_ON_FAILURE(handler) handler( e4c_get_exception() )
-
 /** @} */
 
 /**
@@ -1011,10 +786,6 @@ typedef jmp_buf e4c_jump_buffer;
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * This macro **always** attempts to begin a new exception context, whereas
- * #e4c_reusing_context only does if there is no exception context, already
- * begun, to be used.
- *
  * This macro **should be used whenever possible**, rather than doing the
  * explicit, manual calls to #e4c_context_begin and #e4c_context_end,
  * because it is less prone to errors.
@@ -1029,7 +800,6 @@ typedef jmp_buf e4c_jump_buffer;
  *
  * @see     #e4c_context_begin
  * @see     #e4c_context_end
- * @see     #e4c_reusing_context
  */
 # define e4c_using_context \
     E4C_USING_CONTEXT
@@ -1710,7 +1480,6 @@ E4C_DECLARE_EXCEPTION(NullPointerException);
  * @see     #e4c_context_begin
  * @see     #e4c_context_end
  * @see     #e4c_using_context
- * @see     #e4c_reusing_context
  */
 bool
 e4c_context_is_ready(
@@ -1739,7 +1508,6 @@ e4c_context_is_ready(
  * @see     #e4c_context_end
  * @see     #e4c_context_is_ready
  * @see     #e4c_using_context
- * @see     #e4c_reusing_context
  * @see     #e4c_uncaught_handler
  * @see     #e4c_print_exception
  * @see     #e4c_context_set_handlers
@@ -1762,7 +1530,6 @@ e4c_context_begin(
  * @see     #e4c_context_begin
  * @see     #e4c_context_is_ready
  * @see     #e4c_using_context
- * @see     #e4c_reusing_context
  */
 void
 e4c_context_end(

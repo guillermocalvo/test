@@ -65,7 +65,6 @@ set(TESTS
         b10
         b11
         b12
-        b13
         b14
         b15
         b16
@@ -100,17 +99,6 @@ set(TESTS
         g10
         g11
         g12
-        h01
-        h02
-        h03
-        h04
-        h05
-        h06
-        h07
-        h08
-        h09
-        h10
-        h11
         i01
         i02
         i03
@@ -176,8 +164,6 @@ set_property(TEST d05 PROPERTY WILL_FAIL TRUE)
 set_property(TEST g04 PROPERTY WILL_FAIL TRUE)
 set_property(TEST g05 PROPERTY WILL_FAIL TRUE)
 set_property(TEST g06 PROPERTY WILL_FAIL TRUE)
-set_property(TEST h06 PROPERTY WILL_FAIL TRUE)
-set_property(TEST h11 PROPERTY WILL_FAIL TRUE)
 set_property(TEST i05 PROPERTY WILL_FAIL TRUE)
 
 set(TESTS

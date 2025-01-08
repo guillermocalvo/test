@@ -87,7 +87,6 @@ check_PROGRAMS =                        \
 	bin/check/b10                       \
 	bin/check/b11                       \
 	bin/check/b12                       \
-	bin/check/b13                       \
 	bin/check/b14                       \
 	bin/check/b15                       \
 	bin/check/b16                       \
@@ -122,17 +121,6 @@ check_PROGRAMS =                        \
 	bin/check/g10                       \
 	bin/check/g11                       \
 	bin/check/g12                       \
-	bin/check/h01                       \
-	bin/check/h02                       \
-	bin/check/h03                       \
-	bin/check/h04                       \
-	bin/check/h05                       \
-	bin/check/h06                       \
-	bin/check/h07                       \
-	bin/check/h08                       \
-	bin/check/h09                       \
-	bin/check/h10                       \
-	bin/check/h11                       \
 	bin/check/i01                       \
 	bin/check/i02                       \
 	bin/check/i03                       \
@@ -182,7 +170,6 @@ TESTS =                                 \
 	bin/check/b10                       \
 	bin/check/b11                       \
 	bin/check/b12                       \
-	bin/check/b13                       \
 	bin/check/b14                       \
 	bin/check/b15                       \
 	bin/check/b16                       \
@@ -217,17 +204,6 @@ TESTS =                                 \
 	bin/check/g10                       \
 	bin/check/g11                       \
 	bin/check/g12                       \
-	bin/check/h01                       \
-	bin/check/h02                       \
-	bin/check/h03                       \
-	bin/check/h04                       \
-	bin/check/h05                       \
-	bin/check/h06                       \
-	bin/check/h07                       \
-	bin/check/h08                       \
-	bin/check/h09                       \
-	bin/check/h10                       \
-	bin/check/h11                       \
 	bin/check/i01                       \
 	bin/check/i02                       \
 	bin/check/i03                       \
@@ -290,8 +266,6 @@ XFAIL_TESTS =                           \
 	bin/check/g04                       \
 	bin/check/g05                       \
 	bin/check/g06                       \
-	bin/check/h06                       \
-	bin/check/h11                       \
 	bin/check/i05                       \
     bin/check/lite/uncaught             \
     bin/check/lite/overflow
@@ -339,7 +313,6 @@ bin_check_b09_SOURCES                   = src/e4c.c test/b09.c
 bin_check_b10_SOURCES                   = src/e4c.c test/b10.c
 bin_check_b11_SOURCES                   = src/e4c.c test/b11.c
 bin_check_b12_SOURCES                   = src/e4c.c test/b12.c
-bin_check_b13_SOURCES                   = src/e4c.c test/b13.c
 bin_check_b14_SOURCES                   = src/e4c.c test/b14.c
 bin_check_b15_SOURCES                   = src/e4c.c test/b15.c
 bin_check_b16_SOURCES                   = src/e4c.c test/b16.c
@@ -374,17 +347,6 @@ bin_check_g09_SOURCES                   = src/e4c.c test/g09.c
 bin_check_g10_SOURCES                   = src/e4c.c test/g10.c
 bin_check_g11_SOURCES                   = src/e4c.c test/g11.c
 bin_check_g12_SOURCES                   = src/e4c.c test/g12.c
-bin_check_h01_SOURCES                   = src/e4c.c test/h01.c
-bin_check_h02_SOURCES                   = src/e4c.c test/h02.c
-bin_check_h03_SOURCES                   = src/e4c.c test/h03.c
-bin_check_h04_SOURCES                   = src/e4c.c test/h04.c
-bin_check_h05_SOURCES                   = src/e4c.c test/h05.c
-bin_check_h06_SOURCES                   = src/e4c.c test/h06.c
-bin_check_h07_SOURCES                   = src/e4c.c test/h07.c
-bin_check_h08_SOURCES                   = src/e4c.c test/h08.c
-bin_check_h09_SOURCES                   = src/e4c.c test/h09.c
-bin_check_h10_SOURCES                   = src/e4c.c test/h10.c
-bin_check_h11_SOURCES                   = src/e4c.c test/h11.c
 bin_check_i01_SOURCES                   = src/e4c.c test/i01.c
 bin_check_i02_SOURCES                   = src/e4c.c test/i02.c
 bin_check_i03_SOURCES                   = src/e4c.c test/i03.c
