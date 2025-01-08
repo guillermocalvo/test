@@ -62,60 +62,15 @@
 # define DESC_SIGERR_DEFAULT        "Could not reset the default signal handling."
 # define DESC_SIGERR_IGNORE         "Could not ignore the signal."
 
-# ifdef E4C_THREADSAFE
-#   include <pthread.h>
-/*
- * The MISSING_PTHREAD_CANCEL compile-time parameter
- * could be defined in order to prevent calling pthread_cancel.
- */
-#   ifdef MISSING_PTHREAD_CANCEL
-#       define pthread_cancel(_ignore_) 0
-#   endif
-/*
- * Some systems don't even define PTHREAD_CANCELED.
- */
-#   ifndef PTHREAD_CANCELED
-#       define PTHREAD_CANCELED     ( (void *)-1 )
-#   endif
-#   define E4C_CONTEXT              _e4c_context_get_current()
-#   define DESC_INVALID_STATE       "The exception context for this thread is in an invalid state."
-#   define DESC_ALREADY_BEGUN       "The exception context for this thread has already begun."
-#   define DESC_NOT_BEGUN_YET       "The exception context for this thread has not begun yet."
-#   define DESC_NOT_ENDED           "There is at least one thread that did not end its exception context properly."
-#   define DESC_LOCK_ERROR          "Synchronization error (could not acquire lock)."
-#   define DESC_UNLOCK_ERROR        "Synchronization error (could not release lock)."
-#   define MSG_FATAL_ERROR          "\n\nThis is an unrecoverable programming error; the thread will be terminated\nimmediately.\n"
-#   define MSG_AT_EXIT_ERROR        "\n\nException system errors occurred during program execution.\n"
-#   define THREAD_TYPE              pthread_t
-#   define THREAD_CURRENT           pthread_self()
-#   define THREAD_SAME(t1, t2)      ( pthread_equal(t1, t2) != 0 )
-#   define THREAD_CANCEL_CURRENT    (void)pthread_cancel(THREAD_CURRENT)
-#   define THREAD_EXIT              pthread_exit(PTHREAD_CANCELED)
-#   define MUTEX_DEFINE(mutex)      static pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-#   define MUTEX_LOCK(mutex, function) \
-        if(pthread_mutex_lock(&mutex) != 0){ \
-            _e4c_library_fatal_error(&ExceptionSystemFatalError, DESC_LOCK_ERROR, __FILE__, __LINE__, function, errno); \
-        }
-#   define MUTEX_UNLOCK(mutex, function) \
-        if(pthread_mutex_unlock(&mutex) != 0){ \
-            _e4c_library_fatal_error(&ExceptionSystemFatalError, DESC_UNLOCK_ERROR, __FILE__, __LINE__, function, errno); \
-        }
-#   define STOP_EXECUTION           do{ THREAD_CANCEL_CURRENT; THREAD_EXIT; }while(true)
-#   define DANGLING_CONTEXT         (environment_collection.first != NULL)
-# else
-#   define E4C_CONTEXT              current_context
-#   define DESC_INVALID_STATE       "The exception context for this program is in an invalid state."
-#   define DESC_ALREADY_BEGUN       "The exception context for this program has already begun."
-#   define DESC_NOT_BEGUN_YET       "The exception context for this program has not begun yet."
-#   define DESC_NOT_ENDED           "The program did not end its exception context properly."
-#   define MSG_FATAL_ERROR          "\n\nThis is an unrecoverable programming error; the application will be terminated\nimmediately.\n"
-#   define MSG_AT_EXIT_ERROR        "\n\nException system errors occurred during program execution.\nIf this application is making use of threads, please recompile exceptions4c\nwith thread support (by defining the macro E4C_THREADSAFE).\n"
-#   define MUTEX_DEFINE(mutex)
-#   define MUTEX_LOCK(mutex, function)
-#   define MUTEX_UNLOCK(mutex, function)
-#   define STOP_EXECUTION           exit(EXIT_FAILURE)
-#   define DANGLING_CONTEXT         (current_context != NULL)
-# endif
+#define E4C_CONTEXT              current_context
+#define DESC_INVALID_STATE       "The exception context for this program is in an invalid state."
+#define DESC_ALREADY_BEGUN       "The exception context for this program has already begun."
+#define DESC_NOT_BEGUN_YET       "The exception context for this program has not begun yet."
+#define DESC_NOT_ENDED           "The program did not end its exception context properly."
+#define MSG_FATAL_ERROR          "\n\nThis is an unrecoverable programming error; the application will be terminated\nimmediately.\n"
+#define MSG_AT_EXIT_ERROR        "\n\nException system errors occurred during program execution.\n"
+#define STOP_EXECUTION           exit(EXIT_FAILURE)
+#define DANGLING_CONTEXT         (current_context != NULL)
 
 # define MISUSE_ERROR(exception, message, file, line, function) \
     _e4c_library_fatal_error(&exception, message, file, line, function, errno);
@@ -307,25 +262,6 @@ struct e4c_context_ {
     e4c_finalize_handler        finalize_handler;
 };
 
-# ifdef E4C_THREADSAFE
-
-typedef struct e4c_environment_ e4c_environment;
-struct e4c_environment_{
-    THREAD_TYPE                 self;
-    e4c_environment *           next;
-    e4c_context                 context;
-};
-
-typedef struct e4c_environment_collection_ e4c_environment_collection;
-struct e4c_environment_collection_{
-    e4c_environment *           first;
-};
-
-# endif
-
-
-
-
 /** flag to signal a critical error in the exception system */
 static volatile bool fatal_error_flag = false;
 
@@ -335,26 +271,11 @@ static volatile bool is_initialized = false;
 /** flag to determine if the exception system is finalized */
 static volatile bool is_finalized = false;
 
-# ifdef E4C_THREADSAFE
-
-/** collection of environments (one per thread) */
-static e4c_environment_collection environment_collection = { NULL };
-
-/** mutex to control access to global variable is_initialized */
-MUTEX_DEFINE(is_initialized_mutex)
-
-/** mutex to control access to global variable environment_collection */
-MUTEX_DEFINE(environment_collection_mutex)
-
-# else
-
 /** main exception context of the program */
 static e4c_context main_context = {NULL, NULL, NULL, NULL, NULL, NULL};
 
 /** pointer to the current exception context */
 static e4c_context * current_context = NULL;
-
-# endif
 
 /** symbolic signal names */
 static const char *
@@ -462,19 +383,6 @@ static noreturn void _e4c_library_fatal_error(
     int                         error_number
 );
 
-# ifdef E4C_THREADSAFE
-
-static e4c_environment * _e4c_environment_allocate(int line, const char * function);
-static void _e4c_environment_deallocate(e4c_environment * environment);
-static void _e4c_environment_initialize(e4c_environment * environment, e4c_uncaught_handler uncaught_handler);
-static void _e4c_environment_add(e4c_environment * environment);
-static e4c_environment * _e4c_environment_remove(void);
-static e4c_environment * _e4c_environment_get_current(void);
-
-static e4c_context * _e4c_context_get_current(void);
-
-# endif
-
 static void _e4c_context_initialize(e4c_context * context, e4c_uncaught_handler uncaught_handler);
 static void _e4c_context_set_signal_handlers(e4c_context * context, const e4c_signal_mapping * mappings);
 static void _e4c_context_at_uncaught_exception(e4c_context * context, const e4c_exception * exception);
@@ -519,17 +427,12 @@ static void _e4c_print_exception(const e4c_exception * exception);
  ================================================================ */
 
 static void _e4c_library_initialize(void) {
-
-    MUTEX_LOCK(is_initialized_mutex, "_e4c_library_initialize")
-
     if (!is_initialized) {
 
         /* registers the function _e4c_library_finalize to be called when the program exits */
         is_initialized  = (atexit(_e4c_library_finalize) == 0);
         is_finalized    = !is_initialized;
     }
-
-    MUTEX_UNLOCK(is_initialized_mutex, "_e4c_library_initialize")
 }
 
 static void _e4c_library_finalize(void) {
@@ -672,112 +575,6 @@ int e4c_library_version(void) {
     return EXCEPTIONS4C_VERSION;
 }
 
-# ifdef E4C_THREADSAFE
-
-/* ENVIRONMENT
- ================================================================ */
-
-static e4c_environment * _e4c_environment_get_current(void){
-
-    THREAD_TYPE         self        = THREAD_CURRENT;
-    e4c_environment *   environment = NULL;
-
-    MUTEX_LOCK(environment_collection_mutex, "_e4c_environment_get_current")
-
-        FOREACH(environment, environment_collection){
-
-            if( THREAD_SAME(self, environment->self) ){
-                break;
-            }
-        }
-
-    MUTEX_UNLOCK(environment_collection_mutex, "_e4c_environment_get_current")
-
-    return environment;
-}
-
-static e4c_environment * _e4c_environment_allocate(int line, const char * function){
-
-    e4c_environment * environment;
-
-    environment = malloc( sizeof(*environment) );
-
-    /* ensure that there was enough memory */
-    if(environment != NULL){
-
-        return environment;
-    }
-
-    MEMORY_ERROR(DESC_MALLOC_CONTEXT, line, function);
-}
-
-static void _e4c_environment_deallocate(e4c_environment * environment){
-
-    if(environment != NULL){
-
-        _e4c_frame_deallocate(environment->context.current_frame, environment->context.finalize_handler);
-        environment->context.current_frame = NULL;
-
-        free(environment);
-    }
-}
-
-static void _e4c_environment_initialize(e4c_environment * environment, e4c_uncaught_handler uncaught_handler){
-
-    /* assert: environment != NULL */
-
-    /* bound the new environment to the current thread */
-    environment->self = THREAD_CURRENT;
-
-    _e4c_context_initialize(&environment->context, uncaught_handler);
-}
-
-static void _e4c_environment_add(e4c_environment * environment){
-
-    /* assert: environment != NULL */
-
-    MUTEX_LOCK(environment_collection_mutex, "_e4c_environment_add")
-
-        environment->next               = environment_collection.first;
-        environment_collection.first    = environment;
-
-    MUTEX_UNLOCK(environment_collection_mutex, "_e4c_environment_add")
-}
-
-static e4c_environment * _e4c_environment_remove(void){
-
-    THREAD_TYPE         self        = THREAD_CURRENT;
-    e4c_environment *   previous    = NULL;
-    e4c_environment *   current;
-    e4c_environment *   found       = NULL;
-
-    MUTEX_LOCK(environment_collection_mutex, "_e4c_environment_remove")
-
-        FOREACH(current, environment_collection){
-
-            if( THREAD_SAME(self, current->self) ){
-                if(previous == NULL){
-                    found                           = environment_collection.first /* (equals current) */;
-                    environment_collection.first    = current->next;
-                }else{
-                    found                           = previous->next  /* (equals current) */;
-                    previous->next                  = current->next;
-                }
-                current->next = NULL;
-                break;
-            }
-
-            /* keep track of the previous environment */
-            previous = current;
-        }
-
-    MUTEX_UNLOCK(environment_collection_mutex, "_e4c_environment_remove")
-
-    return found;
-}
-
-# endif
-
 /* CONTEXT
  ================================================================ */
 
@@ -834,92 +631,12 @@ static void _e4c_context_propagate(e4c_context * context, e4c_exception * except
     EXCEPTIONS4C_LONG_JUMP(frame->continuation);
 }
 
-# ifdef E4C_THREADSAFE
-
-static e4c_context * _e4c_context_get_current(void){
-
-    e4c_environment * environment = _e4c_environment_get_current();
-
-    return environment == NULL ? NULL : &environment->context;
-}
-
-/* e4c_context_begin (multi-thread) */
-void e4c_context_begin(bool handle_signals) {
-
-    e4c_environment * environment;
-
-    INITIALIZE_ONCE;
-
-    /* get the current environment */
-    environment = _e4c_environment_get_current();
-
-    /* check if e4c_context_begin was called twice for this thread */
-    if(environment != NULL){
-        MISUSE_ERROR(ContextAlreadyBegun, "e4c_context_begin: " DESC_ALREADY_BEGUN, NULL, 0, NULL);
-    }
-
-    /* allocate memory for the new environment */
-    environment = _e4c_environment_allocate(__LINE__, "e4c_context_begin");
-
-    /* initialize the new environment, register uncaught handler */
-    _e4c_environment_initialize(environment, e4c_print_exception);
-
-    /* add the new environment to the collection */
-    _e4c_environment_add(environment);
-
-    if(handle_signals){
-        _e4c_context_set_signal_handlers(&environment->context, e4c_default_signal_mappings);
-    }
-}
-
-/* e4c_context_end (multi-thread) */
-void e4c_context_end(void) {
-
-    e4c_context *       context;
-    e4c_frame *         frame;
-    e4c_environment *   environment;
-
-    /* remove (and get) the current context */
-    environment = _e4c_environment_remove();
-
-    /* check if `e4c_context_end` was called before calling `e4c_context_begin` */
-    if(environment == NULL){
-        MISUSE_ERROR(ContextHasNotBegunYet, "e4c_context_end: " DESC_NOT_BEGUN_YET, NULL, 0, NULL);
-    }
-
-    /* update local variable */
-    context = &environment->context;
-
-    /* check if the current context is NULL (unlikely) */
-    PREVENT_PROC(context == NULL, DESC_INVALID_CONTEXT, "e4c_context_end");
-
-    /* get the current frame */
-    frame = context->current_frame;
-
-    /* check if there are no frames left (unlikely) */
-    PREVENT_PROC(frame == NULL, DESC_NO_FRAMES_LEFT, "e4c_context_end");
-
-    /* check if there are too many frames left (breaking out of a try block) */
-    if( !IS_TOP_FRAME(frame) ){
-        INTERNAL_ERROR(DESC_TOO_MANY_FRAMES, "e4c_context_end");
-    }
-
-    /* reset all signal handlers */
-    _e4c_context_set_signal_handlers(context, NULL);
-
-    /* deallocate the thread environment */
-    _e4c_environment_deallocate(environment);
-}
-
-# else
-
 /* e4c_context_begin (single-thread) */
 void e4c_context_begin(bool handle_signals) {
 
     INITIALIZE_ONCE;
 
     /* check if e4c_context_begin was called twice for this program */
-    /* this can also happen when the program uses threads but E4C_THREADSAFE is not defined */
     if (current_context != NULL) {
         MISUSE_ERROR(ContextAlreadyBegun, "e4c_context_begin: " DESC_ALREADY_BEGUN, NULL, 0, NULL);
     }
@@ -978,8 +695,6 @@ void e4c_context_end(void) {
         MISUSE_ERROR(ContextHasNotBegunYet, "e4c_context_end: " DESC_NOT_BEGUN_YET, NULL, 0, NULL);
     }
 }
-
-# endif
 
 static void _e4c_context_set_signal_handlers(e4c_context * context, const e4c_signal_mapping * mappings) {
 
