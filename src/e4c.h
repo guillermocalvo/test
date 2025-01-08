@@ -70,26 +70,13 @@ typedef jmp_buf e4c_jump_buffer;
 #   define E4C_DEBUG_INFO               NULL, 0, NULL
 # endif
 
-
-# define E4C_PASTE_(x, y, z)            x ## _ ## y ## _ ## z
-# define E4C_MANGLE_(pre, id, post)     E4C_PASTE_(pre, id, post)
-# define E4C_AUTO_(id)                  E4C_MANGLE_(_implicit, id, __LINE__)
-
 /*
  * These undocumented macros hide implementation details from documentation.
  */
 
-# define E4C_FRAME_LOOP_(stage) \
-    if(EXCEPTIONS4C_SET_JUMP(*e4c_frame_first_stage_(stage, E4C_DEBUG_INFO)) >= 0) \
-        while( e4c_frame_next_stage_() )
-
-# define E4C_USING_CONTEXT \
-    \
-    for( \
-        e4c_context_begin(); \
-        e4c_context_is_ready(); \
-        e4c_context_end() \
-    )
+# define EXCEPTIONS4C_BLOCK(stage)                                          \
+    if (EXCEPTIONS4C_SET_JUMP(*e4c_start(stage, E4C_DEBUG_INFO)) >= 0)      \
+        while (e4c_next_stage())
 
 /**
  * @name Exception handling keywords
@@ -177,9 +164,9 @@ typedef jmp_buf e4c_jump_buffer;
  * @see     #e4c_get_status
  */
 #define E4C_TRY                                                             \
-  E4C_FRAME_LOOP_(e4c_acquiring)                                            \
-  if (e4c_frame_get_stage_(E4C_DEBUG_INFO) == e4c_trying && e4c_frame_next_stage_())
-    /* simple optimization: e4c_frame_next_stage_ will avoid disposing stage */
+  EXCEPTIONS4C_BLOCK(e4c_acquiring)                                         \
+  if (e4c_get_current_stage(E4C_DEBUG_INFO) == e4c_trying && e4c_next_stage())
+    /* simple optimization: e4c_next_stage will avoid disposing stage */
 
 /**
  * Introduces a block of code capable of handling a specific type of exceptions
@@ -264,7 +251,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see     #e4c_is_instance_of
  */
 #define E4C_CATCH(exception_type)                                           \
-  else if (e4c_frame_catch_(&exception_type, E4C_DEBUG_INFO))
+  else if (e4c_catch(&exception_type, E4C_DEBUG_INFO))
 
 /**
  * Introduces a block of code responsible for cleaning up the previous
@@ -318,7 +305,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see     #e4c_status
  */
 #define E4C_FINALLY                                                         \
-  else if (e4c_frame_get_stage_(E4C_DEBUG_INFO) == e4c_finalizing)
+  else if (e4c_get_current_stage(E4C_DEBUG_INFO) == e4c_finalizing)
 
 /**
  * Repeats the previous #E4C_TRY (or #E4C_USE) block entirely
@@ -409,7 +396,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see     #E4C_USE
  */
 #define E4C_RETRY(max_retry_attempts)                                       \
-    e4c_frame_repeat_(max_retry_attempts, e4c_acquiring, E4C_DEBUG_INFO)
+    e4c_restart(max_retry_attempts, e4c_acquiring, E4C_DEBUG_INFO)
 
 /**
  * Signals an exceptional situation represented by an exception object
@@ -448,7 +435,62 @@ typedef jmp_buf e4c_jump_buffer;
  * @see     #e4c_get_exception
  */
 #define E4C_THROW(exception_type, message)                                  \
-  e4c_exception_throw_verbatim_(&exception_type, E4C_DEBUG_INFO, message )
+  e4c_throw(&exception_type, E4C_DEBUG_INFO, message)
+
+/**
+ * Throws an exception with a formatted message
+ *
+ * @param   exception_type
+ *          The type of exception to be thrown
+ * @param   format
+ *          The string containing the specifications that determine the output
+ *          format for the variadic arguments
+ * @param   ...
+ *          The variadic arguments that will be formatted according to the
+ *          format control
+ *
+ * This is a handy way to compose a formatted message and #E4C_THROW an exception
+ * *on the fly*:
+ *
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
+ *   int bytes = 1024;
+ *   void * buffer = malloc(bytes);
+ *   if(buffer == NULL){
+ *       throwf(NotEnoughMemoryException, "Could not allocate %d bytes.", bytes);
+ *   }
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * This macro relies on two features that were introduced in the **ISO/IEC
+ * 9899:1999** (also known as *C99*) revision of the C programming language
+ * standard in 1999:
+ *
+ *   - Variadic macros
+ *   - Buffer-safe function `vsnprintf`
+ *
+ * The semantics of this keyword are the same as for `throw`.
+ *
+ * @pre
+ *   - A program (or thread) **must** begin an exception context prior to using
+ *     the keyword `throwf`. Such programming error will lead to an abrupt exit
+ *     of the program (or thread).
+ *   - At least one argument **must** be passed right after the format string.
+ *     The message will be composed through the function `vsnprintf` with the
+ *     specified format and variadic arguments. For further information on
+ *     formatting rules, you may look up the specifications for the function
+ *     `vsnprintf`.
+ * @post
+ *   - Control does not return to the `throwf` point.
+ *
+ * @see     #E4C_THROW
+ * @see     #E4C_RETHROWF
+ */
+#define E4C_THROWF(exception_type, format, ...)                             \
+  e4c_throw_formatted(                                                      \
+    &exception_type,                                                        \
+    E4C_DEBUG_INFO,                                                         \
+    (format),                                                               \
+    __VA_ARGS__                                                             \
+  )
 
 /**
  * Throws again the currently thrown exception, with a new message
@@ -486,10 +528,63 @@ typedef jmp_buf e4c_jump_buffer;
  * @see     #E4C_RETHROWF
  */
 #define E4C_RETHROW(message)                                                \
-  e4c_exception_throw_verbatim_(                                            \
+  e4c_throw(                                                                \
     (e4c_get_exception() == NULL ? &NullPointerException : e4c_get_exception()->type), \
-    E4C_DEBUG_INFO,                                                              \
+    E4C_DEBUG_INFO,                                                         \
     message                                                                 \
+  )
+
+/**
+ * Throws again the currently thrown exception, with a new, formatted message
+ *
+ * @param   format
+ *          The string containing the specifications that determine the output
+ *          format for the variadic arguments.
+ * @param   ...
+ *          The variadic arguments that will be formatted according to the
+ *          format control.
+ *
+ * This is a handy way to create (and then #E4C_THROW) a new instance of the
+ * currently thrown exception, with a more specific, formatted message.
+ *
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
+ *   try{
+ *       image = read_file(file_path);
+ *   }catch(FileOpenException){
+ *       rethrowf("Image '%s' not found.", title);
+ *   }
+ * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ *
+ * This macro relies on two features that were introduced in the **ISO/IEC
+ * 9899:1999** (also known as *C99*) revision of the C programming language
+ * standard in 1999:
+ *
+ *   - Variadic macros
+ *   - Buffer-safe function `vsnprintf`
+ *
+ * The semantics of this keyword are the same as for `throw`.
+ *
+ * @pre
+ *   - A program (or thread) **must** begin an exception context prior to using
+ *     the keyword `rethrowf`. Such programming error will lead to an abrupt
+ *     exit of the program (or thread).
+ *   - At least one argument **must** be passed right after the format string.
+ *     The message will be composed through the function `vsnprintf` with the
+ *     specified format and variadic arguments. For further information on
+ *     formatting rules, you may look up the specifications for the function
+ *     `vsnprintf`.
+ * @post
+ *   - Control does not return to the `rethrowf` point.
+ *
+ * @see     #E4C_RETHROW
+ * @see     #E4C_THROWF
+ */
+#define E4C_RETHROWF(format, ...)                                           \
+  e4c_throw_formatted(                                                      \
+    (e4c_get_exception() == NULL ? NULL : e4c_get_exception()->type),       \
+    E4C_DEBUG_INFO,                                                         \
+    (format),                                                               \
+    __VA_ARGS__                                                             \
   )
 
 /** @} */
@@ -595,10 +690,10 @@ typedef jmp_buf e4c_jump_buffer;
  * @see     #E4C_USING
  */
 #define E4C_WITH(resource, dispose)                                         \
-  E4C_FRAME_LOOP_(e4c_beginning)                                            \
-  if (e4c_frame_get_stage_(E4C_DEBUG_INFO) == e4c_disposing) {                   \
+  EXCEPTIONS4C_BLOCK(e4c_beginning)                                         \
+  if (e4c_get_current_stage(E4C_DEBUG_INFO) == e4c_disposing) {             \
   dispose((resource), e4c_get_status() == e4c_failed);                      \
-  } else if (e4c_frame_get_stage_(E4C_DEBUG_INFO) == e4c_acquiring) {
+  } else if (e4c_get_current_stage(E4C_DEBUG_INFO) == e4c_acquiring) {
 
 /**
  * Closes a block of code with automatic disposal of a resource
@@ -621,7 +716,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see     #E4C_WITH
  */
 #define E4C_USE                                                             \
-  } else if (e4c_frame_get_stage_(E4C_DEBUG_INFO) == e4c_trying)
+  } else if (e4c_get_current_stage(E4C_DEBUG_INFO) == e4c_trying)
 
 /**
  * Introduces a block of code with automatic acquisition and disposal of a
@@ -732,7 +827,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see     #E4C_USE
  */
 #define E4C_REACQUIRE(max_reacquire_attempts)                               \
-  e4c_frame_repeat_(max_reacquire_attempts, e4c_beginning, E4C_DEBUG_INFO)
+  e4c_restart(max_reacquire_attempts, e4c_beginning, E4C_DEBUG_INFO)
 
 /** @} */
 
@@ -801,8 +896,8 @@ typedef jmp_buf e4c_jump_buffer;
  * @see     #e4c_context_begin
  * @see     #e4c_context_end
  */
-# define e4c_using_context \
-    E4C_USING_CONTEXT
+#define E4C_USING_CONTEXT                                                   \
+  for (e4c_context_begin(); e4c_context_is_ready(); e4c_context_end())
 
 /**
  * Expresses a program assertion
@@ -851,115 +946,6 @@ typedef jmp_buf e4c_jump_buffer;
 #define E4C_ASSERT(ignore)                                                  \
   ( (void)0 )
 #endif
-
-/**
- * Throws an exception with a formatted message
- *
- * @param   exception_type
- *          The type of exception to be thrown
- * @param   format
- *          The string containing the specifications that determine the output
- *          format for the variadic arguments
- * @param   ...
- *          The variadic arguments that will be formatted according to the
- *          format control
- *
- * This is a handy way to compose a formatted message and #E4C_THROW an exception
- * *on the fly*:
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   int bytes = 1024;
- *   void * buffer = malloc(bytes);
- *   if(buffer == NULL){
- *       throwf(NotEnoughMemoryException, "Could not allocate %d bytes.", bytes);
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * This macro relies on two features that were introduced in the **ISO/IEC
- * 9899:1999** (also known as *C99*) revision of the C programming language
- * standard in 1999:
- *
- *   - Variadic macros
- *   - Buffer-safe function `vsnprintf`
- *
- * The semantics of this keyword are the same as for `throw`.
- *
- * @pre
- *   - A program (or thread) **must** begin an exception context prior to using
- *     the keyword `throwf`. Such programming error will lead to an abrupt exit
- *     of the program (or thread).
- *   - At least one argument **must** be passed right after the format string.
- *     The message will be composed through the function `vsnprintf` with the
- *     specified format and variadic arguments. For further information on
- *     formatting rules, you may look up the specifications for the function
- *     `vsnprintf`.
- * @post
- *   - Control does not return to the `throwf` point.
- *
- * @see     #E4C_THROW
- * @see     #E4C_RETHROWF
- */
-#define E4C_THROWF(exception_type, format, ...)                             \
-  e4c_exception_throw_format_(                                              \
-    &exception_type,                                                        \
-    E4C_DEBUG_INFO,                                                         \
-    (format),                                                               \
-    __VA_ARGS__                                                             \
-  )
-
-/**
- * Throws again the currently thrown exception, with a new, formatted message
- *
- * @param   format
- *          The string containing the specifications that determine the output
- *          format for the variadic arguments.
- * @param   ...
- *          The variadic arguments that will be formatted according to the
- *          format control.
- *
- * This is a handy way to create (and then #E4C_THROW) a new instance of the
- * currently thrown exception, with a more specific, formatted message.
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   try{
- *       image = read_file(file_path);
- *   }catch(FileOpenException){
- *       rethrowf("Image '%s' not found.", title);
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * This macro relies on two features that were introduced in the **ISO/IEC
- * 9899:1999** (also known as *C99*) revision of the C programming language
- * standard in 1999:
- *
- *   - Variadic macros
- *   - Buffer-safe function `vsnprintf`
- *
- * The semantics of this keyword are the same as for `throw`.
- *
- * @pre
- *   - A program (or thread) **must** begin an exception context prior to using
- *     the keyword `rethrowf`. Such programming error will lead to an abrupt
- *     exit of the program (or thread).
- *   - At least one argument **must** be passed right after the format string.
- *     The message will be composed through the function `vsnprintf` with the
- *     specified format and variadic arguments. For further information on
- *     formatting rules, you may look up the specifications for the function
- *     `vsnprintf`.
- * @post
- *   - Control does not return to the `rethrowf` point.
- *
- * @see     #E4C_RETHROW
- * @see     #E4C_THROWF
- */
-#define E4C_RETHROWF(format, ...)                                           \
-  e4c_exception_throw_format_(                                              \
-  (e4c_get_exception() == NULL ? NULL : e4c_get_exception()->type),         \
-  E4C_DEBUG_INFO,                                                           \
-  (format),                                                                 \
-  __VA_ARGS__                                                               \
-)
-
 
 /**
  * Declares an exception type
@@ -1198,7 +1184,7 @@ typedef enum {
  *
  *   int main(int argc, char * argv[]){
  *
- *       e4c_using_context(true){
+ *       E4C_USING_CONTEXT(true){
  *
  *           e4c_context_set_handlers(my_uncaught_handler, NULL, NULL, NULL);
  *           // ...
@@ -1249,7 +1235,7 @@ typedef void (*e4c_uncaught_handler)(const e4c_exception * exception);
  *
  *   int main(int argc, char * argv[]){
  *
- *       e4c_using_context(true){
+ *       E4C_USING_CONTEXT(true){
  *
  *           e4c_context_set_handlers(NULL, NULL, my_initialize_handler, NULL);
  *           // ...
@@ -1271,13 +1257,13 @@ typedef void (*e4c_uncaught_handler)(const e4c_exception * exception);
  *
  *   int main(int argc, char * argv[]){
  *
- *       e4c_using_context(true){
+ *       E4C_USING_CONTEXT(true){
  *
  *           e4c_context_set_handlers(NULL, "FOO", log_handler, NULL);
  *           // ...
  *       }
  *
- *       e4c_using_context(true){
+ *       E4C_USING_CONTEXT(true){
  *
  *           e4c_context_set_handlers(NULL, "BAR", log_handler, NULL);
  *           // ...
@@ -1329,7 +1315,7 @@ typedef void * (*e4c_initialize_handler)(const e4c_exception * exception);
  *
  *   int main(int argc, char * argv[]){
  *
- *       e4c_using_context(true){
+ *       E4C_USING_CONTEXT(true){
  *
  *           e4c_context_set_handlers(NULL, NULL, initialize_data, finalize_data);
  *           ...
@@ -1441,12 +1427,9 @@ E4C_DECLARE_EXCEPTION(NullPointerException);
  *
  * @see     #e4c_context_begin
  * @see     #e4c_context_end
- * @see     #e4c_using_context
+ * @see     #E4C_USING_CONTEXT
  */
-bool
-e4c_context_is_ready(
-    void
-);
+bool e4c_context_is_ready(void);
 
 /**
  * Begins an exception context
@@ -1469,15 +1452,12 @@ e4c_context_is_ready(
  *
  * @see     #e4c_context_end
  * @see     #e4c_context_is_ready
- * @see     #e4c_using_context
+ * @see     #E4C_USING_CONTEXT
  * @see     #e4c_uncaught_handler
  * @see     #e4c_print_exception
  * @see     #e4c_context_set_handlers
  */
-void
-e4c_context_begin(
-    void
-);
+void e4c_context_begin(void);
 
 /**
  * Ends the current exception context
@@ -1491,12 +1471,9 @@ e4c_context_begin(
  *
  * @see     #e4c_context_begin
  * @see     #e4c_context_is_ready
- * @see     #e4c_using_context
+ * @see     #E4C_USING_CONTEXT
  */
-void
-e4c_context_end(
-    void
-);
+void e4c_context_end(void);
 
 /**
  * Sets the optional handlers of an exception context
@@ -1543,8 +1520,7 @@ e4c_context_end(
  * @see     #e4c_exception
  * @see     #e4c_print_exception
  */
-void
-e4c_context_set_handlers(
+void e4c_context_set_handlers(
     e4c_uncaught_handler uncaught_handler,
     void * custom_data,
     e4c_initialize_handler initialize_handler,
@@ -1573,10 +1549,7 @@ e4c_context_set_handlers(
  * @see     #e4c_status
  * @see     #E4C_FINALLY
  */
-e4c_status
-e4c_get_status(
-    void
-);
+e4c_status e4c_get_status(void);
 
 /**
  * Returns the exception that was thrown
@@ -1630,10 +1603,7 @@ e4c_get_status(
  * @see     #E4C_CATCH
  * @see     #E4C_FINALLY
  */
-const e4c_exception *
-e4c_get_exception(
-    void
-);
+const e4c_exception * e4c_get_exception(void);
 
 /** @} */
 
@@ -1663,11 +1633,7 @@ e4c_get_exception(
  *
  * @see     #EXCEPTIONS4C_VERSION
  */
-int
-e4c_library_version(
-    void
-)
-;
+int e4c_library_version(void);
 
 /**
  * Returns whether an exception instance is of a given type
@@ -1709,8 +1675,7 @@ e4c_library_version(
  * @see     #e4c_exception_type
  * @see     #e4c_get_exception
  */
-bool
-e4c_is_instance_of(
+bool e4c_is_instance_of(
     const e4c_exception *       instance,
     const e4c_exception_type *  exception_type
 );
@@ -1737,12 +1702,9 @@ e4c_is_instance_of(
  *
  * @see     #e4c_uncaught_handler
  * @see     #e4c_context_begin
- * @see     #e4c_using_context
+ * @see     #E4C_USING_CONTEXT
  */
-void
-e4c_print_exception(
-    const e4c_exception *       exception
-);
+void e4c_print_exception(const e4c_exception * exception);
 
 /**
  * Prints an ASCII graph representing an exception type's hierarchy
@@ -1778,10 +1740,7 @@ e4c_print_exception(
  *
  * @see     #e4c_exception_type
  */
-void
-e4c_print_exception_type(
-    const e4c_exception_type *  exception_type
-);
+void e4c_print_exception_type(const e4c_exception_type *  exception_type);
 
 /** @} */
 
@@ -1790,36 +1749,29 @@ e4c_print_exception_type(
  * directly (but through the "keywords").
  */
 
-e4c_jump_buffer *
-e4c_frame_first_stage_(
+e4c_jump_buffer * e4c_start(
     enum e4c_frame_stage        stage,
     const char *                file,
     int                         line,
     const char *                function
 );
 
-bool
-e4c_frame_next_stage_(
-    void
-);
+bool e4c_next_stage(void);
 
-enum e4c_frame_stage
-e4c_frame_get_stage_(
+enum e4c_frame_stage e4c_get_current_stage(
     const char *                file,
     int                         line,
     const char *                function
 );
 
-bool
-e4c_frame_catch_(
+bool e4c_catch(
     const e4c_exception_type *  exception_type,
     const char *                file,
     int                         line,
     const char *                function
 );
 
-void
-e4c_frame_repeat_(
+void e4c_restart(
     int                         max_repeat_attempts,
     enum e4c_frame_stage        stage,
     const char *                file,
@@ -1827,9 +1779,7 @@ e4c_frame_repeat_(
     const char *                function
 );
 
-noreturn
-void
-e4c_exception_throw_verbatim_(
+noreturn void e4c_throw(
     const e4c_exception_type *  exception_type,
     const char *                file,
     int                         line,
@@ -1837,9 +1787,7 @@ e4c_exception_throw_verbatim_(
     const char *                message
 );
 
-noreturn
-void
-e4c_exception_throw_format_(
+noreturn void e4c_throw_formatted(
     const e4c_exception_type *  exception_type,
     const char *                file,
     int                         line,

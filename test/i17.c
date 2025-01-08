@@ -16,25 +16,25 @@ TEST_CASE{
 
     e4c_context_begin();
 
-    E4C_TRY{
+    E4C_TRY {
 
-        E4C_TRY{
+        E4C_TRY {
 
-            E4C_TRY{
+            E4C_TRY {
 
                 E4C_THROW(CustomException, "This is the original cause of the issue");
 
-            }E4C_CATCH(CustomException){
+            } E4C_CATCH(CustomException) {
 
-                e4c_exception_throw_verbatim_(&NullPointerException, __FILE__, __LINE__, NULL, "First wrapper");
+                E4C_THROW(NullPointerException, "First wrapper");
             }
 
-        }E4C_CATCH(NullPointerException){
+        } E4C_CATCH(NullPointerException) {
 
-            e4c_exception_throw_verbatim_(&RuntimeException, __FILE__, __LINE__, "test_function", "Second wrapper");
+            E4C_THROW(RuntimeException, "Second wrapper");
         }
 
-    }E4C_CATCH(RuntimeException){
+    } E4C_CATCH(RuntimeException) {
 
         const e4c_exception * exception = e4c_get_exception();
 

@@ -18,7 +18,7 @@ TEST_CASE{
 
     e4c_context_begin();
 
-    e4c_using_context {
+    E4C_USING_CONTEXT {
 
         THIS_SHOULD_NOT_HAPPEN;
     }

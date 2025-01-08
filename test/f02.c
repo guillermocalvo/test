@@ -13,13 +13,13 @@ TEST_CASE{
 
     volatile bool caught = false;
 
-    e4c_using_context {
+    E4C_USING_CONTEXT {
 
-        E4C_TRY{
+        E4C_TRY {
 
             E4C_THROW(NullPointerException, "I'm going to be caught.");
 
-        }E4C_CATCH(RuntimeException){
+        } E4C_CATCH(RuntimeException) {
 
             caught = true;
 

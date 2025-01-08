@@ -17,5 +17,5 @@ TEST_CASE{
     TEST_EXPECTING(ContextHasNotBegunYet);
 
     /* This function must not be called like this! */
-    (void)e4c_frame_get_stage_(__FILE__, __LINE__, "test");
+    (void) e4c_get_current_stage(E4C_DEBUG_INFO);
 }
