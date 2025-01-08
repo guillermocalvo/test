@@ -16,7 +16,7 @@ TEST_CASE{
 
     TEST_EXPECTING(ContextNotEnded);
 
-    e4c_using_context(true){
+    e4c_using_context {
 
         TEST_ECHO("Inside `e4c_using_context` block...");
 

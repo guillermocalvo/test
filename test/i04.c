@@ -15,7 +15,7 @@ TEST_CASE{
 
 # else
 
-    e4c_context_begin(false);
+    e4c_context_begin();
 
     E4C_TRY{
 

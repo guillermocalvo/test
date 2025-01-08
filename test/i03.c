@@ -19,7 +19,7 @@ TEST_CASE{
     volatile int foo          = 0;
     volatile int total_acquisitions = 0;
 
-    e4c_context_begin(false);
+    e4c_context_begin();
 
     E4C_WITH(foo, DISPOSE_FOO){
 

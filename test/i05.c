@@ -20,7 +20,7 @@ TEST_CASE{
 
     atexit(check_execution);
 
-    e4c_context_begin(false);
+    e4c_context_begin();
 
     e4c_context_set_handlers(custom_uncaught_handler, NULL, NULL, NULL);
 

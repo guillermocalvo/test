@@ -1,6 +1,11 @@
 
+# include <signal.h>
 # include "testing.h"
 
+
+E4C_DEFINE_EXCEPTION(AbortException, "Abort exception.", RuntimeException);
+
+void throw_on_signal(int);
 
 /**
  * Abort exception
@@ -18,9 +23,15 @@ TEST_CASE{
 
     TEST_EXPECTING(AbortException);
 
-    e4c_context_begin(true);
+    signal(SIGABRT, throw_on_signal);
+
+    e4c_context_begin();
 
     abort();
 
     e4c_context_end();
+}
+
+void throw_on_signal(int _) {
+    E4C_THROW(AbortException, NULL);
 }

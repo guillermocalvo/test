@@ -29,7 +29,6 @@
 
 
 # include <stdio.h>
-# include <signal.h>
 # include <errno.h>
 # include <stdarg.h>
 # include "e4c.h"
@@ -45,7 +44,6 @@
 # define VERBATIM_COPY(dst, src) (void)snprintf(dst, (size_t)E4C_EXCEPTION_MESSAGE_SIZE, "%s", src)
 
 # define DESC_INVALID_FRAME         "The exception context has an invalid frame."
-# define DESC_SIGERR_HANDLE         "Could not register the signal handling procedure."
 
 #define E4C_CURRENT_CONTEXT      current_context
 #define DESC_INVALID_STATE       "The exception context for this program is in an invalid state."
@@ -71,156 +69,7 @@
 #   define STOP_IF(condition, message)
 # endif
 
-# define WHEN_SIGNAL(signal_id) \
-    case signal_id: \
-        signal_name = signal_name_##signal_id; \
-        break;
-
-# define DEFINE_SIGNAL_NAME(signal_id) \
-    static const char * signal_name_##signal_id = #signal_id
-
-# ifdef SIGALRM
-#   define DEFINE_SIGNAL_NAME_SIGALRM           DEFINE_SIGNAL_NAME(SIGALRM);
-#   define WHEN_SIGNAL_SIGALRM                  WHEN_SIGNAL(SIGALRM)
-#   define E4C_SIGNAL_MAPPING_SIGALRM           E4C_SIGNAL_MAPPING(SIGALRM,     SignalAlarmException),
-# else
-#   define DEFINE_SIGNAL_NAME_SIGALRM
-#   define WHEN_SIGNAL_SIGALRM
-#   define E4C_SIGNAL_MAPPING_SIGALRM
-# endif
-
-# ifdef SIGCHLD
-#   define DEFINE_SIGNAL_NAME_SIGCHLD           DEFINE_SIGNAL_NAME(SIGCHLD);
-#   define WHEN_SIGNAL_SIGCHLD                  WHEN_SIGNAL(SIGCHLD)
-#   define E4C_SIGNAL_MAPPING_SIGCHLD           E4C_SIGNAL_MAPPING(SIGCHLD,     SignalChildException),
-# else
-#   define DEFINE_SIGNAL_NAME_SIGCHLD
-#   define WHEN_SIGNAL_SIGCHLD
-#   define E4C_SIGNAL_MAPPING_SIGCHLD
-# endif
-
-# ifdef SIGTRAP
-#   define DEFINE_SIGNAL_NAME_SIGTRAP           DEFINE_SIGNAL_NAME(SIGTRAP);
-#   define WHEN_SIGNAL_SIGTRAP                  WHEN_SIGNAL(SIGTRAP)
-#   define E4C_SIGNAL_MAPPING_SIGTRAP           E4C_SIGNAL_MAPPING(SIGTRAP,     SignalTrapException),
-# else
-#   define DEFINE_SIGNAL_NAME_SIGTRAP
-#   define WHEN_SIGNAL_SIGTRAP
-#   define E4C_SIGNAL_MAPPING_SIGTRAP
-# endif
-
-# ifdef SIGPIPE
-#   define DEFINE_SIGNAL_NAME_SIGPIPE           DEFINE_SIGNAL_NAME(SIGPIPE);
-#   define WHEN_SIGNAL_SIGPIPE                  WHEN_SIGNAL(SIGPIPE)
-#   define E4C_SIGNAL_MAPPING_SIGPIPE           E4C_SIGNAL_MAPPING(SIGPIPE,     BrokenPipeException),
-# else
-#   define DEFINE_SIGNAL_NAME_SIGPIPE
-#   define WHEN_SIGNAL_SIGPIPE
-#   define E4C_SIGNAL_MAPPING_SIGPIPE
-# endif
-
 /* unless otherwise stated, SIGSTOP and SIGKILL cannot be caught or ignored */
-
-/*
- * The E4C_CAN_HANDLE_SIGSTOP compile-time parameter
- * could be defined in order to try to map signal SIGSTOP to StopException.
- */
-# ifdef SIGSTOP
-#   define DEFINE_SIGNAL_NAME_SIGSTOP           DEFINE_SIGNAL_NAME(SIGSTOP);
-#   define WHEN_SIGNAL_SIGSTOP                  WHEN_SIGNAL(SIGSTOP)
-#   ifdef E4C_CAN_HANDLE_SIGSTOP
-#       define E4C_SIGNAL_MAPPING_SIGSTOP       E4C_SIGNAL_MAPPING(SIGSTOP,     StopException),
-#   else
-#       define E4C_SIGNAL_MAPPING_SIGSTOP
-#   endif
-# else
-#   define DEFINE_SIGNAL_NAME_SIGSTOP
-#   define WHEN_SIGNAL_SIGSTOP
-#   define E4C_SIGNAL_MAPPING_SIGSTOP
-# endif
-
-/*
- * The E4C_CAN_HANDLE_SIGKILL compile-time parameter
- * could be defined in order to try to map signal SIGKILL to KillException.
- */
-# ifdef SIGKILL
-#   define DEFINE_SIGNAL_NAME_SIGKILL           DEFINE_SIGNAL_NAME(SIGKILL);
-#   define WHEN_SIGNAL_SIGKILL                  WHEN_SIGNAL(SIGKILL)
-#   ifdef E4C_CAN_HANDLE_SIGKILL
-#       define E4C_SIGNAL_MAPPING_SIGKILL       E4C_SIGNAL_MAPPING(SIGKILL,     KillException),
-#   else
-#       define E4C_SIGNAL_MAPPING_SIGKILL
-#   endif
-# else
-#   define DEFINE_SIGNAL_NAME_SIGKILL
-#   define WHEN_SIGNAL_SIGKILL
-#   define E4C_SIGNAL_MAPPING_SIGKILL
-# endif
-
-# ifdef SIGHUP
-#   define DEFINE_SIGNAL_NAME_SIGHUP            DEFINE_SIGNAL_NAME(SIGHUP);
-#   define WHEN_SIGNAL_SIGHUP                   WHEN_SIGNAL(SIGHUP)
-#   define E4C_SIGNAL_MAPPING_SIGHUP            E4C_SIGNAL_MAPPING(SIGHUP,      HangUpException),
-# else
-#   define DEFINE_SIGNAL_NAME_SIGHUP
-#   define WHEN_SIGNAL_SIGHUP
-#   define E4C_SIGNAL_MAPPING_SIGHUP
-# endif
-
-# ifdef SIGXCPU
-#   define DEFINE_SIGNAL_NAME_SIGXCPU           DEFINE_SIGNAL_NAME(SIGXCPU);
-#   define WHEN_SIGNAL_SIGXCPU                  WHEN_SIGNAL(SIGXCPU)
-#   define E4C_SIGNAL_MAPPING_SIGXCPU           E4C_SIGNAL_MAPPING(SIGXCPU,     CPUTimeException),
-# else
-#   define DEFINE_SIGNAL_NAME_SIGXCPU
-#   define WHEN_SIGNAL_SIGXCPU
-#   define E4C_SIGNAL_MAPPING_SIGXCPU
-# endif
-
-# ifdef SIGQUIT
-#   define DEFINE_SIGNAL_NAME_SIGQUIT           DEFINE_SIGNAL_NAME(SIGQUIT);
-#   define WHEN_SIGNAL_SIGQUIT                  WHEN_SIGNAL(SIGQUIT)
-#   define E4C_SIGNAL_MAPPING_SIGQUIT           E4C_SIGNAL_MAPPING(SIGQUIT,     UserQuitException),
-# else
-#   define DEFINE_SIGNAL_NAME_SIGQUIT
-#   define WHEN_SIGNAL_SIGQUIT
-#   define E4C_SIGNAL_MAPPING_SIGQUIT
-# endif
-
-# ifdef SIGBREAK
-#   define DEFINE_SIGNAL_NAME_SIGBREAK          DEFINE_SIGNAL_NAME(SIGBREAK);
-#   define WHEN_SIGNAL_SIGBREAK                 WHEN_SIGNAL(SIGBREAK)
-#   define E4C_SIGNAL_MAPPING_SIGBREAK          E4C_SIGNAL_MAPPING(SIGBREAK,    UserBreakException),
-# else
-#   define DEFINE_SIGNAL_NAME_SIGBREAK
-#   define WHEN_SIGNAL_SIGBREAK
-#   define E4C_SIGNAL_MAPPING_SIGBREAK
-# endif
-
-# ifdef SIGUSR1
-#   define DEFINE_SIGNAL_NAME_SIGUSR1           DEFINE_SIGNAL_NAME(SIGUSR1);
-#   define WHEN_SIGNAL_SIGUSR1                  WHEN_SIGNAL(SIGUSR1)
-#   define E4C_SIGNAL_MAPPING_SIGUSR1           E4C_SIGNAL_MAPPING(SIGUSR1,     ProgramSignal1Exception),
-# else
-#   define DEFINE_SIGNAL_NAME_SIGUSR1
-#   define WHEN_SIGNAL_SIGUSR1
-#   define E4C_SIGNAL_MAPPING_SIGUSR1
-# endif
-
-# ifdef SIGUSR2
-#   define DEFINE_SIGNAL_NAME_SIGUSR2           DEFINE_SIGNAL_NAME(SIGUSR2);
-#   define WHEN_SIGNAL_SIGUSR2                  WHEN_SIGNAL(SIGUSR2)
-#   define E4C_SIGNAL_MAPPING_SIGUSR2           E4C_SIGNAL_MAPPING(SIGUSR2,     ProgramSignal2Exception),
-# else
-#   define DEFINE_SIGNAL_NAME_SIGUSR2
-#   define WHEN_SIGNAL_SIGUSR2
-#   define E4C_SIGNAL_MAPPING_SIGUSR2
-# endif
-
-
-
-
-typedef void (*signal_handler)(int);
 
 typedef struct e4c_frame_ e4c_frame;
 struct e4c_frame_ {
@@ -236,7 +85,6 @@ struct e4c_frame_ {
 typedef struct e4c_context_ e4c_context;
 struct e4c_context_ {
     e4c_frame *                 current_frame;
-    const e4c_signal_mapping *  signal_mappings;
     e4c_uncaught_handler        uncaught_handler;
     void *                      custom_data;
     e4c_initialize_handler      initialize_handler;
@@ -253,58 +101,11 @@ static volatile bool is_initialized = false;
 static volatile bool is_finalized = false;
 
 /** main exception context of the program */
-static e4c_context main_context = {NULL, NULL, NULL, NULL, NULL, NULL};
+static e4c_context main_context = {NULL, NULL, NULL, NULL, NULL};
 
 /** pointer to the current exception context */
 static e4c_context * current_context = NULL;
 
-/** symbolic signal names */
-static const char *
-signal_name_UNKNOWN = "{unknown signal}";
-DEFINE_SIGNAL_NAME(SIGABRT);
-DEFINE_SIGNAL_NAME(SIGFPE);
-DEFINE_SIGNAL_NAME(SIGILL);
-DEFINE_SIGNAL_NAME(SIGSEGV);
-DEFINE_SIGNAL_NAME(SIGTERM);
-DEFINE_SIGNAL_NAME(SIGINT);
-DEFINE_SIGNAL_NAME_SIGALRM
-DEFINE_SIGNAL_NAME_SIGCHLD
-DEFINE_SIGNAL_NAME_SIGTRAP
-DEFINE_SIGNAL_NAME_SIGPIPE
-DEFINE_SIGNAL_NAME_SIGSTOP
-DEFINE_SIGNAL_NAME_SIGKILL
-DEFINE_SIGNAL_NAME_SIGHUP
-DEFINE_SIGNAL_NAME_SIGXCPU
-DEFINE_SIGNAL_NAME_SIGQUIT
-DEFINE_SIGNAL_NAME_SIGBREAK
-DEFINE_SIGNAL_NAME_SIGUSR1
-DEFINE_SIGNAL_NAME_SIGUSR2
-
-/** default signal mapping */
-static const e4c_signal_mapping e4c_default_signal_mappings_array[] = {
-    E4C_SIGNAL_MAPPING(SIGABRT,     AbortException),
-    E4C_SIGNAL_MAPPING(SIGFPE,      ArithmeticException),
-    E4C_SIGNAL_MAPPING(SIGILL,      IllegalInstructionException),
-    E4C_SIGNAL_MAPPING(SIGSEGV,     BadPointerException),
-    E4C_SIGNAL_MAPPING(SIGTERM,     TerminationException),
-    E4C_SIGNAL_MAPPING(SIGINT,      UserInterruptionException),
-    E4C_SIGNAL_MAPPING_SIGALRM
-    E4C_SIGNAL_MAPPING_SIGCHLD
-    E4C_SIGNAL_MAPPING_SIGTRAP
-    E4C_SIGNAL_MAPPING_SIGPIPE
-    E4C_SIGNAL_MAPPING_SIGSTOP
-    E4C_SIGNAL_MAPPING_SIGKILL
-    E4C_SIGNAL_MAPPING_SIGHUP
-    E4C_SIGNAL_MAPPING_SIGXCPU
-    E4C_SIGNAL_MAPPING_SIGQUIT
-    E4C_SIGNAL_MAPPING_SIGBREAK
-    E4C_SIGNAL_MAPPING_SIGUSR1
-    E4C_SIGNAL_MAPPING_SIGUSR2
-    E4C_NULL_SIGNAL_MAPPING
-};
-
-/** pointer to the default signal mapping */
-const e4c_signal_mapping * const e4c_default_signal_mappings = &e4c_default_signal_mappings_array[0];
 
 E4C_DEFINE_EXCEPTION(AssertionException,                "Assertion failed.",                AssertionException);
 
@@ -313,30 +114,8 @@ E4C_DEFINE_EXCEPTION(NotEnoughMemoryException,          "Not enough memory.",   
 E4C_DEFINE_EXCEPTION(InputOutputException,              "Input/output exception.",          RuntimeException);
 E4C_DEFINE_EXCEPTION(IllegalArgumentException,          "Illegal argument.",                RuntimeException);
 
-E4C_DEFINE_EXCEPTION(SignalException,                   "Signal received.",                 RuntimeException);
-E4C_DEFINE_EXCEPTION(SignalAlarmException,              "Alarm clock signal received.",     SignalException);
-E4C_DEFINE_EXCEPTION(SignalChildException,              "Child process signal received.",   SignalException);
-E4C_DEFINE_EXCEPTION(SignalTrapException,               "Trace trap.",                      SignalException);
-E4C_DEFINE_EXCEPTION(ErrorSignalException,              "Error signal received.",           SignalException);
-E4C_DEFINE_EXCEPTION(IllegalInstructionException,       "Illegal instruction.",             ErrorSignalException);
-E4C_DEFINE_EXCEPTION(ArithmeticException,               "Erroneous arithmetic operation.",  ErrorSignalException);
-E4C_DEFINE_EXCEPTION(BrokenPipeException,               "Broken pipe.",                     ErrorSignalException);
-E4C_DEFINE_EXCEPTION(BadPointerException,               "Segmentation violation.",          ErrorSignalException);
-E4C_DEFINE_EXCEPTION(NullPointerException,              "Null pointer.",                    BadPointerException);
-E4C_DEFINE_EXCEPTION(ControlSignalException,            "Control signal received.",         SignalException);
-E4C_DEFINE_EXCEPTION(StopException,                     "Stop signal received.",            ControlSignalException);
-E4C_DEFINE_EXCEPTION(KillException,                     "Kill signal received.",            ControlSignalException);
-E4C_DEFINE_EXCEPTION(HangUpException,                   "Hang up signal received.",         ControlSignalException);
-E4C_DEFINE_EXCEPTION(TerminationException,              "Termination signal received.",     ControlSignalException);
-E4C_DEFINE_EXCEPTION(AbortException,                    "Abort signal received.",           ControlSignalException);
-E4C_DEFINE_EXCEPTION(CPUTimeException,                  "Exceeded CPU time.",               ControlSignalException);
-E4C_DEFINE_EXCEPTION(UserControlSignalException,        "User control signal received.",    ControlSignalException);
-E4C_DEFINE_EXCEPTION(UserQuitException,                 "Quit signal received.",            UserControlSignalException);
-E4C_DEFINE_EXCEPTION(UserInterruptionException,         "Interrupt signal received.",       UserControlSignalException);
-E4C_DEFINE_EXCEPTION(UserBreakException,                "Break signal received.",           UserControlSignalException);
-E4C_DEFINE_EXCEPTION(ProgramSignalException,            "User-defined signal received.",    SignalException);
-E4C_DEFINE_EXCEPTION(ProgramSignal1Exception,           "User-defined signal 1 received.",  ProgramSignalException);
-E4C_DEFINE_EXCEPTION(ProgramSignal2Exception,           "User-defined signal 2 received.",  ProgramSignalException);
+E4C_DEFINE_EXCEPTION(NullPointerException,              "Null pointer.",                    RuntimeException);
+
 
 static
 E4C_DEFINE_EXCEPTION(ExceptionSystemFatalError,         DESC_INVALID_STATE,                 RuntimeException);
@@ -354,7 +133,6 @@ E4C_DEFINE_EXCEPTION(ContextNotEnded,                   DESC_NOT_ENDED,         
 
 static void _e4c_library_initialize(void);
 static void _e4c_library_finalize(void);
-static void _e4c_library_handle_signal(int signal_number);
 static noreturn void _e4c_library_fatal_error(
     const e4c_exception_type *  exception_type,
     const char *                message,
@@ -365,7 +143,6 @@ static noreturn void _e4c_library_fatal_error(
 );
 
 static void _e4c_context_initialize(e4c_context * context, e4c_uncaught_handler uncaught_handler);
-static void _e4c_context_set_signal_handlers(e4c_context * context, const e4c_signal_mapping * mappings);
 static void _e4c_context_at_uncaught_exception(e4c_context * context, const e4c_exception * exception);
 static noreturn void _e4c_context_propagate(e4c_context * context, e4c_exception * exception);
 
@@ -448,91 +225,6 @@ static void _e4c_library_finalize(void) {
 
 }
 
-static void _e4c_library_handle_signal(int signal_number) {
-
-    e4c_context *               context;
-    const e4c_signal_mapping *  mapping;
-    e4c_exception *             new_exception;
-    signal_handler              previous_handler;
-
-    context = E4C_CURRENT_CONTEXT;
-
-    /* check if `handleSignal` was called before `e4c_context_begin` or after `e4c_context_end` (very unlikely) */
-    STOP_IF(context == NULL, "The exception context is invalid.");
-
-    /* check if the current frame is NULL (very unlikely) */
-    STOP_IF(context->current_frame == NULL, DESC_INVALID_FRAME);
-
-    /* check if the current frame is NULL (very unlikely) */
-    STOP_IF(context->signal_mappings == NULL, DESC_INVALID_STATE);
-
-    /* try to find a mapping for this signal */
-    mapping = context->signal_mappings;
-
-    /* loop until we find the NULL terminator */
-    while (mapping->signal_number != E4C_INVALID_SIGNAL_NUMBER_) {
-
-        if (signal_number == mapping->signal_number) {
-
-            const char * signal_name;
-
-            switch (signal_number) {
-                WHEN_SIGNAL(SIGABRT)
-                WHEN_SIGNAL(SIGFPE)
-                WHEN_SIGNAL(SIGILL)
-                WHEN_SIGNAL(SIGSEGV)
-                WHEN_SIGNAL(SIGTERM)
-                WHEN_SIGNAL(SIGINT)
-                WHEN_SIGNAL_SIGALRM
-                WHEN_SIGNAL_SIGCHLD
-                WHEN_SIGNAL_SIGTRAP
-                WHEN_SIGNAL_SIGPIPE
-                WHEN_SIGNAL_SIGSTOP
-                WHEN_SIGNAL_SIGKILL
-                WHEN_SIGNAL_SIGHUP
-                WHEN_SIGNAL_SIGXCPU
-                WHEN_SIGNAL_SIGQUIT
-                WHEN_SIGNAL_SIGBREAK
-                WHEN_SIGNAL_SIGUSR1
-                WHEN_SIGNAL_SIGUSR2
-                default:
-                    signal_name = signal_name_UNKNOWN;
-                    break;
-            }
-
-            /* check if we were supposed to ignore this signal (very unlikely) */
-            STOP_IF(mapping->exception_type == NULL, DESC_INVALID_STATE);
-
-            /* reset the handler for this signal */
-            previous_handler = signal(signal_number, _e4c_library_handle_signal);
-            if (previous_handler == SIG_ERR) {
-                /* we were unable to register the signal handling procedure again */
-                INTERNAL_ERROR(DESC_SIGERR_HANDLE);
-            }
-
-            /* check context and frame; initialize exception and cause */
-            new_exception = _e4c_exception_throw(context->current_frame, mapping->exception_type, signal_name, signal_number, __func__, errno, true, NULL);
-
-            /* set initial value for custom data */
-            new_exception->custom_data = context->custom_data;
-            /* initialize custom data */
-            if (context->initialize_handler != NULL) {
-                new_exception->custom_data = context->initialize_handler(new_exception);
-            }
-
-            /* propagate the exception up the call stack */
-            _e4c_context_propagate(context, new_exception);
-        }
-
-        /* proceed to the next mapping */
-        mapping++;
-    }
-
-    /* this should never happen, but anyway... */
-    /* we were unable to find the exception that represents the received signal number */
-    INTERNAL_ERROR("There is no exception mapping for the received signal.");
-}
-
 static void _e4c_library_fatal_error(const e4c_exception_type * exception_type, const char * message, const char * file, int line, const char * function, int error_number) {
 
     e4c_exception exception;
@@ -562,7 +254,6 @@ int e4c_library_version(void) {
 static void _e4c_context_initialize(e4c_context * context, e4c_uncaught_handler uncaught_handler) {
 
     context->uncaught_handler   = uncaught_handler;
-    context->signal_mappings    = NULL;
     context->custom_data        = NULL;
     context->initialize_handler = NULL;
     context->finalize_handler   = NULL;
@@ -613,7 +304,7 @@ static void _e4c_context_propagate(e4c_context * context, e4c_exception * except
 }
 
 /* e4c_context_begin (single-thread) */
-void e4c_context_begin(bool handle_signals) {
+void e4c_context_begin() {
 
     INITIALIZE_ONCE;
 
@@ -627,10 +318,6 @@ void e4c_context_begin(bool handle_signals) {
 
     /* initialize context, register uncaught handler */
     _e4c_context_initialize(&main_context, e4c_print_exception);
-
-    if (handle_signals) {
-        _e4c_context_set_signal_handlers(&main_context, e4c_default_signal_mappings);
-    }
 
     /* update global variable */
     current_context = &main_context;
@@ -659,9 +346,6 @@ void e4c_context_end(void) {
             INTERNAL_ERROR("There are too many exception frames. Probably some try{...} block was exited through 'return' or 'break'.");
         }
 
-        /* reset all signal handlers */
-        _e4c_context_set_signal_handlers(context, NULL);
-
         /* deallocate the current, top frame */
         _e4c_frame_deallocate(frame, context->finalize_handler);
 
@@ -674,59 +358,6 @@ void e4c_context_end(void) {
     } else {
 
         MISUSE_ERROR(ContextHasNotBegunYet, DESC_NOT_BEGUN_YET, NULL, 0, NULL);
-    }
-}
-
-static void _e4c_context_set_signal_handlers(e4c_context * context, const e4c_signal_mapping * mappings) {
-
-    /* assert: context != NULL */
-
-    const e4c_signal_mapping *  next_mapping;
-    signal_handler              previous_handler;
-
-    if (context->signal_mappings != NULL) {
-        next_mapping = context->signal_mappings;
-        /* reset all the previously set signal handlers */
-        while (next_mapping->signal_number != E4C_INVALID_SIGNAL_NUMBER_) {
-            previous_handler = signal(next_mapping->signal_number, SIG_DFL);
-            if (previous_handler == SIG_ERR) {
-                /* we were unable to reset to the default action */
-                INTERNAL_ERROR("Could not reset the default signal handling.");
-            }
-            next_mapping++;
-        }
-    }
-
-    if (mappings == NULL) {
-        /* disable signal handling */
-        context->signal_mappings = NULL;
-        return;
-    }
-
-    /* set up signal mapping */
-    context->signal_mappings = next_mapping = mappings;
-
-    while (next_mapping->signal_number != E4C_INVALID_SIGNAL_NUMBER_) {
-
-        signal_handler  handler;
-        const char *    error_message;
-
-        if (next_mapping->exception_type != NULL) {
-            /* map this signal to this exception */
-            handler         = _e4c_library_handle_signal;
-            error_message   = DESC_SIGERR_HANDLE;
-        } else {
-            /* ignore this signal */
-            handler         = SIG_IGN;
-            error_message   = "Could not ignore the signal.";
-        }
-
-        previous_handler = signal(next_mapping->signal_number, handler);
-        if (previous_handler == SIG_ERR) {
-            INTERNAL_ERROR(error_message);
-        }
-
-        next_mapping++;
     }
 }
 
@@ -769,35 +400,6 @@ void e4c_context_set_handlers(e4c_uncaught_handler uncaught_handler, void * cust
 
         MISUSE_ERROR(ContextHasNotBegunYet, DESC_NOT_BEGUN_YET, __FILE__, __LINE__, __func__);
     }
-}
-
-void e4c_context_set_signal_mappings(const e4c_signal_mapping * mappings) {
-
-    e4c_context * context;
-
-    context = E4C_CURRENT_CONTEXT;
-
-    /* check if `e4c_context_set_signal_mappings` was called before calling `e4c_context_begin` */
-    if (context == NULL) {
-        MISUSE_ERROR(ContextHasNotBegunYet, DESC_NOT_BEGUN_YET, __FILE__, __LINE__, __func__);
-    }
-
-    _e4c_context_set_signal_handlers(context, mappings);
-}
-
-const e4c_signal_mapping * e4c_context_get_signal_mappings(void) {
-
-    e4c_context * context;
-
-    context = E4C_CURRENT_CONTEXT;
-
-    /* ensure that `e4c_context_get_signal_mappings` was called after calling `e4c_context_begin` */
-    if (context != NULL) {
-
-        return context->signal_mappings;
-    }
-
-    MISUSE_ERROR(ContextHasNotBegunYet, DESC_NOT_BEGUN_YET, __FILE__, __LINE__, __func__);
 }
 
 bool e4c_context_is_ready(void) {

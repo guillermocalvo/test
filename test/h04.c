@@ -20,7 +20,7 @@ void library_function(int foobar);
  */
 TEST_CASE{
 
-    e4c_context_begin(false);
+    e4c_context_begin();
 
     /* The client doesn't need to check the returned error code */
     (void)library_3rd_party(123);

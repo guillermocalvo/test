@@ -21,7 +21,7 @@ TEST_CASE{
 
 # else
 
-    e4c_context_begin(false);
+    e4c_context_begin();
 
     e4c_context_set_handlers(NULL, NULL, custom_initialize_handler, NULL);
 

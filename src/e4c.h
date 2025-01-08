@@ -53,17 +53,6 @@
 #include <stdbool.h>
 #endif
 
-/*
- * The E4C_INVALID_SIGNAL_NUMBER_ compile-time parameter
- * could be defined in order to work with some specific compiler.
- */
-# ifndef E4C_INVALID_SIGNAL_NUMBER_
-
-#   define E4C_INVALID_SIGNAL_NUMBER_   -1
-
-# endif
-
-
 #ifdef HAVE_SIGSETJMP
 typedef sigjmp_buf e4c_jump_buffer;
 #define EXCEPTIONS4C_SET_JUMP(buffer) sigsetjmp(buffer, 1)
@@ -100,7 +89,7 @@ typedef jmp_buf e4c_jump_buffer;
     volatile bool E4C_AUTO_(DONE)  = false; \
     \
     if( E4C_AUTO_(BEGIN) ){ \
-        e4c_context_begin(false); \
+        e4c_context_begin(); \
         E4C_TRY{ \
             goto E4C_AUTO_(PAYLOAD); \
             E4C_AUTO_(CLEANUP): \
@@ -119,10 +108,10 @@ typedef jmp_buf e4c_jump_buffer;
             goto E4C_AUTO_(CLEANUP); \
         }else
 
-# define E4C_USING_CONTEXT(handle_signals) \
+# define E4C_USING_CONTEXT \
     \
     for( \
-        e4c_context_begin(handle_signals); \
+        e4c_context_begin(); \
         e4c_context_is_ready(); \
         e4c_context_end() \
     )
@@ -897,8 +886,7 @@ typedef jmp_buf e4c_jump_buffer;
  *       * The control will be transferred to the nearest surrounding block of
  *         code which is able to handle that exception.
  *   - If there is no exception context at the time the block starts:
- *     1. A new exception context will be begun; note that the signal handling
- *        system **WILL NOT** be set up.
+ *     1. A new exception context will be begun.
  *     2. The code block will take place.
  *     3. If any exception is thrown during the execution of the block:
  *       * It will be **caught**.
@@ -917,36 +905,6 @@ typedef jmp_buf e4c_jump_buffer;
  *           ...
  *       }finally{
  *           free(buffer);
- *       }
- *   }
- *   ...
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * If you need to rely on the signal handling system, you may call
- * #e4c_context_set_signal_mappings explicitly. You should take into account
- * that you could be *hijacking* your client's original signal mappings, so you
- * should also call #e4c_context_get_signal_mappings in order to restore the
- * previous signal mappings when you are done.
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   const e4c_signal_mapping new_mappings[] = {
- *       E4C_SIGNAL_MAPPING(SIGABRT, Exception1),
- *       E4C_SIGNAL_MAPPING(SIGINT, Exception2),
- *       E4C_IGNORE_SIGNAL(SIGTERM),
- *       ...
- *       E4C_NULL_SIGNAL_MAPPING
- *   };
- *   ...
- *   e4c_reusing_context(status, STATUS_ERROR){
- *
- *       const e4c_signal_mapping * old_mappings = e4c_context_get_signal_mappings();
- *
- *       e4c_context_set_signal_mappings(new_mappings);
- *
- *       try{
- *           ...
- *       }finally{
- *           e4c_context_set_signal_mappings(old_mappings);
  *       }
  *   }
  *   ...
@@ -1025,18 +983,13 @@ typedef jmp_buf e4c_jump_buffer;
  * @name Other convenience macros
  *
  * These macros provide a handy way to: begin (and end) implicitly a new
- * exception context, express *assertions*, define and declare exceptions, and
- * define arrays of signal mappings.
+ * exception context, express *assertions*, and define and declare exceptions.
  *
  * @{
  */
 
 /**
  * Introduces a block of code which will use a new exception context.
- *
- * @param   handle_signals
- *          If `true`, the signal handling system will be set up with the
- *          default mapping.
  *
  * This macro begins a new exception context to be used by the code block right
  * next to it. When the code completes, #e4c_context_end will be called
@@ -1048,12 +1001,12 @@ typedef jmp_buf e4c_jump_buffer;
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
  *   // block 1
- *   e4c_context_begin(true);
+ *   e4c_context_begin();
  *   // ...
  *   e4c_context_end();
  *
  *   // block 2
- *   e4c_using_context(true){
+ *   e4c_using_context(){
  *       // ...
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1078,8 +1031,8 @@ typedef jmp_buf e4c_jump_buffer;
  * @see     #e4c_context_end
  * @see     #e4c_reusing_context
  */
-# define e4c_using_context(handle_signals) \
-    E4C_USING_CONTEXT(handle_signals)
+# define e4c_using_context \
+    E4C_USING_CONTEXT
 
 /**
  * Expresses a program assertion
@@ -1301,65 +1254,6 @@ typedef jmp_buf e4c_jump_buffer;
         &supertype \
     }
 
-/**
- * Maps a specific signal number to a given exception type
- *
- * @param   signal_number
- *          Numeric value of the signal to be converted
- * @param   exception_type
- *          Exception type representing the signal
- *
- * This macro represents a [signal mapping](#e4c_signal_mapping) literal. It
- * comes in handy for initializing arrays of signal mappings.
- *
- * @see     #e4c_signal_mapping
- * @see     #e4c_context_set_signal_mappings
- * @see     #e4c_context_get_signal_mappings
- * @see     #E4C_IGNORE_SIGNAL
- * @see     #E4C_NULL_SIGNAL_MAPPING
- * @see     #E4C_DECLARE_EXCEPTION
- */
-# define E4C_SIGNAL_MAPPING(signal_number, exception_type) \
-    \
-    {signal_number, &exception_type}
-
-/**
- * Ignores a specific signal number
- *
- * @param   signal_number
- *          Numeric value of the signal to be ignored
- *
- * This macro represents a [signal mapping](#e4c_signal_mapping) literal.
- * It comes in handy for initializing arrays of signal mappings.
- *
- * @see     #e4c_signal_mapping
- * @see     #e4c_context_set_signal_mappings
- * @see     #e4c_context_get_signal_mappings
- * @see     #E4C_SIGNAL_MAPPING
- * @see     #E4C_NULL_SIGNAL_MAPPING
- * @see     #E4C_DECLARE_EXCEPTION
- */
-# define E4C_IGNORE_SIGNAL(signal_number) \
-    \
-    {signal_number, NULL}
-
-/**
- * Represents a null signal mapping literal
- *
- * This macro represents a *null* [signal mapping](#e4c_signal_mapping)
- * literal. It comes in handy for terminating arrays of #e4c_signal_mapping.
- *
- * @see     #e4c_signal_mapping
- * @see     #e4c_context_set_signal_mappings
- * @see     #e4c_context_get_signal_mappings
- * @see     #E4C_SIGNAL_MAPPING
- * @see     #E4C_IGNORE_SIGNAL
- * @see     #E4C_DECLARE_EXCEPTION
- */
-# define E4C_NULL_SIGNAL_MAPPING \
-    \
-    {E4C_INVALID_SIGNAL_NUMBER_, NULL}
-
 /** @} */
 
 
@@ -1386,30 +1280,7 @@ typedef jmp_buf e4c_jump_buffer;
  *     - #AssertionException
  *     - #IllegalArgumentException
  *     - #InputOutputException
- *     - #SignalException
- *       - #SignalAlarmException
- *       - #SignalChildException
- *       - #SignalTrapException
- *       - #ErrorSignalException
- *         - #IllegalInstructionException
- *         - #ArithmeticException
- *         - #BrokenPipeException
- *         - #BadPointerException
- *           * #NullPointerException
- *       - #ControlSignalException
- *         - #StopException
- *         - #KillException
- *         - #HangUpException
- *         - #TerminationException
- *         - #AbortException
- *         - #CPUTimeException
- *         - #UserControlSignalException
- *           - #UserQuitException
- *           - #UserInterruptionException
- *           - #UserBreakException
- *       - #ProgramSignalException
- *         - #ProgramSignal1Exception
- *         - #ProgramSignal2Exception
+ *     - #NullPointerException
  *
  * @see     #e4c_exception
  * @see     #E4C_DEFINE_EXCEPTION
@@ -1498,106 +1369,6 @@ typedef struct e4c_exception_struct {
     /** Custom data associated to this exception */
     void *                          custom_data;
 } e4c_exception;
-
-/**
- * Represents a map between a signal and an exception
- *
- * A signal is an asynchronous notification sent by the operating system to a
- * process in order to notify it of an event that occurred. Most of the signals
- * will, by default, crash the program as soon as they are raised.
- * **exceptions4c** can convert signals to exceptions, so they can be easily
- * handled.
- *
- * For example, a *suspicious* or *dangerous* part of the program could be
- * wrapped up with #E4C_TRY blocks and then #E4C_CATCH *segmentation faults* or
- * *divisions by zero*. Then the program would clean up and continue normally:
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   e4c_using_context(true){
- *       int * pointer = NULL;
- *       try{
- *           int oops = *pointer;
- *       }catch(BadPointerException){
- *           printf("No problem ;-)");
- *       }finally{
- *           // clean up...
- *       }
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * In order to perform the conversion, **exceptions4c** *maps* signals to
- * exceptions.
- *
- * The simplest way to get this working is by calling the function
- * #e4c_context_begin. This function will set up the [default mappings]
- * (#e4c_default_signal_mappings) for the available signals in the platform,
- * when passed `handle_signals=true`.
- *
- * If you need to be more specific about which signals get converted to
- * exceptions, you can define an array of [signal mappings]
- * (#e4c_signal_mapping) and then pass it to the function
- * #e4c_context_set_signal_mappings.
- *
- * An array of signal mappings is defined through three macros:
- *
- *   - #E4C_SIGNAL_MAPPING
- *   - #E4C_IGNORE_SIGNAL
- *   - #E4C_NULL_SIGNAL_MAPPING
- *
- * While `E4C_SIGNAL_MAPPING` tells the system to convert a specific signal to a
- * given exception, `E4C_IGNORE_SIGNAL` allows you to disregard the signal and
- * continue (even if unmeaningful).
- *
- * Every array of signal mappings **needs** to be terminated with the
- * `E4C_NULL_SIGNAL_MAPPING` element, so the system finds out how many mappings
- * are there in a given array.
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   const e4c_signal_mapping my_signal_mappings[] = {
- *       E4C_SIGNAL_MAPPING(SIGABRT, Exception1),
- *       E4C_SIGNAL_MAPPING(SIGINT, Exception2),
- *       E4C_IGNORE_SIGNAL(SIGTERM),
- *       ...
- *       E4C_NULL_SIGNAL_MAPPING
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * Once the array is properly defined, it can be passed to the function
- * `e4c_context_set_signal_mappings`. This way, only the specified signals will
- * be handled as exceptions, and they will be converted to the specified
- * exceptions.
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   e4c_using_context(false){
- *
- *       e4c_context_set_signal_mappings(my_signal_mappings);
- *       ...
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * These are some of the signals you can handle:
- *
- *   - `SIGFPE`  when dividing by *zero*.
- *   - `SIGSEGV` when dereferencing an invalid pointer.
- *   - `SIGINT`  when a user interrupts the process.
- *   - `SIGTERM` when a process is requested to be terminated.
- *
- * @see     #e4c_context_begin
- * @see     #e4c_context_set_signal_mappings
- * @see     #e4c_context_get_signal_mappings
- * @see     #E4C_SIGNAL_MAPPING
- * @see     #E4C_IGNORE_SIGNAL
- * @see     #e4c_default_signal_mappings
- */
-typedef struct {
-
-    /** The signal to be converted */
-    int                                 signal_number;
-
-    /** The exception representing the signal */
-    const e4c_exception_type * const    exception_type;
-
-} e4c_signal_mapping;
 
 /**
  * Represents the completeness of a code block aware of exceptions
@@ -1821,34 +1592,6 @@ enum e4c_frame_stage {
 };
 
 /**
- * @name Predefined signal mappings
- *
- * There is a predefined set of signal mappings. Signal mappings are used to
- * convert signals into exceptions.
- *
- * Common signals are mapped to its corresponding exception, for example:
- *
- *   - `SIGABRT` is mapped to #AbortException
- *   - `SIGFPE`  is mapped to #ArithmeticException
- *   - `SIGSEGV` is mapped to #BadPointerException
- *   - `SIGTERM` is mapped to #TerminationException
- *   - ...and so on
- *
- * @see     #e4c_signal_mapping
- * @see     #e4c_context_begin
- * @see     #e4c_context_set_signal_mappings
- * @see     #e4c_context_get_signal_mappings
- * @{
- */
-
-/**
- * The array of predefined signal mappings.
- */
-extern const e4c_signal_mapping * const e4c_default_signal_mappings;
-
-/** @} */
-
-/**
  * @name Predefined exceptions
  *
  * Built-in exceptions represent usual error conditions that might occur during
@@ -1870,7 +1613,6 @@ extern const e4c_signal_mapping * const e4c_default_signal_mappings;
  *          #AssertionException,
  *          #IllegalArgumentException,
  *          #InputOutputException,
- *          #SignalException
  */
 E4C_DECLARE_EXCEPTION(RuntimeException);
 
@@ -1924,130 +1666,6 @@ E4C_DECLARE_EXCEPTION(AssertionException);
 E4C_DECLARE_EXCEPTION(InputOutputException);
 
 /**
- * This exception is the common supertype of all signal exceptions
- *
- * Signal exceptions are thrown when some signal is sent to the process.
- *
- * A signal can be generated by calling `raise`.
- *
- * @par     Extends:
- *          #RuntimeException
- *
- * @par     Direct known subexceptions:
- *          #SignalException,
- *          #SignalAlarmException,
- *          #SignalChildException,
- *          #SignalTrapException,
- *          #ErrorSignalException,
- *          #ControlSignalException,
- *          #ProgramSignalException
- */
-E4C_DECLARE_EXCEPTION(SignalException);
-
-/**
- * This exception is thrown when a time limit has elapsed
- *
- * #SignalAlarmException represents `SIGALRM`, the signal sent to a process
- * when a time limit has elapsed.
- *
- * @par     Extends:
- *          #SignalException
- */
-E4C_DECLARE_EXCEPTION(SignalAlarmException);
-
-/**
- * This exception is thrown when a child process terminates
- *
- * #SignalChildException represents `SIGCHLD`, the signal sent to a process
- * when a child process terminates.
- *
- * @par     Extends:
- *          #SignalException
- */
-E4C_DECLARE_EXCEPTION(SignalChildException);
-
-/**
- * This exception is thrown when a condition arises that a debugger has
- * requested to be informed of
- *
- * #SignalTrapException represents `SIGTRAP`, the signal sent to a process
- * when a condition arises that a debugger has requested to be informed of.
- *
- * @par     Extends:
- *          #SignalException
- */
-E4C_DECLARE_EXCEPTION(SignalTrapException);
-
-/**
- * This exception is the common supertype of all error signal exceptions
- *
- * Error signal exceptions are thrown when some error prevents the program to
- * keep executing its normal flow.
- *
- * @par     Extends:
- *          #SignalException
- *
- * @par     Direct known subexceptions:
- *          #IllegalInstructionException,
- *          #BadPointerException,
- *          #ArithmeticException,
- *          #BrokenPipeException
- */
-E4C_DECLARE_EXCEPTION(ErrorSignalException);
-
-/**
- * This exception is thrown when the process attempts to execute an illegal
- * instruction
- *
- * #IllegalInstructionException represents `SIGILL`, the signal sent to a
- * process when it attempts to execute a malformed, unknown, or privileged
- * instruction.
- *
- * @par     Extends:
- *          #ErrorSignalException
- */
-E4C_DECLARE_EXCEPTION(IllegalInstructionException);
-
-/**
- * This exception is thrown when the process performs an erroneous arithmetic
- * operation
- *
- * #ArithmeticException represents `SIGFPE`, the signal sent to a process
- * when it performs an erroneous arithmetic operation.
- *
- * @par     Extends:
- *          #ErrorSignalException
- */
-E4C_DECLARE_EXCEPTION(ArithmeticException);
-
-/**
- * This exception is thrown when the process attempts to write to a broken pipe
- *
- * #BrokenPipeException represents `SIGPIPE`, the signal sent to a process
- * when it attempts to write to a pipe without a process connected to the other
- * end.
- *
- * @par     Extends:
- *          #ErrorSignalException
- */
-E4C_DECLARE_EXCEPTION(BrokenPipeException);
-
-/**
- * This exception is thrown when the process tries to dereference an invalid
- * pointer
- *
- * #BadPointerException represents `SIGSEGV`, the signal sent to a process
- * when it makes an invalid memory reference, or segmentation fault.
- *
- * @par     Extends:
- *          #ErrorSignalException
- *
- * @par     Direct known subexceptions:
- *          #NullPointerException
- */
-E4C_DECLARE_EXCEPTION(BadPointerException);
-
-/**
  * This exception is thrown when an unexpected null pointer is found
  *
  * #NullPointerException is thrown when some part of the program gets a
@@ -2068,188 +1686,6 @@ E4C_DECLARE_EXCEPTION(BadPointerException);
  * @see     #IllegalArgumentException
  */
 E4C_DECLARE_EXCEPTION(NullPointerException);
-
-/**
- * This exception is the common supertype of all control signal exceptions
- *
- * Control signal exceptions are thrown when the process needs to be controlled
- * by the user or some other process.
- *
- * @par     Extends:
- *          #SignalException
- *
- * @par     Direct known subexceptions:
- *          #StopException,
- *          #KillException,
- *          #HangUpException,
- *          #TerminationException,
- *          #AbortException,
- *          #CPUTimeException,
- *          #UserControlSignalException
- */
-E4C_DECLARE_EXCEPTION(ControlSignalException);
-
-/**
- * This exception is thrown to stop the process for later resumption
- *
- * #StopException represents `SIGSTOP`, the signal sent to a process to stop
- * it for later resumption.
- *
- * @remark
- * Since `SIGSTOP` is usually unblock-able, it won't be handled and converted
- * to this exception automatically on some platforms.
- *
- * @par     Extends:
- *          #ControlSignalException
- */
-E4C_DECLARE_EXCEPTION(StopException);
-
-/**
- * This exception is thrown to terminate the process immediately
- *
- * #KillException represents `SIGKILL`, the signal sent to a process to
- * cause it to terminate immediately.
- *
- * @remark
- * Since `SIGKILL` is usually unblock-able, it won't be handled and converted
- * to this exception automatically on some platforms.
- *
- * @par     Extends:
- *          #ControlSignalException
- */
-E4C_DECLARE_EXCEPTION(KillException);
-
-/**
- * This exception is thrown when the process' terminal is closed
- *
- * #HangUpException represents `SIGHUP`, the signal sent to a process when
- * its controlling terminal is closed.
- *
- * @par     Extends:
- *          #ControlSignalException
- */
-E4C_DECLARE_EXCEPTION(HangUpException);
-
-/**
- * This exception is thrown to request the termination of the process
- *
- * #TerminationException represents `SIGTERM`, the signal sent to a process
- * to request its termination.
- *
- * @par     Extends:
- *          #ControlSignalException
- */
-E4C_DECLARE_EXCEPTION(TerminationException);
-
-/**
- * This exception is thrown to abort the process
- *
- * #AbortException represents `SIGABRT`, the signal sent by computer
- * programs to abort the process.
- *
- * @par     Extends:
- *          #ControlSignalException
- */
-E4C_DECLARE_EXCEPTION(AbortException);
-
-/**
- * This exception is thrown when the process has used up the CPU for too long
- *
- * #CPUTimeException represents `SIGXCPU`, the signal sent to a process when
- * it has used up the CPU for a duration that exceeds a certain predetermined
- * user-settable value.
- *
- * @par     Extends:
- *          #ControlSignalException
- */
-E4C_DECLARE_EXCEPTION(CPUTimeException);
-
-/**
- * This exception is the common supertype of all control signal exceptions
- * caused by the user
- *
- * User control signal exceptions are thrown when the process needs to be
- * controlled by the user.
- *
- * @par     Extends:
- *          #ControlSignalException
- *
- * @par     Direct known subexceptions:
- *          #UserQuitException,
- *          #UserInterruptionException,
- *          #UserBreakException
- */
-E4C_DECLARE_EXCEPTION(UserControlSignalException);
-
-/**
- * This exception is thrown when the user requests to quit the process
- *
- * #UserQuitException represents `SIGQUIT`, the signal sent to a process by
- * its controlling terminal when the user requests that the process dump core.
- *
- * @par     Extends:
- *          #UserControlSignalException
- */
-E4C_DECLARE_EXCEPTION(UserQuitException);
-
-/**
- * This exception is thrown when the user requests to interrupt the process
- *
- * #UserInterruptionException represents `SIGINT`, the signal sent to a
- * process by its controlling terminal when a user wishes to interrupt it.
- *
- * @par     Extends:
- *          #UserControlSignalException
- */
-E4C_DECLARE_EXCEPTION(UserInterruptionException);
-
-/**
- * This exception is thrown when a user wishes to break the process
- *
- * #UserBreakException represents `SIGBREAK`, the signal sent to a process
- * by its controlling terminal when a user wishes to break it.
- *
- * @par     Extends:
- *          #UserControlSignalException
- */
-E4C_DECLARE_EXCEPTION(UserBreakException);
-
-/**
- * This exception is the common supertype of all user-defined signal exceptions
- *
- * User-defined signal exceptions are thrown to indicate user-defined
- * conditions.
- *
- * @par     Extends:
- *          #SignalException
- *
- * @par     Direct known subexceptions:
- *          #ProgramSignal1Exception,
- *          #ProgramSignal2Exception
- */
-E4C_DECLARE_EXCEPTION(ProgramSignalException);
-
-/**
- * This exception is thrown when user-defined conditions occur
- *
- * #ProgramSignal1Exception represents `SIGUSR1`, the signal sent to a
- * process to indicate user-defined conditions.
- *
- * @par     Extends:
- *          #ProgramSignalException
- */
-E4C_DECLARE_EXCEPTION(ProgramSignal1Exception);
-
-/**
- * This exception is thrown when user-defined conditions occur
- *
- * #ProgramSignal2Exception represents `SIGUSR1`, the signal sent to a
- * process to indicate user-defined conditions.
- *
- * @par     Extends:
- *          #ProgramSignalException
- */
-E4C_DECLARE_EXCEPTION(ProgramSignal2Exception);
 
 /** @} */
 
@@ -2284,24 +1720,8 @@ e4c_context_is_ready(
 /**
  * Begins an exception context
  *
- * @param   handle_signals
- *          If `true`, the signal handling system will be set up with the
- *          default mapping.
- *
  * This function begins the current exception context to be used by the program
  * (or current thread), until #e4c_context_end is called.
- *
- * The signal handling system can be initialized automatically with the
- * [default signal mappings](#e4c_default_signal_mappings) by passing
- * `handle_signals=true`. This is equivalent to:
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   e4c_context_set_signal_mappings(e4c_default_signal_mappings);
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * @warning
- * Note that the behavior of the standard `signal` function might be undefined
- * for a multithreaded program, so use the signal handling system with caution.
  *
  * The convenience function #e4c_print_exception will be used as the default
  * *uncaught handler*. It will be called in the event of an uncaught exception,
@@ -2326,7 +1746,7 @@ e4c_context_is_ready(
  */
 void
 e4c_context_begin(
-    bool                        handle_signals
+    void
 );
 
 /**
@@ -2400,56 +1820,6 @@ e4c_context_set_handlers(
     void * custom_data,
     e4c_initialize_handler initialize_handler,
     e4c_finalize_handler finalize_handler
-);
-
-/**
- * Assigns the specified signal mappings to the exception context
- *
- * @param   mappings
- *          The array of mappings
- *
- * This function assigns an array of mappings between the signals to be handled
- * and the corresponding exception to be thrown.
- *
- * @warning
- * Note that the behavior of the standard `signal` function might be undefined
- * for a multithreaded program, so use the signal handling system with caution.
- *
- * @pre
- *   - A program (or thread) **must** begin an exception context prior to
- *     calling `e4c_context_set_signal_mappings`. Such programming error will
- *     lead to an abrupt exit of the program (or thread).
- *   - `mappings` **must** be terminated by #E4C_NULL_SIGNAL_MAPPING.
- *
- * @see     #e4c_context_get_signal_mappings
- * @see     #e4c_signal_mapping
- * @see     #e4c_default_signal_mappings
- */
-void
-e4c_context_set_signal_mappings(
-    const e4c_signal_mapping * mappings
-);
-
-/**
- * Retrieves the signal mappings for the current exception context
- *
- * @return  The current array of mappings
- *
- * This function retrieves the current array of mappings between the signals to
- * be handled and the corresponding exception to be thrown.
- *
- * @pre
- *   - A program (or thread) **must** begin an exception context prior to
- *     calling `e4c_context_get_signal_mappings`. Such programming error will
- *     lead to an abrupt exit of the program (or thread).
- *
- * @see     #e4c_context_set_signal_mappings
- * @see     #e4c_signal_mapping
- * @see     #e4c_default_signal_mappings
- */
-const e4c_signal_mapping *
-e4c_context_get_signal_mappings(
-    void
 );
 
 /**

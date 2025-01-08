@@ -17,7 +17,7 @@ TEST_CASE{
 
     volatile bool uncaught = false;
 
-    e4c_context_begin(false);
+    e4c_context_begin();
 
     E4C_TRY{
 

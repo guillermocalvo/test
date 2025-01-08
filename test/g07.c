@@ -1,10 +1,11 @@
 
+# include <signal.h>
 # include "testing.h"
 
-
 void * null(int dummy);
-int integer = 123;
+void throw_on_signal(int);
 
+int integer = 123;
 
 /**
  * Catching `BadPointerException`
@@ -22,7 +23,9 @@ TEST_CASE{
 
     volatile bool caught = false;
 
-    e4c_context_begin(true);
+    signal(SIGSEGV, throw_on_signal);
+
+    e4c_context_begin();
 
     E4C_TRY{
 
@@ -36,11 +39,11 @@ TEST_CASE{
         TEST_DUMP("%d", integer);
         TEST_DUMP("%p", (void *)pointer);
 
-    }E4C_CATCH(BadPointerException){
+    }E4C_CATCH(NullPointerException){
 
         caught = true;
 
-        TEST_ASSERT(e4c_get_exception()->type == &BadPointerException);
+        TEST_ASSERT(e4c_get_exception()->type == &NullPointerException);
     }
 
     e4c_context_end();
@@ -51,4 +54,8 @@ TEST_CASE{
 void * null(int dummy){
 
     return(dummy ? NULL : &integer);
+}
+
+void throw_on_signal(int _) {
+    E4C_THROW(NullPointerException, NULL);
 }

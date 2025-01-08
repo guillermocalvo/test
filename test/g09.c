@@ -1,6 +1,11 @@
 
+# include <signal.h>
 # include "testing.h"
 
+
+E4C_DEFINE_EXCEPTION(AbortException, "Abort exception.", RuntimeException);
+
+void throw_on_signal(int);
 
 /**
  * Catching `AbortException`
@@ -18,7 +23,9 @@ TEST_CASE{
 
     volatile bool caught = false;
 
-    e4c_context_begin(true);
+    signal(SIGABRT, throw_on_signal);
+
+    e4c_context_begin();
 
     E4C_TRY{
 
@@ -26,7 +33,7 @@ TEST_CASE{
 
         TEST_FAIL("AbortException should have been thrown");
 
-    }E4C_CATCH(SignalException){
+    }E4C_CATCH(RuntimeException){
 
         caught = true;
 
@@ -36,4 +43,8 @@ TEST_CASE{
     e4c_context_end();
 
     TEST_ASSERT(caught);
+}
+
+void throw_on_signal(int _) {
+    E4C_THROW(AbortException, NULL);
 }

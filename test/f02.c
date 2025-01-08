@@ -13,7 +13,7 @@ TEST_CASE{
 
     volatile bool caught = false;
 
-    e4c_using_context(true){
+    e4c_using_context {
 
         E4C_TRY{
 

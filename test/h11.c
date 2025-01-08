@@ -31,7 +31,7 @@ TEST_CASE{
 
     TEST_EXPECTING(IllegalArgumentException);
 
-    e4c_using_context(true){
+    e4c_using_context {
 
         E4C_TRY{
 

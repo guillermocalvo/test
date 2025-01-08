@@ -52,8 +52,6 @@ set(TESTS
         a11
         a12
         a13
-        a14
-        a15
         a16
         b01
         b02
@@ -74,7 +72,6 @@ set(TESTS
         b17
         b18
         b19
-        b20
         b21
         b22
         c01
@@ -94,9 +91,6 @@ set(TESTS
         f05
         f06
         f07
-        g01
-        g02
-        g03
         g04
         g05
         g06
@@ -106,16 +100,6 @@ set(TESTS
         g10
         g11
         g12
-        g13
-        g14
-        g15
-        g16
-        g17
-        g18
-        g19
-        g20
-        g21
-        g22
         h01
         h02
         h03
@@ -138,8 +122,6 @@ set(TESTS
         i09
         i10
         i11
-        i12
-        i13
         i14
         i15
         i16
@@ -168,8 +150,6 @@ set_property(TEST a10 PROPERTY WILL_FAIL TRUE)
 set_property(TEST a11 PROPERTY WILL_FAIL TRUE)
 set_property(TEST a12 PROPERTY WILL_FAIL TRUE)
 set_property(TEST a13 PROPERTY WILL_FAIL TRUE)
-set_property(TEST a14 PROPERTY WILL_FAIL TRUE)
-set_property(TEST a15 PROPERTY WILL_FAIL TRUE)
 set_property(TEST a16 PROPERTY WILL_FAIL TRUE)
 set_property(TEST b01 PROPERTY WILL_FAIL TRUE)
 set_property(TEST b02 PROPERTY WILL_FAIL TRUE)
@@ -187,16 +167,12 @@ set_property(TEST b16 PROPERTY WILL_FAIL TRUE)
 set_property(TEST b17 PROPERTY WILL_FAIL TRUE)
 set_property(TEST b18 PROPERTY WILL_FAIL TRUE)
 set_property(TEST b19 PROPERTY WILL_FAIL TRUE)
-set_property(TEST b20 PROPERTY WILL_FAIL TRUE)
 set_property(TEST b21 PROPERTY WILL_FAIL TRUE)
 set_property(TEST d01 PROPERTY WILL_FAIL TRUE)
 set_property(TEST d02 PROPERTY WILL_FAIL TRUE)
 set_property(TEST d03 PROPERTY WILL_FAIL TRUE)
 set_property(TEST d04 PROPERTY WILL_FAIL TRUE)
 set_property(TEST d05 PROPERTY WILL_FAIL TRUE)
-set_property(TEST g01 PROPERTY WILL_FAIL TRUE)
-set_property(TEST g02 PROPERTY WILL_FAIL TRUE)
-set_property(TEST g03 PROPERTY WILL_FAIL TRUE)
 set_property(TEST g04 PROPERTY WILL_FAIL TRUE)
 set_property(TEST g05 PROPERTY WILL_FAIL TRUE)
 set_property(TEST g06 PROPERTY WILL_FAIL TRUE)

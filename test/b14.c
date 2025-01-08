@@ -16,9 +16,9 @@ TEST_CASE{
 
     TEST_EXPECTING(ContextAlreadyBegun);
 
-    e4c_context_begin(false);
+    e4c_context_begin();
 
-    e4c_using_context(false){
+    e4c_using_context {
 
         THIS_SHOULD_NOT_HAPPEN;
     }

@@ -17,7 +17,7 @@ volatile bool custom_handler_was_finalized = false;
  */
 TEST_CASE{
 
-    e4c_context_begin(false);
+    e4c_context_begin();
 
     e4c_context_set_handlers(NULL, foobar, NULL, custom_finalize_handler);
 

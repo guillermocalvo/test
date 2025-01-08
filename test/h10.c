@@ -31,7 +31,7 @@ TEST_CASE{
 
     volatile bool exception_caught = false;
 
-    e4c_using_context(true){
+    e4c_using_context {
 
         E4C_TRY{
 

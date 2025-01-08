@@ -11,7 +11,7 @@
  */
 TEST_CASE{
 
-    e4c_context_begin(false);
+    e4c_context_begin();
 
     E4C_TRY{
 

@@ -21,7 +21,7 @@ TEST_CASE{
 
     TEST_EXPECTING(ContextHasNotBegunYet);
 
-    e4c_context_begin(false);
+    e4c_context_begin();
 
     e4c_context_end();
 

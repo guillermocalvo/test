@@ -22,7 +22,7 @@ TEST_CASE{
 
     volatile bool caught = false;
 
-    e4c_context_begin(false);
+    e4c_context_begin();
 
     E4C_TRY{
 
@@ -70,9 +70,9 @@ void aux4(void){
 
         aux5();
 
-    }E4C_CATCH(ProgramSignalException){
+    }E4C_CATCH(NullPointerException){
 
-        TEST_FAIL("Block `catch(ProgramSignalException)` cannot handle a RuntimeException");
+        TEST_FAIL("Block `catch(NullPointerException)` cannot handle a RuntimeException");
     }
 }
 

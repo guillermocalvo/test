@@ -1,10 +1,11 @@
 
+# include <signal.h>
 # include "testing.h"
 
-
 void * null(int dummy);
-int integer = 123;
+void throw_npe(int);
 
+int integer = 123;
 
 /**
  * Bad pointer exception
@@ -22,9 +23,11 @@ TEST_CASE{
 
     int * pointer = &integer;
 
+    signal(SIGSEGV, throw_npe);
+
     TEST_EXPECTING(BadPointerException);
 
-    e4c_context_begin(true);
+    e4c_context_begin();
 
     pointer = null(integer);
     integer = *pointer;
@@ -38,4 +41,8 @@ TEST_CASE{
 void * null(int dummy){
 
     return(dummy ? NULL : &integer);
+}
+
+void throw_npe(int _) {
+    E4C_THROW(NullPointerException, NULL);
 }

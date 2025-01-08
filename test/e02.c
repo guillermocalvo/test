@@ -30,7 +30,7 @@ TEST_CASE{
     volatile bool cleanup1 = false;
     volatile bool cleanup2 = false;
 
-    e4c_context_begin(false);
+    e4c_context_begin();
 
     E4C_TRY{
 

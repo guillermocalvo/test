@@ -1,8 +1,12 @@
 
+# include <signal.h>
 # include "testing.h"
 
 
+E4C_DEFINE_EXCEPTION(ArithmeticException, "Arithmetic exception.", RuntimeException);
+
 int zero(int dummy);
+void throw_on_signal(int);
 int integer = 123;
 
 
@@ -22,9 +26,11 @@ TEST_CASE{
 
     TEST_SKIP("Skip this test temporarily");
 
+    signal(SIGFPE, throw_on_signal);
+
     volatile bool caught = false;
 
-    e4c_context_begin(true);
+    e4c_context_begin();
 
     E4C_TRY{
 
@@ -37,7 +43,7 @@ TEST_CASE{
 
         TEST_FAIL("ArithmeticException should have been thrown");
 
-    }E4C_CATCH(SignalException){
+    }E4C_CATCH(RuntimeException){
 
         caught = true;
 
@@ -52,4 +58,8 @@ TEST_CASE{
 int zero(int dummy){
 
     return(dummy ? 0 : 1);
+}
+
+void throw_on_signal(int _) {
+    E4C_THROW(ArithmeticException, NULL);
 }

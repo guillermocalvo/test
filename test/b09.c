@@ -19,7 +19,7 @@ TEST_CASE{
 
     TEST_EXPECTING(ExceptionSystemFatalError);
 
-    e4c_context_begin(false);
+    e4c_context_begin();
 
     aux();
 

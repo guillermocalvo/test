@@ -3,6 +3,11 @@
 # include "testing.h"
 
 
+E4C_DEFINE_EXCEPTION(IllegalInstructionException, "Illegal instruction exception.", RuntimeException);
+
+void throw_on_signal(int);
+
+
 /**
  * Catching `IllegalInstructionException`
  *
@@ -16,7 +21,9 @@ TEST_CASE{
 
     volatile bool exception_was_caught = false;
 
-    e4c_context_begin(true);
+    signal(SIGILL, throw_on_signal);
+
+    e4c_context_begin();
 
     E4C_TRY{
 
@@ -24,7 +31,7 @@ TEST_CASE{
 
         TEST_FAIL("IllegalInstructionException should have been thrown");
 
-    }E4C_CATCH(SignalException){
+    }E4C_CATCH(RuntimeException){
 
         exception_was_caught = true;
 
@@ -34,4 +41,8 @@ TEST_CASE{
     e4c_context_end();
 
     TEST_ASSERT(exception_was_caught);
+}
+
+void throw_on_signal(int _) {
+    E4C_THROW(IllegalInstructionException, NULL);
 }
