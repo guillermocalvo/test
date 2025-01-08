@@ -852,9 +852,6 @@ typedef jmp_buf e4c_jump_buffer;
 /**
  * @name Other convenience macros
  *
- * These macros provide a handy way to: begin (and end) implicitly a new
- * exception context, express *assertions*, and define and declare exceptions.
- *
  * @{
  */
 
@@ -898,54 +895,6 @@ typedef jmp_buf e4c_jump_buffer;
  */
 #define E4C_USING_CONTEXT                                                   \
   for (e4c_context_begin(); e4c_context_is_ready(); e4c_context_end())
-
-/**
- * Expresses a program assertion
- *
- * @param   condition
- *          A predicate that must evaluate to `true`
- *
- * An assertion is a mechanism to express that the developer *thinks* that a
- * specific condition is always met at some point of the program.
- *
- * `assert` is a convenient way to insert debugging assertions into a program.
- * The `NDEBUG` *compile-time* parameter determines whether the assumptions will
- * be actually verified by the program at *run-time*.
- *
- * In presence of `NDEBUG`, the assertion statements will be ignored and
- * therefore will have no effects on the program, not even evaluating the
- * condition. Therefore expressions passed to `assert` **must not contain
- * side-effects**, since they will not take place when debugging is disabled.
- *
- * In absence of `NDEBUG`, the assertion statements will verify that the
- * condition is met every time the program reaches that point of the program.
- *
- * If the assertion does not hold at any time, then an #AssertionException
- * will be thrown to indicate the programming error. This exception cannot be
- * caught whatsoever. The program (or current thread) will be terminated.
- *
- * The main advantage of using this assertion mechanism (as opposed to the
- * macros provided by the standard header file `assert.h`) is that all of the
- * pending #E4C_FINALLY blocks will be executed, before actually exiting the
- * program or thread.
- *
- * @pre
- *   - A program (or thread) **must** begin an exception context prior to using
- *     the keyword `assert`. Such programming error will lead to an abrupt exit
- *     of the program (or thread).
- *
- * @see     #AssertionException
- */
-#ifndef NDEBUG
-#define E4C_ASSERT(condition) (                                             \
-    (condition)                                                             \
-    ? (void) 0                                                              \
-    : E4C_THROW(AssertionException, "Assertion failed: " #condition)        \
-  )
-#else
-#define E4C_ASSERT(ignore)                                                  \
-  ( (void)0 )
-#endif
 
 /**
  * Declares an exception type
@@ -1033,7 +982,6 @@ typedef jmp_buf e4c_jump_buffer;
  *
  *   - #RuntimeException
  *     - #NotEnoughMemoryException
- *     - #AssertionException
  *     - #NullPointerException
  *
  * @see     #e4c_exception
@@ -1081,7 +1029,7 @@ typedef struct e4c_exception_type_struct {
  *
  * @note
  * **Any** exception can be caught by a block introduced by
- * `catch(RuntimeException)`, **except for #AssertionException**.
+ * `catch(RuntimeException)`.
  *
  * @see     #e4c_exception_type
  * @see     #E4C_THROW
@@ -1089,7 +1037,6 @@ typedef struct e4c_exception_type_struct {
  * @see     #e4c_get_exception
  * @see     #e4c_context_set_handlers
  * @see     #RuntimeException
- * @see     #AssertionException
  */
 typedef struct e4c_exception_struct {
 
@@ -1378,21 +1325,6 @@ E4C_DECLARE_EXCEPTION(RuntimeException);
  *          #RuntimeException
  */
 E4C_DECLARE_EXCEPTION(NotEnoughMemoryException);
-
-/**
- * This exception is thrown when an assertion does not hold
- *
- * #AssertionException is part of the assertion facility of the library. It is
- * thrown when the *compile-time* parameter `NDEBUG` is present and the
- * conditon of an assertion evaluates to `false`.
- *
- * @remark
- * This exception cannot be caught whatsoever. The program (or current thread)
- * will be terminated, after the execution of all pending #E4C_FINALLY blocks.
- *
- * @see     #E4C_ASSERT
- */
-E4C_DECLARE_EXCEPTION(AssertionException);
 
 /**
  * This exception is thrown when an unexpected null pointer is found
