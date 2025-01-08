@@ -34,18 +34,6 @@
 # include <stdarg.h>
 # include "e4c.h"
 
-
-/*
- * HAVE_POSIX_SIGSETJMP (or HAVE_SIGSETJMP)
- * can be defined in order to use `siglongjmp` rather than `longjmp`
- */
-# if defined(HAVE_POSIX_SIGSETJMP) || defined(HAVE_SIGSETJMP)
-#   define E4C_CONTINUE(continuation)   siglongjmp(continuation.buffer, 1)
-# else
-#   define E4C_CONTINUE(continuation)   longjmp(continuation.buffer, 1)
-# endif
-
-
 # define IS_TOP_FRAME(frame)            ( frame->previous == NULL )
 
 # define IS_UNCATCHABLE(exception)      (exception->type == NULL || exception->type == &AssertionException)
@@ -298,8 +286,6 @@
 
 typedef void (*signal_handler)(int);
 
-typedef struct e4c_continuation_ e4c_continuation;
-
 typedef struct e4c_frame_ e4c_frame;
 struct e4c_frame_ {
     e4c_frame *                 previous;
@@ -308,7 +294,7 @@ struct e4c_frame_ {
     e4c_exception *             thrown_exception;
     int                         retry_attempts;
     int                         reacquire_attempts;
-    e4c_continuation            continuation;
+    e4c_jump_buffer             continuation;
 };
 
 typedef struct e4c_context_ e4c_context;
@@ -845,7 +831,7 @@ static void _e4c_context_propagate(e4c_context * context, e4c_exception * except
     }
 
     /* keep looping */
-    E4C_CONTINUE(frame->continuation);
+    EXCEPTIONS4C_LONG_JUMP(frame->continuation);
 }
 
 # ifdef E4C_THREADSAFE
@@ -1126,7 +1112,7 @@ bool e4c_context_is_ready(void) {
 /* FRAME
  ================================================================ */
 
-e4c_continuation * e4c_frame_first_stage_(enum e4c_frame_stage stage, const char * file, int line, const char * function) {
+e4c_jump_buffer * e4c_frame_first_stage_(enum e4c_frame_stage stage, const char * file, int line, const char * function) {
 
     e4c_context *   context;
     e4c_frame *     current_frame;
@@ -1404,7 +1390,7 @@ void e4c_frame_repeat_(int max_repeat_attempts, enum e4c_frame_stage stage, cons
     frame->stage            = stage;
 
     /* keep looping */
-    E4C_CONTINUE(frame->continuation);
+    EXCEPTIONS4C_LONG_JUMP(frame->continuation);
 }
 
 e4c_status e4c_get_status(void) {

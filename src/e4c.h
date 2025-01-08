@@ -79,37 +79,13 @@
 "in order to enable the multi-thread version of exceptions4c."
 # endif
 
-
-/* POSIX features */
-# if defined(_POSIX_C_SOURCE) \
-    ||  defined(_POSIX_SOURCE) \
-    ||  defined(_POSIX_VERSION) \
-    ||  defined(_POSIX2_C_VERSION) \
-    ||  defined(_XOPEN_SOURCE) \
-    ||  defined(_XOPEN_VERSION) \
-    ||  defined(_XOPEN_SOURCE_EXTENDED) \
-    ||  defined(_GNU_SOURCE)
-
-/*
- * POSIX.1 does not specify whether setjmp and longjmp save or restore the
- * current set of blocked signals. If a program employs signal handling it
- * should use POSIX's sigsetjmp/siglongjmp.
- */
-#   ifndef HAVE_POSIX_SIGSETJMP
-#       define HAVE_POSIX_SIGSETJMP
-#   endif
-
-# endif
-
-
-# include <stdlib.h>
-# include <setjmp.h>
+#include <stdlib.h>
+#include <setjmp.h>
+#include <stdnoreturn.h>
 
 #ifndef __bool_true_false_are_defined
 #include <stdbool.h>
 #endif
-
-#include <stdnoreturn.h>
 
 /*
  * The E4C_INVALID_SIGNAL_NUMBER_ compile-time parameter
@@ -122,21 +98,21 @@
 # endif
 
 
-# if defined(HAVE_POSIX_SIGSETJMP) || defined(HAVE_SIGSETJMP)
-#   define E4C_CONTINUATION_BUFFER_     sigjmp_buf
-#   define E4C_CONTINUATION_CREATE_(continuation) \
-        sigsetjmp(continuation->buffer, 1)
-# else
-#   define E4C_CONTINUATION_BUFFER_     jmp_buf
-#   define E4C_CONTINUATION_CREATE_(continuation) \
-        setjmp(continuation->buffer)
-# endif
+#ifdef HAVE_SIGSETJMP
+typedef sigjmp_buf e4c_jump_buffer;
+#define EXCEPTIONS4C_SET_JUMP(buffer) sigsetjmp(buffer, 1)
+#define EXCEPTIONS4C_LONG_JUMP(buffer) siglongjmp(buffer, 1)
+#else
+typedef jmp_buf e4c_jump_buffer;
+#define EXCEPTIONS4C_SET_JUMP(buffer) setjmp(buffer)
+#define EXCEPTIONS4C_LONG_JUMP(buffer) longjmp(buffer, 1)
+#endif
 
 
 # ifndef NDEBUG
-#   define E4C_INFO_                    __FILE__, __LINE__, __func__
+#   define E4C_DEBUG_INFO               __FILE__, __LINE__, __func__
 # else
-#   define E4C_INFO_                    NULL, 0, NULL
+#   define E4C_DEBUG_INFO               NULL, 0, NULL
 # endif
 
 
@@ -149,7 +125,7 @@
  */
 
 # define E4C_FRAME_LOOP_(stage) \
-    if(E4C_CONTINUATION_CREATE_(e4c_frame_first_stage_(stage,E4C_INFO_)) >= 0) \
+    if(EXCEPTIONS4C_SET_JUMP(*e4c_frame_first_stage_(stage, E4C_DEBUG_INFO)) >= 0) \
         while( e4c_frame_next_stage_() )
 
 # define E4C_REUSING_CONTEXT(status, on_failure) \
@@ -272,7 +248,7 @@
  */
 #define E4C_TRY                                                             \
   E4C_FRAME_LOOP_(e4c_acquiring)                                            \
-  if (e4c_frame_get_stage_(E4C_INFO_) == e4c_trying && e4c_frame_next_stage_())
+  if (e4c_frame_get_stage_(E4C_DEBUG_INFO) == e4c_trying && e4c_frame_next_stage_())
     /* simple optimization: e4c_frame_next_stage_ will avoid disposing stage */
 
 /**
@@ -358,7 +334,7 @@
  * @see     #e4c_is_instance_of
  */
 #define E4C_CATCH(exception_type)                                           \
-  else if (e4c_frame_catch_(&exception_type, E4C_INFO_))
+  else if (e4c_frame_catch_(&exception_type, E4C_DEBUG_INFO))
 
 /**
  * Introduces a block of code responsible for cleaning up the previous
@@ -412,7 +388,7 @@
  * @see     #e4c_status
  */
 #define E4C_FINALLY                                                         \
-  else if (e4c_frame_get_stage_(E4C_INFO_) == e4c_finalizing)
+  else if (e4c_frame_get_stage_(E4C_DEBUG_INFO) == e4c_finalizing)
 
 /**
  * Repeats the previous #E4C_TRY (or #E4C_USE) block entirely
@@ -503,7 +479,7 @@
  * @see     #E4C_USE
  */
 #define E4C_RETRY(max_retry_attempts)                                       \
-    e4c_frame_repeat_(max_retry_attempts, e4c_acquiring, E4C_INFO_)
+    e4c_frame_repeat_(max_retry_attempts, e4c_acquiring, E4C_DEBUG_INFO)
 
 /**
  * Signals an exceptional situation represented by an exception object
@@ -542,7 +518,7 @@
  * @see     #e4c_get_exception
  */
 #define E4C_THROW(exception_type, message)                                  \
-  e4c_exception_throw_verbatim_(&exception_type, E4C_INFO_, message )
+  e4c_exception_throw_verbatim_(&exception_type, E4C_DEBUG_INFO, message )
 
 /**
  * Throws again the currently thrown exception, with a new message
@@ -582,7 +558,7 @@
 #define E4C_RETHROW(message)                                                \
   e4c_exception_throw_verbatim_(                                            \
     (e4c_get_exception() == NULL ? &NullPointerException : e4c_get_exception()->type), \
-    E4C_INFO_,                                                              \
+    E4C_DEBUG_INFO,                                                              \
     message                                                                 \
   )
 
@@ -690,9 +666,9 @@
  */
 #define E4C_WITH(resource, dispose)                                         \
   E4C_FRAME_LOOP_(e4c_beginning)                                            \
-  if (e4c_frame_get_stage_(E4C_INFO_) == e4c_disposing) {                   \
+  if (e4c_frame_get_stage_(E4C_DEBUG_INFO) == e4c_disposing) {                   \
   dispose((resource), e4c_get_status() == e4c_failed);                      \
-  } else if (e4c_frame_get_stage_(E4C_INFO_) == e4c_acquiring) {
+  } else if (e4c_frame_get_stage_(E4C_DEBUG_INFO) == e4c_acquiring) {
 
 /**
  * Closes a block of code with automatic disposal of a resource
@@ -715,7 +691,7 @@
  * @see     #E4C_WITH
  */
 #define E4C_USE                                                             \
-  } else if (e4c_frame_get_stage_(E4C_INFO_) == e4c_trying)
+  } else if (e4c_frame_get_stage_(E4C_DEBUG_INFO) == e4c_trying)
 
 /**
  * Introduces a block of code with automatic acquisition and disposal of a
@@ -826,7 +802,7 @@
  * @see     #E4C_USE
  */
 #define E4C_REACQUIRE(max_reacquire_attempts)                               \
-  e4c_frame_repeat_(max_reacquire_attempts, e4c_beginning, E4C_INFO_)
+  e4c_frame_repeat_(max_reacquire_attempts, e4c_beginning, E4C_DEBUG_INFO)
 
 /** @} */
 
@@ -1237,7 +1213,7 @@
 #define E4C_THROWF(exception_type, format, ...)                             \
   e4c_exception_throw_format_(                                              \
     &exception_type,                                                        \
-    E4C_INFO_,                                                              \
+    E4C_DEBUG_INFO,                                                         \
     (format),                                                               \
     __VA_ARGS__                                                             \
   )
@@ -1290,7 +1266,7 @@
 #define E4C_RETHROWF(format, ...)                                           \
   e4c_exception_throw_format_(                                              \
   (e4c_get_exception() == NULL ? NULL : e4c_get_exception()->type),         \
-  E4C_INFO_,                                                                \
+  E4C_DEBUG_INFO,                                                           \
   (format),                                                                 \
   __VA_ARGS__                                                               \
 )
@@ -1876,10 +1852,6 @@ enum e4c_frame_stage {
     e4c_catching,
     e4c_finalizing,
     e4c_done
-};
-
-struct e4c_continuation_ {
-    E4C_CONTINUATION_BUFFER_        buffer;
 };
 
 /**
@@ -2753,7 +2725,7 @@ e4c_print_exception_type(
  * directly (but through the "keywords").
  */
 
-struct e4c_continuation_ *
+e4c_jump_buffer *
 e4c_frame_first_stage_(
     enum e4c_frame_stage        stage,
     const char *                file,
