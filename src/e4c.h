@@ -1518,24 +1518,14 @@ bool e4c_is_instance_of(
 );
 
 /**
- * Prints a fatal error message regarding the specified exception
+ * Prints the supplied exception to the standard error output
  *
  * @param   exception
- *          The uncaught exception
+ *          The exception to print
  *
  * This is a convenience function for showing an error message through the
- * standard error output. It can be passed to #e4c_context_set_handlers as
- * the handler for uncaught exceptions. Will be used by default, unless
- * otherwise set up.
- *
- * In absence of `NDEBUG`, this function prints as much information regarding
- * the exception as it is available, whereas in presence of `NDEBUG`, only the
- * `name` and `message` of the exception are printed.
- *
- * @pre
- *   - `exception` **must not** be `NULL`
- * @throws  #NullPointerException
- *          If `exception` is `NULL`
+ * standard error output. It will be used by default as the handler for
+ * uncaught exceptions.
  *
  * @see     #e4c_uncaught_handler
  * @see     #e4c_context_begin

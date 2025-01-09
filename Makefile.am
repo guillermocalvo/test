@@ -88,7 +88,6 @@ check_PROGRAMS =                        \
 	bin/check/b12                       \
 	bin/check/b14                       \
 	bin/check/b15                       \
-	bin/check/b16                       \
 	bin/check/b18                       \
 	bin/check/b19                       \
 	bin/check/b21                       \
@@ -168,7 +167,6 @@ TESTS =                                 \
 	bin/check/b12                       \
 	bin/check/b14                       \
 	bin/check/b15                       \
-	bin/check/b16                       \
 	bin/check/b18                       \
 	bin/check/b19                       \
 	bin/check/b21                       \
@@ -246,7 +244,6 @@ XFAIL_TESTS =                           \
 	bin/check/b10                       \
 	bin/check/b14                       \
 	bin/check/b15                       \
-	bin/check/b16                       \
 	bin/check/b18                       \
 	bin/check/b19                       \
 	bin/check/b21                       \
@@ -306,7 +303,6 @@ bin_check_b11_SOURCES                   = src/e4c.c test/b11.c
 bin_check_b12_SOURCES                   = src/e4c.c test/b12.c
 bin_check_b14_SOURCES                   = src/e4c.c test/b14.c
 bin_check_b15_SOURCES                   = src/e4c.c test/b15.c
-bin_check_b16_SOURCES                   = src/e4c.c test/b16.c
 bin_check_b18_SOURCES                   = src/e4c.c test/b18.c
 bin_check_b19_SOURCES                   = src/e4c.c test/b19.c
 bin_check_b21_SOURCES                   = src/e4c.c test/b21.c

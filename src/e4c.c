@@ -134,7 +134,7 @@ static e4c_exception * frame_throw_exception(
     bool                        set_message,
     const char *                message
 );
-static void exception_print(const e4c_exception * exception);
+static void exception_print(const char * prefix, const e4c_exception * exception);
 
 
 
@@ -323,7 +323,8 @@ static void context_handle_uncaught_exception(const e4c_context * context, const
     if (context == NULL) {
 
         /* fatal error (likely library misuse) */
-        exception_print(exception);
+        exception_print("\n", exception);
+        (void) fflush(stderr);
 
     } else {
 
@@ -848,56 +849,32 @@ static void exception_set_cause(e4c_exception * exception, e4c_exception * cause
     cause->ref_count++;
 }
 
-static void exception_print(const e4c_exception * exception) {
+static void exception_print(const char * prefix, const e4c_exception * exception) {
 
-# ifdef NDEBUG
+    assert(exception != NULL);
 
-    fprintf(stderr, "\n\nFatal Error: %s (%s)\n\n", exception->name, exception->message);
-
-# else
-
-    const e4c_exception * cause;
-
-    fprintf(stderr, "\n\nUncaught %s: %s\n\n", exception->name, exception->message);
+    fprintf(stderr, "%s%s: %s\n", prefix, exception->name, exception->message);
 
     if (exception->file != NULL) {
         if (exception->function != NULL) {
-            fprintf(stderr, "    thrown at %s (%s:%d)\n\n", exception->function, exception->file, exception->line);
+            fprintf(stderr, "    at %s (%s:%d)\n", exception->function, exception->file, exception->line);
         } else {
-            fprintf(stderr, "    thrown at %s:%d\n\n", exception->file, exception->line);
+            fprintf(stderr, "    at %s:%d\n", exception->file, exception->line);
         }
     }
 
-    cause = exception->cause;
-    while (cause != NULL) {
-        fprintf(stderr, "Caused by %s: %s\n\n", cause->name, cause->message);
-        if (cause->file != NULL) {
-            if (cause->function != NULL) {
-                fprintf(stderr, "    thrown at %s (%s:%d)\n\n", cause->function, cause->file, cause->line);
-            } else {
-                fprintf(stderr, "    thrown at %s:%d\n\n", cause->file, cause->line);
-            }
-        }
-        cause = cause->cause;
+    if (exception->cause != NULL) {
+        exception_print("Caused by: ", exception->cause);
     }
-
-    fprintf(stderr, "The value of errno was %d.\n\n", exception->error_number);
-
-    /* checks whether this exception is fatal to the exception system (likely library misuse) */
-    if (e4c_is_instance_of(exception, &ExceptionSystemFatalError)) {
-
-        fprintf(stderr, "\n\nThis is an unrecoverable programming error; the application will be terminated\nimmediately.\n");
-    }
-# endif
-
-    (void) fflush(stderr);
 }
 
 void e4c_print_exception(const e4c_exception * exception) {
 
     if (exception == NULL) {
-        e4c_throw(&NullPointerException, __FILE__, __LINE__, __func__, "Null exception.");
+        fprintf(stderr, "No exception\n");
+    } else {
+        exception_print("\n", exception);
     }
 
-    exception_print(exception);
+    (void) fflush(stderr);
 }
