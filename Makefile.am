@@ -64,7 +64,6 @@ check_PROGRAMS =                        \
 	bin/check/a01                       \
 	bin/check/a02                       \
 	bin/check/a03                       \
-	bin/check/a04                       \
 	bin/check/a05                       \
 	bin/check/a06                       \
 	bin/check/a07                       \
@@ -147,7 +146,6 @@ TESTS =                                 \
 	bin/check/a01                       \
 	bin/check/a02                       \
 	bin/check/a03                       \
-	bin/check/a04                       \
 	bin/check/a05                       \
 	bin/check/a06                       \
 	bin/check/a07                       \
@@ -230,7 +228,6 @@ XFAIL_TESTS =                           \
 	bin/check/a01                       \
 	bin/check/a02                       \
 	bin/check/a03                       \
-	bin/check/a04                       \
 	bin/check/a05                       \
 	bin/check/a06                       \
 	bin/check/a07                       \
@@ -290,7 +287,6 @@ lib_libe4c_lite_a_SOURCES               = lite/src/e4c_lite.c
 bin_check_a01_SOURCES                   = src/e4c.c test/a01.c
 bin_check_a02_SOURCES                   = src/e4c.c test/a02.c
 bin_check_a03_SOURCES                   = src/e4c.c test/a03.c
-bin_check_a04_SOURCES                   = src/e4c.c test/a04.c
 bin_check_a05_SOURCES                   = src/e4c.c test/a05.c
 bin_check_a06_SOURCES                   = src/e4c.c test/a06.c
 bin_check_a07_SOURCES                   = src/e4c.c test/a07.c

@@ -15,27 +15,14 @@ void * custom_initialize_handler(const e4c_exception * exception);
  */
 TEST_CASE{
 
-# if !defined(E4C_THROWF) && !defined(HAVE_VSNPRINTF)
-
-    TEST_SKIP("This platform does not support variadic macros or vsnprintf");
-
-# else
-
     e4c_context_begin();
 
     e4c_context_set_handlers(NULL, NULL, custom_initialize_handler, NULL);
 
     E4C_TRY{
 
-#  ifdef E4C_THROWF
+        E4C_THROW(RuntimeException, "%s_%s", "FORMATTED", "MESSAGE");
 
-        E4C_THROWF(RuntimeException, "%s_%s", "FORMATTED", "MESSAGE");
-
-#  elif defined(HAVE_VSNPRINTF)
-
-        e4c_exception_throw_format_(&RuntimeException, "file", 123, "function", "%s_%s", "FORMATTED", "MESSAGE");
-
-# endif
 
     }E4C_CATCH(RuntimeException){
 
@@ -45,8 +32,6 @@ TEST_CASE{
     e4c_context_end();
 
     TEST_ASSERT(custom_initializer_was_executed);
-
-# endif
 
 }
 

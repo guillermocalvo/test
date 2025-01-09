@@ -403,14 +403,17 @@ typedef jmp_buf e4c_jump_buffer;
  *
  * @param   exception_type
  *          The type of exception to be thrown
- * @param   message
- *          The *ad-hoc* message describing the exception. If `NULL`, then the
- *          default message for the specified exception type will be used
+ * @param   format
+ *          The detail message.
+ * @param   ...
+ *          The variadic arguments that will be formatted according to the
+ *          format control
  *
  * Creates a new instance of the specified type of exception and then throws it.
- * The message is copied into the thrown exception, so it may be freely
- * deallocated. If `NULL` is passed, then the default message for that type of
- * exception will be used.
+ *
+ * If `format` is `NULL`, then the default message for that type of exception will
+ * be used. Otherwise, it MAY contain printf-like format specifications that
+ * determine how the variadic arguments will be interpreted.
  *
  * When an exception is thrown, the exception handling framework looks for the
  * appropriate #E4C_CATCH block that can handle the exception. The system unwinds
@@ -427,80 +430,35 @@ typedef jmp_buf e4c_jump_buffer;
  * @post
  *   - Control does not return to the `throw` point.
  *
- * @see     #E4C_THROWF
  * @see     #E4C_RETHROW
  * @see     #e4c_exception_type
  * @see     #e4c_exception
  * @see     #e4c_uncaught_handler
  * @see     #e4c_get_exception
  */
-#define E4C_THROW(exception_type, message)                                  \
-  e4c_throw(&exception_type, E4C_DEBUG_INFO, message)
-
-/**
- * Throws an exception with a formatted message
- *
- * @param   exception_type
- *          The type of exception to be thrown
- * @param   format
- *          The string containing the specifications that determine the output
- *          format for the variadic arguments
- * @param   ...
- *          The variadic arguments that will be formatted according to the
- *          format control
- *
- * This is a handy way to compose a formatted message and #E4C_THROW an exception
- * *on the fly*:
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   int bytes = 1024;
- *   void * buffer = malloc(bytes);
- *   if(buffer == NULL){
- *       throwf(NotEnoughMemoryException, "Could not allocate %d bytes.", bytes);
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * This macro relies on two features that were introduced in the **ISO/IEC
- * 9899:1999** (also known as *C99*) revision of the C programming language
- * standard in 1999:
- *
- *   - Variadic macros
- *   - Buffer-safe function `vsnprintf`
- *
- * The semantics of this keyword are the same as for `throw`.
- *
- * @pre
- *   - A program (or thread) **must** begin an exception context prior to using
- *     the keyword `throwf`. Such programming error will lead to an abrupt exit
- *     of the program (or thread).
- *   - At least one argument **must** be passed right after the format string.
- *     The message will be composed through the function `vsnprintf` with the
- *     specified format and variadic arguments. For further information on
- *     formatting rules, you may look up the specifications for the function
- *     `vsnprintf`.
- * @post
- *   - Control does not return to the `throwf` point.
- *
- * @see     #E4C_THROW
- * @see     #E4C_RETHROWF
- */
-#define E4C_THROWF(exception_type, format, ...)                             \
-  e4c_throw_formatted(                                                      \
+#define E4C_THROW(exception_type, format, ...)                              \
+  e4c_throw(                                                                \
     &exception_type,                                                        \
     E4C_DEBUG_INFO,                                                         \
-    (format),                                                               \
-    __VA_ARGS__                                                             \
+    (format)                                                                \
+    __VA_OPT__(,) __VA_ARGS__                                               \
   )
 
 /**
  * Throws again the currently thrown exception, with a new message
  *
- * @param   message
- *          The new message describing the exception. It should be more specific
- *          than the current one
+ * @param   format
+ *          The detail message.
+ * @param   ...
+ *          The variadic arguments that will be formatted according to the
+ *          format control.
  *
  * This macro creates a new instance of the thrown exception, with a more
- * specific message.
+ * specific message, and then throws it.
+ *
+ * If `format` is `NULL`, then the default message for that type of exception will
+ * be used. Otherwise, it MAY contain printf-like format specifications that
+ * determine how the variadic arguments will be interpreted.
  *
  * `rethrow` is intended to be used within a #E4C_CATCH block; the purpose is to
  * refine the message of the currently caught exception. The previous exception
@@ -525,66 +483,13 @@ typedef jmp_buf e4c_jump_buffer;
  *   - Control does not return to the `rethrow` point.
  *
  * @see     #E4C_THROW
- * @see     #E4C_RETHROWF
  */
-#define E4C_RETHROW(message)                                                \
+#define E4C_RETHROW(format, ...)                                            \
   e4c_throw(                                                                \
-    (e4c_get_exception() == NULL ? &NullPointerException : e4c_get_exception()->type), \
-    E4C_DEBUG_INFO,                                                         \
-    message                                                                 \
-  )
-
-/**
- * Throws again the currently thrown exception, with a new, formatted message
- *
- * @param   format
- *          The string containing the specifications that determine the output
- *          format for the variadic arguments.
- * @param   ...
- *          The variadic arguments that will be formatted according to the
- *          format control.
- *
- * This is a handy way to create (and then #E4C_THROW) a new instance of the
- * currently thrown exception, with a more specific, formatted message.
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   try{
- *       image = read_file(file_path);
- *   }catch(FileOpenException){
- *       rethrowf("Image '%s' not found.", title);
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * This macro relies on two features that were introduced in the **ISO/IEC
- * 9899:1999** (also known as *C99*) revision of the C programming language
- * standard in 1999:
- *
- *   - Variadic macros
- *   - Buffer-safe function `vsnprintf`
- *
- * The semantics of this keyword are the same as for `throw`.
- *
- * @pre
- *   - A program (or thread) **must** begin an exception context prior to using
- *     the keyword `rethrowf`. Such programming error will lead to an abrupt
- *     exit of the program (or thread).
- *   - At least one argument **must** be passed right after the format string.
- *     The message will be composed through the function `vsnprintf` with the
- *     specified format and variadic arguments. For further information on
- *     formatting rules, you may look up the specifications for the function
- *     `vsnprintf`.
- * @post
- *   - Control does not return to the `rethrowf` point.
- *
- * @see     #E4C_RETHROW
- * @see     #E4C_THROWF
- */
-#define E4C_RETHROWF(format, ...)                                           \
-  e4c_throw_formatted(                                                      \
     (e4c_get_exception() == NULL ? NULL : e4c_get_exception()->type),       \
     E4C_DEBUG_INFO,                                                         \
-    (format),                                                               \
-    __VA_ARGS__                                                             \
+    (format)                                                                \
+    __VA_OPT__(,) __VA_ARGS__                                               \
   )
 
 /** @} */
@@ -1712,14 +1617,6 @@ void e4c_restart(
 );
 
 noreturn void e4c_throw(
-    const e4c_exception_type *  exception_type,
-    const char *                file,
-    int                         line,
-    const char *                function,
-    const char *                message
-);
-
-noreturn void e4c_throw_formatted(
     const e4c_exception_type *  exception_type,
     const char *                file,
     int                         line,

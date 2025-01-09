@@ -42,7 +42,6 @@ set(TESTS
         a01
         a02
         a03
-        a04
         a05
         a06
         a07
@@ -128,7 +127,6 @@ endforeach()
 set_property(TEST a01 PROPERTY WILL_FAIL TRUE)
 set_property(TEST a02 PROPERTY WILL_FAIL TRUE)
 set_property(TEST a03 PROPERTY WILL_FAIL TRUE)
-set_property(TEST a04 PROPERTY WILL_FAIL TRUE)
 set_property(TEST a05 PROPERTY WILL_FAIL TRUE)
 set_property(TEST a06 PROPERTY WILL_FAIL TRUE)
 set_property(TEST a07 PROPERTY WILL_FAIL TRUE)

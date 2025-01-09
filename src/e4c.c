@@ -773,7 +773,7 @@ static e4c_exception * frame_throw_exception(const e4c_frame * frame, const e4c_
     return new_exception;
 }
 
-void e4c_throw(const e4c_exception_type * exception_type, const char * file, int line, const char * function, const char * message) {
+void e4c_throw(const e4c_exception_type * exception_type, const char * file, int line, const char * function, const char * format, ...) {
 
     int                 error_number;
     e4c_context *       context;
@@ -786,47 +786,8 @@ void e4c_throw(const e4c_exception_type * exception_type, const char * file, int
     /* get the current context */
     context = E4C_CURRENT_CONTEXT;
 
-    /* ensure that 'throw' was used after calling e4c_context_begin */
-    if (context != NULL) {
-
-        /* make sure the current frame is not null */
-        assert(context->current_frame != NULL);
-
-        /* get the current frame */
-        frame = context->current_frame;
-
-        /* check context and frame; initialize exception and cause */
-        new_exception = frame_throw_exception(frame, exception_type, file, line, function, error_number, true, message);
-
-        /* set initial value for custom data */
-        new_exception->custom_data = context->custom_data;
-        /* initialize custom data */
-        if (context->initialize_handler != NULL) {
-            new_exception->custom_data = context->initialize_handler(new_exception);
-        }
-
-        /* propagate the exception up the call stack */
-        context_propagate_exception(context, new_exception);
-    }
-
-    library_panic(&ContextHasNotBegunYet, NULL, file, line, function, errno);
-}
-
-void e4c_throw_formatted(const e4c_exception_type * exception_type, const char * file, int line, const char * function, const char * format, ...) {
-
-    int                 error_number;
-    e4c_context *       context;
-    e4c_frame *         frame;
-    e4c_exception *     new_exception;
-
-    /* store the current error number up front */
-    error_number = errno;
-
-    /* get the current context */
-    context = E4C_CURRENT_CONTEXT;
-
-    /* check if 'throwf' was used before calling e4c_context_begin */
-    if(context == NULL){
+    /* make sure e4c_context_begin was called before */
+    if (context == NULL) {
         library_panic(&ContextHasNotBegunYet, NULL, file, line, function, errno);
     }
 
@@ -839,18 +800,18 @@ void e4c_throw_formatted(const e4c_exception_type * exception_type, const char *
     /* check context and frame; initialize exception and cause */
     new_exception = frame_throw_exception(frame, exception_type, file, line, function, error_number, (format == NULL), NULL);
 
-    /* format the message (only if feasible) */
-    if(format != NULL){
+    /* format the message */
+    if (format != NULL) {
         va_list arguments_list;
         va_start(arguments_list, format);
-        (void)vsnprintf(new_exception->message, (size_t)E4C_EXCEPTION_MESSAGE_SIZE, format, arguments_list);
+        (void) vsnprintf(new_exception->message, E4C_EXCEPTION_MESSAGE_SIZE, format, arguments_list);
         va_end(arguments_list);
     }
 
     /* set initial value for custom data */
     new_exception->custom_data = context->custom_data;
     /* initialize custom data */
-    if(context->initialize_handler != NULL){
+    if (context->initialize_handler != NULL) {
         new_exception->custom_data = context->initialize_handler(new_exception);
     }
 
