@@ -12,9 +12,9 @@
 /* Output */
 # define TEST_PRINT_PREFIX              "    - "
 # define TEST_PRINT_SUFFIX              "\n"
-# define TEST_PRINT(FORMAT, MESSAGE) \
+# define TEST_PRINT(FORMAT, ...) \
     do{ \
-        (void)fprintf(stdout, TEST_PRINT_PREFIX FORMAT TEST_PRINT_SUFFIX, (MESSAGE)); \
+        (void)fprintf(stdout, TEST_PRINT_PREFIX FORMAT TEST_PRINT_SUFFIX, __VA_ARGS__); \
         (void)fflush(stdout); \
     }while(0)
 # define TEST_ECHO(MESSAGE)             TEST_PRINT("%s", (MESSAGE))
@@ -64,7 +64,7 @@
     void test_case(void); \
     \
     int main(void){ \
-        TEST_PRINT("Running test %s...", __FILE__); \
+        TEST_PRINT("Running test %s:%d", __FILE__, __LINE__); \
         test_case(); \
         return(EXIT_SUCCESS); \
     } \
