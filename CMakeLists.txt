@@ -67,7 +67,6 @@ set(TESTS
         b14
         b15
         b16
-        b17
         b18
         b19
         b21
@@ -98,7 +97,6 @@ set(TESTS
         g10
         g11
         g12
-        i01
         i02
         i03
         i04
@@ -150,7 +148,6 @@ set_property(TEST b10 PROPERTY WILL_FAIL TRUE)
 set_property(TEST b14 PROPERTY WILL_FAIL TRUE)
 set_property(TEST b15 PROPERTY WILL_FAIL TRUE)
 set_property(TEST b16 PROPERTY WILL_FAIL TRUE)
-set_property(TEST b17 PROPERTY WILL_FAIL TRUE)
 set_property(TEST b18 PROPERTY WILL_FAIL TRUE)
 set_property(TEST b19 PROPERTY WILL_FAIL TRUE)
 set_property(TEST b21 PROPERTY WILL_FAIL TRUE)

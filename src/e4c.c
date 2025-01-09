@@ -109,8 +109,6 @@ static noreturn void context_propagate_exception(const e4c_context * context, e4
 static e4c_frame * frame_allocate(int line, const char * function);
 static void frame_deallocate(e4c_frame * frame, e4c_finalize_handler finalize_handler);
 static void frame_initialize(e4c_frame * frame, e4c_frame * previous, enum e4c_frame_stage stage);
-static void exception_type_print(const e4c_exception_type *  exception_type);
-static int exception_type_print_node(const e4c_exception_type * exception_type);
 static bool exception_type_extends(const e4c_exception_type * child, const e4c_exception_type * parent);
 
 static e4c_exception * exception_allocate();
@@ -687,46 +685,6 @@ bool e4c_is_instance_of(const e4c_exception * instance, const e4c_exception_type
     return exception_type_extends(instance->type, exception_type);
 }
 
-static int exception_type_print_node(const e4c_exception_type * exception_type) {
-
-    int deep = -1;
-
-    if (exception_type->supertype == NULL || exception_type->supertype == exception_type) {
-
-        fprintf(stderr, "    %s\n", exception_type->name);
-
-    } else {
-
-        deep = exception_type_print_node(exception_type->supertype);
-
-        fprintf(stderr, "    %*s |\n    %*s +--%s\n", deep * 4, "", deep * 4, "", exception_type->name);
-    }
-
-    return deep + 1;
-}
-
-static void exception_type_print(const e4c_exception_type * exception_type) {
-
-    const char *    separator   = "________________________________________________________________";
-
-    fprintf(stderr, "Exception hierarchy\n%s\n\n", separator);
-
-    (void) exception_type_print_node(exception_type);
-
-    fprintf(stderr, "%s\n", separator);
-}
-
-void e4c_print_exception_type(const e4c_exception_type * exception_type) {
-
-    if (exception_type == NULL) {
-        e4c_throw(&NullPointerException, __FILE__, __LINE__, __func__, "Null exception type.");
-    }
-
-    exception_type_print(exception_type);
-
-    (void) fflush(stderr);
-}
-
 /* EXCEPTION
  ================================================================ */
 
@@ -924,10 +882,6 @@ static void exception_print(const e4c_exception * exception) {
     }
 
     fprintf(stderr, "The value of errno was %d.\n\n", exception->error_number);
-
-    if (exception->type != NULL) {
-        exception_type_print(exception->type);
-    }
 
     /* checks whether this exception is fatal to the exception system (likely library misuse) */
     if (e4c_is_instance_of(exception, &ExceptionSystemFatalError)) {

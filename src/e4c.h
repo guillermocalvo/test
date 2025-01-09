@@ -1543,42 +1543,6 @@ bool e4c_is_instance_of(
  */
 void e4c_print_exception(const e4c_exception * exception);
 
-/**
- * Prints an ASCII graph representing an exception type's hierarchy
- *
- * @param   exception_type
- *          An exception type
- *
- * This is a convenience function for showing an ASCII graph representing an
- * exception type's hierarchy through the standard error output.
- *
- * For example, the output for #ProgramSignal2Exception would be:
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- *   Exception hierarchy
- *   ________________________________________________________________
- *
- *       RuntimeException
- *        |
- *        +--SignalException
- *            |
- *            +--ProgramSignalException
- *                |
- *                +--ProgramSignal2Exception
- *   ________________________________________________________________
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * @pre
- *   - `exception_type` **must not** be `NULL`
- * @throws  #NullPointerException
- *          If `exception_type` is `NULL`
- *
- * @see     #e4c_exception_type
- */
-void e4c_print_exception_type(const e4c_exception_type *  exception_type);
-
 /** @} */
 
 /*
