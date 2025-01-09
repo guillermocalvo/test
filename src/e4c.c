@@ -105,9 +105,7 @@ static noreturn void library_panic(
 static void context_handle_uncaught_exception(const e4c_context * context, const e4c_exception * exception);
 static noreturn void context_propagate_exception(const e4c_context * context, e4c_exception * exception);
 
-static e4c_frame * frame_allocate(int line, const char * function);
 static void frame_deallocate(e4c_frame * frame, e4c_finalize_handler finalize_handler);
-static void frame_initialize(e4c_frame * frame, e4c_frame * previous, enum e4c_frame_stage stage);
 static bool exception_type_extends(const e4c_exception_type * child, const e4c_exception_type * parent);
 
 static e4c_exception * exception_allocate();
@@ -335,7 +333,6 @@ bool e4c_context_is_ready(void) {
 e4c_jump_buffer * e4c_start(enum e4c_frame_stage stage, const char * file, int line, const char * function) {
 
     e4c_context *   context;
-    e4c_frame *     current_frame;
     e4c_frame *     new_frame;
 
     context = E4C_CURRENT_CONTEXT;
@@ -345,43 +342,27 @@ e4c_jump_buffer * e4c_start(enum e4c_frame_stage stage, const char * file, int l
         library_panic(&ContextHasNotBegunYet, NULL, file, line, function, errno);
     }
 
-    current_frame = context->current_frame;
+    /* allocate a new frame */
+    new_frame = calloc(1, sizeof(e4c_frame));
 
-    /* create a new frame */
-    new_frame = frame_allocate(__LINE__, __func__);
+    if (new_frame == NULL) {
+        library_panic(&NotEnoughMemoryException, "Could not create a new exception frame.", __FILE__, __LINE__, __func__, errno);
+    }
 
-    frame_initialize(new_frame, current_frame, stage);
+    /* initialize frame data */
+    assert(new_frame->previous == NULL);
+    new_frame->previous             = context->current_frame;
+    new_frame->stage                = stage;
+    new_frame->uncaught             = false;
+    new_frame->reacquire_attempts   = 0;
+    new_frame->retry_attempts       = 0;
+    new_frame->thrown_exception     = NULL;
+    /* jmp_buf is an implementation-defined type */
 
     /* make it the new current frame */
     context->current_frame = new_frame;
 
-    return &(new_frame->continuation);
-}
-
-static void frame_initialize(e4c_frame * frame, e4c_frame * previous, enum e4c_frame_stage stage) {
-
-    assert(frame != NULL);
-
-    assert(frame->previous == NULL);
-    frame->previous             = previous;
-    frame->stage                = stage;
-    frame->uncaught             = false;
-    frame->reacquire_attempts   = 0;
-    frame->retry_attempts       = 0;
-    frame->thrown_exception     = NULL;
-
-    /* jmp_buf is an implementation-defined type */
-}
-
-static e4c_frame * frame_allocate(int line, const char * function) {
-
-    e4c_frame * frame = calloc(1, sizeof(e4c_frame));
-
-    if (frame == NULL) {
-        library_panic(&NotEnoughMemoryException, "Could not create a new exception frame.", __FILE__, line, function, errno);
-    }
-
-    return frame;
+    return &new_frame->continuation;
 }
 
 static void frame_deallocate(e4c_frame * frame, e4c_finalize_handler finalize_handler) {
