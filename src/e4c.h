@@ -329,7 +329,7 @@ typedef jmp_buf e4c_jump_buffer;
  *   }catch(ConfigException){
  *       file_path = config_get_default_file_path();
  *       retry(1);
- *       rethrow("Wrong defaults.");
+ *       throw(ConfigException, "Wrong defaults.");
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
@@ -344,7 +344,8 @@ typedef jmp_buf e4c_jump_buffer;
  * @note
  * Once a `catch` code block is being executed, the current exception is
  * considered caught. If you want the exception to be propagated when the
- * maximum number of attempts has been reached, then you need to #E4C_RETHROW it.
+ * maximum number of attempts has been reached, then you need to throw it
+ * again.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
  *   int dividend = 100;
@@ -357,13 +358,13 @@ typedef jmp_buf e4c_jump_buffer;
  *   }catch(RuntimeException){
  *       divisor = 1;
  *       retry(1);
- *       rethrow("Error (not a division by zero).");
+ *       throw(RuntimeException, "Error (not a division by zero).");
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * @note
  * At a `finally` block, the current exception (if any) will be propagated when
- * the `retry` does not take place, so you don't need to `rethrow` it again.
+ * the `retry` does not take place, so you don't need to throw it again.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
  *   int dividend = 100;
@@ -430,7 +431,6 @@ typedef jmp_buf e4c_jump_buffer;
  * @post
  *   - Control does not return to the `throw` point.
  *
- * @see     #E4C_RETHROW
  * @see     #e4c_exception_type
  * @see     #e4c_exception
  * @see     #e4c_uncaught_handler
@@ -439,54 +439,6 @@ typedef jmp_buf e4c_jump_buffer;
 #define E4C_THROW(exception_type, format, ...)                              \
   e4c_throw(                                                                \
     &exception_type,                                                        \
-    E4C_DEBUG_INFO,                                                         \
-    (format)                                                                \
-    __VA_OPT__(,) __VA_ARGS__                                               \
-  )
-
-/**
- * Throws again the currently thrown exception, with a new message
- *
- * @param   format
- *          The detail message.
- * @param   ...
- *          The variadic arguments that will be formatted according to the
- *          format control.
- *
- * This macro creates a new instance of the thrown exception, with a more
- * specific message, and then throws it.
- *
- * If `format` is `NULL`, then the default message for that type of exception will
- * be used. Otherwise, it MAY contain printf-like format specifications that
- * determine how the variadic arguments will be interpreted.
- *
- * `rethrow` is intended to be used within a #E4C_CATCH block; the purpose is to
- * refine the message of the currently caught exception. The previous exception
- * (and its message) will be stored as the *cause* of the newly thrown
- * exception.
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   try{
- *       image = read_file(file_path);
- *   }catch(FileOpenException){
- *       rethrow("Image not found.");
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * The semantics of this keyword are the same as for `throw`.
- *
- * @pre
- *   - A program (or thread) **must** begin an exception context prior to using
- *     the keyword `rethrow`. Such programming error will lead to an abrupt exit
- *     of the program (or thread).
- * @post
- *   - Control does not return to the `rethrow` point.
- *
- * @see     #E4C_THROW
- */
-#define E4C_RETHROW(format, ...)                                            \
-  e4c_throw(                                                                \
-    (e4c_get_exception() == NULL ? NULL : e4c_get_exception()->type),       \
     E4C_DEBUG_INFO,                                                         \
     (format)                                                                \
     __VA_OPT__(,) __VA_ARGS__                                               \

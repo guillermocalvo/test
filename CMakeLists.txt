@@ -76,7 +76,6 @@ set(TESTS
         d02
         d03
         d04
-        d05
         e01
         e02
         e03
@@ -153,7 +152,6 @@ set_property(TEST d01 PROPERTY WILL_FAIL TRUE)
 set_property(TEST d02 PROPERTY WILL_FAIL TRUE)
 set_property(TEST d03 PROPERTY WILL_FAIL TRUE)
 set_property(TEST d04 PROPERTY WILL_FAIL TRUE)
-set_property(TEST d05 PROPERTY WILL_FAIL TRUE)
 set_property(TEST g04 PROPERTY WILL_FAIL TRUE)
 set_property(TEST g05 PROPERTY WILL_FAIL TRUE)
 set_property(TEST g06 PROPERTY WILL_FAIL TRUE)

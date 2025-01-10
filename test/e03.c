@@ -6,10 +6,10 @@ void another_function(volatile bool * flag);
 
 
 /**
- * Uncaught exception, rethrown from a `catch` block, with a `finally` block
+ * Uncaught exception, thrown from a `catch` block, with a `finally` block
  *
  * This test checks the execution of a `finally` block when an exception is
- * rethrown from a preceding `catch` block.
+ * thrown from a preceding `catch` block.
  *
  * The expected behavior is:
  *
@@ -18,7 +18,7 @@ void another_function(volatile bool * flag);
  *     - The function starts a `try` block with a `catch` and a `finally` block.
  *     - An exception is thrown from the `try` block.
  *     - The `catch` block handles it.
- *     - The exception is *rethrown* from the `catch` block.
+ *     - An exception is thrown from the `catch` block.
  *     - The `finally` block is executed.
  *   - The outter `catch` block catches the exception.
  *
@@ -53,7 +53,7 @@ void another_function(volatile bool * flag){
 
     }E4C_CATCH(RuntimeException){
 
-        E4C_RETHROW("Told you to get me out of here.");
+        E4C_THROW(NullPointerException, "Told you to get me out of here.");
 
     }E4C_FINALLY{
 
