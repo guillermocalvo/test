@@ -38,8 +38,6 @@
 
 # define ref_count                      _
 
-# define VERBATIM_COPY(dst, src) (void)snprintf(dst, (size_t)E4C_EXCEPTION_MESSAGE_SIZE, "%s", src)
-
 #define E4C_CURRENT_CONTEXT      current_context
 
 /* unless otherwise stated, SIGSTOP and SIGKILL cannot be caught or ignored */
@@ -555,10 +553,10 @@ noreturn void e4c_restart(enum e4c_frame_stage stage, int max_repeat_attempts, c
         if (format == NULL) {
             e4c_throw(exception_type, file, line, function, NULL);
         }
-        char message[E4C_EXCEPTION_MESSAGE_SIZE] = {0};
+        e4c_exception_message message = {0};
         va_list arguments_list;
         va_start(arguments_list, format);
-        (void) vsnprintf(message, E4C_EXCEPTION_MESSAGE_SIZE, format, arguments_list);
+        (void) vsnprintf(message, sizeof(message), format, arguments_list);
         va_end(arguments_list);
         e4c_throw(exception_type, file, line, function, message);
     }
@@ -702,7 +700,7 @@ void e4c_throw(const e4c_exception_type * exception_type, const char * file, int
     if (format != NULL) {
         va_list arguments_list;
         va_start(arguments_list, format);
-        (void) vsnprintf(new_exception->message, E4C_EXCEPTION_MESSAGE_SIZE, format, arguments_list);
+        (void) vsnprintf(new_exception->message, sizeof(new_exception->message), format, arguments_list);
         va_end(arguments_list);
     }
 
@@ -732,14 +730,8 @@ static void exception_initialize(e4c_exception * exception, const e4c_exception_
     exception->cause        = NULL;
 
     if (set_message) {
-        /* initialize the message of this exception */
-        if (message != NULL) {
-            /* copy the given message */
-            VERBATIM_COPY(exception->message, message);
-        } else {
-            /* copy the default message for this type of exception */
-            VERBATIM_COPY(exception->message, exception_type->default_message);
-        }
+        /* initialize the message of this exception with the supplied message, or the default one for this type of exception */
+        (void) snprintf(exception->message, sizeof(exception->message), "%s", message != NULL ? message : exception_type->default_message);
     }
     /*
      * since the exception is allocated and then zero-initialized,

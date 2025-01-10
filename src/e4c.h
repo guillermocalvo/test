@@ -686,13 +686,6 @@ typedef jmp_buf e4c_jump_buffer;
  * @{
  */
 
-/**
- * Provides the maximum length (in bytes) of an exception message
- */
-# ifndef E4C_EXCEPTION_MESSAGE_SIZE
-#   define E4C_EXCEPTION_MESSAGE_SIZE 128
-# endif
-
 /** @} */
 
 /**
@@ -808,6 +801,9 @@ typedef jmp_buf e4c_jump_buffer;
 /** @} */
 
 
+/** Represents a message exception */
+typedef char e4c_exception_message[128];
+
 /**
  * Represents an exception type in the exception handling system
  *
@@ -842,7 +838,7 @@ typedef struct e4c_exception_type_struct {
     const char *                    name;
 
     /** The default message of this exception type */
-    const char                      default_message[E4C_EXCEPTION_MESSAGE_SIZE];
+    const e4c_exception_message     default_message;
 
     /** The supertype of this exception type */
     const struct e4c_exception_type_struct * supertype;
@@ -893,7 +889,7 @@ typedef struct e4c_exception_struct {
     const char *                    name;
 
     /** The message of this exception */
-    char                            message[E4C_EXCEPTION_MESSAGE_SIZE];
+    e4c_exception_message           message;
 
     /** The path of the source code file from which the exception was thrown */
     const char *                    file;
