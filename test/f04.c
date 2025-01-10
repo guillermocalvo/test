@@ -2,6 +2,8 @@
 # include "testing.h"
 
 
+static E4C_DEFINE_EXCEPTION(NotEnoughMemoryException, "Not enough memory.", RuntimeException);
+
 void aux(volatile bool * flag);
 
 

@@ -216,8 +216,8 @@ typedef jmp_buf e4c_jump_buffer;
  *       ...
  *   }catch(RuntimeException){
  *       const e4c_exception * exception = e4c_get_exception();
- *       if(exception->type == &NotEnoughMemoryException){
- *           // the exception type is precisely NotEnoughMemoryException
+ *       if(exception->type == &NullPointerException){
+ *           // the exception type is precisely NullPointerException
  *       }
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -823,7 +823,6 @@ typedef char e4c_exception_message[128];
  * exceptions *pseudo-hierarchy*:
  *
  *   - #RuntimeException
- *     - #NotEnoughMemoryException
  *     - #NullPointerException
  *
  * @see     #e4c_exception
@@ -1152,21 +1151,9 @@ enum e4c_frame_stage {
  * #RuntimeException is the common *supertype* of all exceptions.
  *
  * @par     Direct known subexceptions:
- *          #NotEnoughMemoryException,
  *          #NullPointerException
  */
 E4C_DECLARE_EXCEPTION(RuntimeException);
-
-/**
- * This exception is thrown when the system runs out of memory
- *
- * #NotEnoughMemoryException is thrown when there is not enough memory to
- * continue the execution of the program.
- *
- * @par     Extends:
- *          #RuntimeException
- */
-E4C_DECLARE_EXCEPTION(NotEnoughMemoryException);
 
 /**
  * This exception is thrown when an unexpected null pointer is found
@@ -1345,7 +1332,7 @@ e4c_status e4c_get_status(void);
  *      const e4c_exception * exception = e4c_get_exception();
  *      if( e4c_is_instance_of(exception, &SignalException) ){
  *          ...
- *      }else if(exception->type == &NotEnoughMemoryException){
+ *      }else if(exception->type == &NullPointerException){
  *          ...
  *      }
  *   }
@@ -1435,7 +1422,7 @@ int e4c_library_version(void);
  *      const e4c_exception * exception = e4c_get_exception();
  *      if( e4c_is_instance_of(exception, &SignalException) ){
  *          ...
- *      }else if(exception->type == &NotEnoughMemoryException){
+ *      }else if(exception->type == &NullPointerException){
  *          ...
  *      }
  *   }

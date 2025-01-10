@@ -12,6 +12,7 @@
         } \
     }E4C_USE
 
+static E4C_DEFINE_EXCEPTION(NotEnoughMemoryException, "Not enough memory.", RuntimeException);
 
 /**
  * `e4c_using_memory` block without beginning

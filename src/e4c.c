@@ -79,7 +79,7 @@ static e4c_context * current_context = NULL;
 
 
 E4C_DEFINE_EXCEPTION(RuntimeException,                  "Runtime exception.",               RuntimeException);
-E4C_DEFINE_EXCEPTION(NotEnoughMemoryException,          "Not enough memory.",               RuntimeException);
+static E4C_DEFINE_EXCEPTION(NotEnoughMemoryException,          "Not enough memory.",               RuntimeException);
 E4C_DEFINE_EXCEPTION(NullPointerException,              "Null pointer.",                    RuntimeException);
 
 static E4C_DEFINE_EXCEPTION(ExceptionSystemFatalError,  "The exception context for this program is in an invalid state.",   RuntimeException);

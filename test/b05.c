@@ -17,6 +17,8 @@
 
 # pragma GCC diagnostic pop
 
+static E4C_DEFINE_EXCEPTION(NotEnoughMemoryException, "Not enough memory.", RuntimeException);
+
 /**
  * `e4c_using_memory` block after having ended
  *
