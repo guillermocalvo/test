@@ -19,7 +19,7 @@ TEST_CASE{
 
         E4C_THROW(RuntimeException, NULL);
 
-    } E4C_CATCH(  *( (e4c_exception_type *)NULL )  ) {
+    } E4C_CATCH(  *( (struct e4c_exception_type *)NULL )  ) {
 
         THIS_SHOULD_NOT_HAPPEN;
     }

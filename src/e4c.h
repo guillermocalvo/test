@@ -720,7 +720,7 @@ typedef jmp_buf e4c_jump_buffer;
  */
 # define E4C_DECLARE_EXCEPTION(name) \
     \
-    extern const e4c_exception_type name
+    extern const struct e4c_exception_type name
 
 /**
  * Defines an exception type
@@ -751,7 +751,7 @@ typedef jmp_buf e4c_jump_buffer;
  */
 # define E4C_DEFINE_EXCEPTION(name, default_message, supertype) \
     \
-    const e4c_exception_type name = { \
+    const struct e4c_exception_type name = { \
         #name, \
         default_message, \
         &supertype \
@@ -790,17 +790,17 @@ typedef char e4c_exception_message[128];
  * @see     #E4C_THROW
  * @see     #E4C_CATCH
  */
-typedef struct e4c_exception_type_struct {
+struct e4c_exception_type {
 
     /** The name of this exception type */
-    const char *                    name;
+    const char * name;
 
     /** The default message of this exception type */
-    const e4c_exception_message     default_message;
+    const e4c_exception_message default_message;
 
     /** The supertype of this exception type */
-    const struct e4c_exception_type_struct * supertype;
-} e4c_exception_type;
+    const struct e4c_exception_type * supertype;
+};
 
 /**
  * Represents an instance of an exception type
@@ -838,7 +838,7 @@ typedef struct e4c_exception_type_struct {
  * @see     #e4c_context_set_handlers
  * @see     #RuntimeException
  */
-typedef struct e4c_exception_struct {
+struct e4c_exception {
 
     /* This field is undocumented on purpose and reserved for internal use */
     int                             _;
@@ -862,14 +862,14 @@ typedef struct e4c_exception_struct {
     int                             error_number;
 
     /** The type of this exception */
-    const e4c_exception_type *      type;
+    const struct e4c_exception_type * type;
 
     /** The cause of this exception */
-    struct e4c_exception_struct *   cause;
+    struct e4c_exception * cause;
 
     /** Custom data associated to this exception */
     void *                          custom_data;
-} e4c_exception;
+};
 
 /**
  * Represents the completeness of a code block aware of exceptions
@@ -902,7 +902,7 @@ typedef struct e4c_exception_struct {
  * @see     #e4c_get_status
  * @see     #E4C_FINALLY
  */
-typedef enum {
+enum e4c_status {
 
     /** There were no exceptions */
     e4c_succeeded,
@@ -912,7 +912,7 @@ typedef enum {
 
     /** There was an exception and it wasn't caught */
     e4c_failed
-} e4c_status;
+};
 
 /**
  * Represents a function which will be executed in the event of an uncaught
@@ -953,7 +953,7 @@ typedef enum {
  * @see     #e4c_finalize_handler
  * @see     #e4c_print_exception
  */
-typedef void (*e4c_uncaught_handler)(const e4c_exception * exception);
+typedef void (*e4c_uncaught_handler)(const struct e4c_exception * exception);
 
 /**
  * Represents a function which will be executed whenever a new exception is
@@ -1024,7 +1024,7 @@ typedef void (*e4c_uncaught_handler)(const e4c_exception * exception);
  * @see     #e4c_uncaught_handler
  * @see     #e4c_print_exception
  */
-typedef void * (*e4c_initialize_handler)(const e4c_exception * exception);
+typedef void * (*e4c_initialize_handler)(const struct e4c_exception * exception);
 
 /**
  * Represents a function which will be executed whenever an exception is
@@ -1090,29 +1090,29 @@ enum e4c_frame_stage {
 };
 
 /** Represents an exception frame */
-typedef struct e4c_frame_struct {
-    struct e4c_frame_struct *   previous;
+struct e4c_frame {
+    struct e4c_frame *          previous;
     enum e4c_frame_stage        stage;
     bool                        uncaught;
-    e4c_exception *             thrown_exception;
+    struct e4c_exception *      thrown_exception;
     int                         retry_attempts;
     int                         reacquire_attempts;
     e4c_jump_buffer             continuation;
-} e4c_frame;
+};
 
 /** Represents an exception context */
-typedef struct {
-    e4c_frame *                 current_frame;
+struct e4c_context {
+    struct e4c_frame *          current_frame;
     e4c_uncaught_handler        uncaught_handler;
     void *                      custom_data;
     e4c_initialize_handler      initialize_handler;
     e4c_finalize_handler        finalize_handler;
-} e4c_context;
+};
 
 /**
  * Represents the function that returns the current exception context.
  */
-typedef e4c_context * (*e4c_context_supplier)(void);
+typedef struct e4c_context * (*e4c_context_supplier)(void);
 
 /**
  * @name Predefined exceptions
@@ -1239,7 +1239,7 @@ void e4c_context_set_handlers(
  * @see     #e4c_status
  * @see     #E4C_FINALLY
  */
-e4c_status e4c_get_status(void);
+enum e4c_status e4c_get_status(void);
 
 /**
  * Returns the exception that was thrown
@@ -1293,7 +1293,7 @@ e4c_status e4c_get_status(void);
  * @see     #E4C_CATCH
  * @see     #E4C_FINALLY
  */
-const e4c_exception * e4c_get_exception(void);
+const struct e4c_exception * e4c_get_exception(void);
 
 /** @} */
 
@@ -1366,8 +1366,8 @@ int e4c_library_version(void);
  * @see     #e4c_get_exception
  */
 bool e4c_is_instance_of(
-    const e4c_exception *       instance,
-    const e4c_exception_type *  exception_type
+    const struct e4c_exception * instance,
+    const struct e4c_exception_type * exception_type
 );
 
 /**
@@ -1382,7 +1382,7 @@ bool e4c_is_instance_of(
  *
  * @see     #e4c_uncaught_handler
  */
-void e4c_print_exception(const e4c_exception * exception);
+void e4c_print_exception(const struct e4c_exception * exception);
 
 /** @} */
 
@@ -1402,12 +1402,12 @@ bool e4c_next_stage(void);
 
 enum e4c_frame_stage e4c_get_current_stage(void);
 
-bool e4c_catch(const e4c_exception_type * exception_type);
+bool e4c_catch(const struct e4c_exception_type * exception_type);
 
 noreturn void e4c_restart(
     bool                        should_reacquire,
     int                         max_repeat_attempts,
-    const e4c_exception_type *  exception_type,
+    const struct e4c_exception_type * exception_type,
     const char *                file,
     int                         line,
     const char *                function,
@@ -1416,7 +1416,7 @@ noreturn void e4c_restart(
 );
 
 noreturn void e4c_throw(
-    const e4c_exception_type *  exception_type,
+    const struct e4c_exception_type * exception_type,
     const char *                file,
     int                         line,
     const char *                function,

@@ -22,7 +22,7 @@ TEST_CASE{
 
         thrown = true;
 
-        E4C_THROW( *( (const e4c_exception_type *)NULL ), "I see what you did there..." );
+        E4C_THROW( *( (const struct e4c_exception_type *)NULL ), "I see what you did there..." );
 
         thrown = false;
 

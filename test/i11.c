@@ -12,7 +12,7 @@
  */
 TEST_CASE{
 
-    volatile e4c_status status = e4c_succeeded;
+    volatile enum e4c_status status = e4c_succeeded;
 
     E4C_TRY{
 

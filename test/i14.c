@@ -3,7 +3,7 @@
 
 
 volatile bool custom_initializer_was_executed = false;
-void * custom_initialize_handler(const e4c_exception * exception);
+void * custom_initialize_handler(const struct e4c_exception * exception);
 
 
 /**
@@ -31,7 +31,7 @@ TEST_CASE{
 
 }
 
-void * custom_initialize_handler(const e4c_exception * exception){
+void * custom_initialize_handler(const struct e4c_exception * exception){
 
     custom_initializer_was_executed = true;
 

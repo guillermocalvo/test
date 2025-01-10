@@ -4,7 +4,7 @@
 
 volatile bool custom_handler_was_executed = false;
 void check_execution(void);
-void custom_uncaught_handler(const e4c_exception * exception);
+void custom_uncaught_handler(const struct e4c_exception * exception);
 
 
 /**
@@ -30,7 +30,7 @@ void check_execution(void){
     TEST_X_ASSERT(custom_handler_was_executed);
 }
 
-void custom_uncaught_handler(const e4c_exception * exception){
+void custom_uncaught_handler(const struct e4c_exception * exception){
 
     custom_handler_was_executed = true;
 }

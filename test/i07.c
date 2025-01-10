@@ -3,7 +3,7 @@
 
 
 char foobar[64] = "FOOBAR";
-void * custom_initialize_handler(const e4c_exception * exception);
+void * custom_initialize_handler(const struct e4c_exception * exception);
 volatile bool custom_handler_was_initialized = false;
 
 
@@ -30,7 +30,7 @@ TEST_CASE{
     TEST_ASSERT(custom_handler_was_initialized);
 }
 
-void * custom_initialize_handler(const e4c_exception * exception){
+void * custom_initialize_handler(const struct e4c_exception * exception){
 
     return(&foobar);
 }

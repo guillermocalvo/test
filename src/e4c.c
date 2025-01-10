@@ -42,7 +42,7 @@ static e4c_context_supplier context_supplier = NULL;
 static volatile bool is_initialized = false;
 
 /** main exception context of the program */
-static e4c_context main_context = {
+static struct e4c_context main_context = {
     NULL,
     e4c_print_exception,
     NULL,
@@ -56,15 +56,15 @@ E4C_DEFINE_EXCEPTION(NullPointerException,              "Null pointer.",        
 static void cleanup(void);
 static noreturn void panic(const char * error_message, const char * file, int line, const char * function);
 
-static e4c_context * get_current_context(void);
-static noreturn void propagate_exception(const e4c_context * context, e4c_exception * exception);
+static struct e4c_context * get_current_context(void);
+static noreturn void propagate_exception(const struct e4c_context * context, struct e4c_exception * exception);
 
-static void deallocate_frame(e4c_frame * frame, e4c_finalize_handler finalize_handler);
-static bool exception_type_extends(const e4c_exception_type * child, const e4c_exception_type * parent);
+static void deallocate_frame(struct e4c_frame * frame, e4c_finalize_handler finalize_handler);
+static bool exception_type_extends(const struct e4c_exception_type * child, const struct e4c_exception_type * parent);
 
-static void deallocate_exception(e4c_exception * exception, e4c_finalize_handler finalize_handler);
+static void deallocate_exception(struct e4c_exception * exception, e4c_finalize_handler finalize_handler);
 static void print_debug_info(const char * file, int line, const char * function);
-static void print_exception(const char * prefix, const e4c_exception * exception);
+static void print_exception(const char * prefix, const struct e4c_exception * exception);
 
 
 
@@ -74,7 +74,7 @@ static void print_exception(const char * prefix, const e4c_exception * exception
 
 static void cleanup(void) {
 
-    e4c_context * context = get_current_context();
+    struct e4c_context * context = get_current_context();
 
     /* check for dangling context */
     /* check if there are too many frames left (breaking out of a try block) */
@@ -104,23 +104,23 @@ void e4c_set_context_supplier(e4c_context_supplier supplier) {
     context_supplier = supplier;
 }
 
-static e4c_context * get_current_context(void) {
+static struct e4c_context * get_current_context(void) {
     if (context_supplier ==  NULL) {
         return &main_context;
     }
-    e4c_context * context = context_supplier();
+    struct e4c_context * context = context_supplier();
     if (context == NULL) {
         panic("Context supplier returned NULL.", E4C_DEBUG_INFO);
     }
     return context;
 }
 
-static void propagate_exception(const e4c_context * context, e4c_exception * exception) {
+static void propagate_exception(const struct e4c_context * context, struct e4c_exception * exception) {
 
     assert(context != NULL);
     assert(exception != NULL);
 
-    e4c_frame * frame = context->current_frame;
+    struct e4c_frame * frame = context->current_frame;
 
     /* if this is the upper frame, then this is an uncaught exception */
     if (frame == NULL) {
@@ -154,7 +154,7 @@ static void propagate_exception(const e4c_context * context, e4c_exception * exc
 
 void e4c_context_set_handlers(e4c_uncaught_handler uncaught_handler, void * custom_data, e4c_initialize_handler initialize_handler, e4c_finalize_handler finalize_handler) {
 
-    e4c_context * context = get_current_context();
+    struct e4c_context * context = get_current_context();
 
     context->uncaught_handler   = uncaught_handler;
     context->custom_data        = custom_data;
@@ -175,10 +175,10 @@ e4c_jump_buffer * e4c_start(enum e4c_frame_stage stage, const char * file, int l
         }
     }
 
-    e4c_context * context = get_current_context();
+    struct e4c_context * context = get_current_context();
 
     /* allocate a new frame */
-    e4c_frame * new_frame = calloc(1, sizeof(e4c_frame));
+    struct e4c_frame * new_frame = calloc(1, sizeof(*new_frame));
 
     if (new_frame == NULL) {
         panic("Not enough memory to create a new exception frame", file, line, function);
@@ -200,7 +200,7 @@ e4c_jump_buffer * e4c_start(enum e4c_frame_stage stage, const char * file, int l
     return &new_frame->continuation;
 }
 
-static void deallocate_frame(e4c_frame * frame, e4c_finalize_handler finalize_handler) {
+static void deallocate_frame(struct e4c_frame * frame, e4c_finalize_handler finalize_handler) {
 
     if (frame != NULL) {
 
@@ -218,16 +218,16 @@ static void deallocate_frame(e4c_frame * frame, e4c_finalize_handler finalize_ha
 
 enum e4c_frame_stage e4c_get_current_stage(void) {
 
-    e4c_context * context = get_current_context();
+    struct e4c_context * context = get_current_context();
 
     assert(context->current_frame != NULL);
 
     return context->current_frame->stage;
 }
 
-bool e4c_catch(const e4c_exception_type * exception_type) {
+bool e4c_catch(const struct e4c_exception_type * exception_type) {
 
-    e4c_context * context = get_current_context();
+    struct e4c_context * context = get_current_context();
 
     /* passing NULL to a catch block will not catch any exception */
     if (exception_type == NULL) {
@@ -260,10 +260,10 @@ bool e4c_catch(const e4c_exception_type * exception_type) {
 
 bool e4c_next_stage(void) {
 
-    e4c_context *   context;
-    e4c_frame *     frame;
-    e4c_frame *     previous;
-    e4c_exception * thrown_exception;
+    struct e4c_context *    context;
+    struct e4c_frame *      frame;
+    struct e4c_frame *      previous;
+    struct e4c_exception *  thrown_exception;
 
     context = get_current_context();
 
@@ -318,12 +318,12 @@ bool e4c_next_stage(void) {
     return false;
 }
 
-noreturn void e4c_restart(const bool should_reacquire, const int max_repeat_attempts, const e4c_exception_type * exception_type, const char * file, const int line, const char * function, const char * format, ...) {
+noreturn void e4c_restart(const bool should_reacquire, const int max_repeat_attempts, const struct e4c_exception_type * exception_type, const char * file, const int line, const char * function, const char * format, ...) {
 
-    e4c_context * context = get_current_context();
+    struct e4c_context * context = get_current_context();
 
     /* get the current frame */
-    e4c_frame * frame = context->current_frame;
+    struct e4c_frame * frame = context->current_frame;
 
     /* check if 'e4c_restart' was used before 'try' or 'use' */
     if (frame == NULL) {
@@ -374,9 +374,9 @@ noreturn void e4c_restart(const bool should_reacquire, const int max_repeat_atte
     EXCEPTIONS4C_LONG_JUMP(frame->continuation);
 }
 
-e4c_status e4c_get_status(void) {
+enum e4c_status e4c_get_status(void) {
 
-    e4c_context * context = get_current_context();
+    struct e4c_context * context = get_current_context();
 
     assert(context->current_frame != NULL);
 
@@ -394,7 +394,7 @@ e4c_status e4c_get_status(void) {
 /* EXCEPTION TYPE
  ================================================================ */
 
-static bool exception_type_extends(const e4c_exception_type * child, const e4c_exception_type * parent) {
+static bool exception_type_extends(const struct e4c_exception_type * child, const struct e4c_exception_type * parent) {
 
     assert(child != parent);
     assert(child != NULL);
@@ -411,7 +411,7 @@ static bool exception_type_extends(const e4c_exception_type * child, const e4c_e
     return false;
 }
 
-bool e4c_is_instance_of(const e4c_exception * instance, const e4c_exception_type * exception_type) {
+bool e4c_is_instance_of(const struct e4c_exception * instance, const struct e4c_exception_type * exception_type) {
 
     if (instance == NULL || instance->type == NULL || exception_type == NULL) {
         return false;
@@ -427,19 +427,19 @@ bool e4c_is_instance_of(const e4c_exception * instance, const e4c_exception_type
 /* EXCEPTION
  ================================================================ */
 
-const e4c_exception * e4c_get_exception(void) {
+const struct e4c_exception * e4c_get_exception(void) {
 
-    e4c_context * context = get_current_context();
+    struct e4c_context * context = get_current_context();
 
     return context->current_frame != NULL ? context->current_frame->thrown_exception : NULL;
 }
 
-void e4c_throw(const e4c_exception_type * exception_type, const char * file, int line, const char * function, const char * format, ...) {
+void e4c_throw(const struct e4c_exception_type * exception_type, const char * file, int line, const char * function, const char * format, ...) {
 
-    int                 error_number;
-    e4c_context *       context;
-    e4c_frame *         frame;
-    e4c_exception *     new_exception;
+    int                     error_number;
+    struct e4c_context *    context;
+    struct e4c_frame *      frame;
+    struct e4c_exception *  new_exception;
 
     /* store the current error number up front */
     error_number = errno;
@@ -453,7 +453,7 @@ void e4c_throw(const e4c_exception_type * exception_type, const char * file, int
     context = get_current_context();
 
     /* check context and frame; initialize exception and cause */
-    new_exception = calloc(1, sizeof(e4c_exception));
+    new_exception = calloc(1, sizeof(*new_exception));
 
     /* make sure there was enough memory */
     if (new_exception == NULL) {
@@ -504,7 +504,7 @@ void e4c_throw(const e4c_exception_type * exception_type, const char * file, int
     propagate_exception(context, new_exception);
 }
 
-static void deallocate_exception(e4c_exception * exception, e4c_finalize_handler finalize_handler) {
+static void deallocate_exception(struct e4c_exception * exception, e4c_finalize_handler finalize_handler) {
 
     if (exception != NULL) {
 
@@ -533,7 +533,7 @@ static void print_debug_info(const char * file, int line, const char * function)
     }
 }
 
-static void print_exception(const char * prefix, const e4c_exception * exception) {
+static void print_exception(const char * prefix, const struct e4c_exception * exception) {
 
     assert(exception != NULL);
 
@@ -546,7 +546,7 @@ static void print_exception(const char * prefix, const e4c_exception * exception
     }
 }
 
-void e4c_print_exception(const e4c_exception * exception) {
+void e4c_print_exception(const struct e4c_exception * exception) {
 
     if (exception == NULL) {
         fprintf(stderr, "No exception\n");

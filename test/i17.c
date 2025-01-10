@@ -36,7 +36,7 @@ TEST_CASE{
 
     } E4C_CATCH(RuntimeException) {
 
-        const e4c_exception * exception = e4c_get_exception();
+        const struct e4c_exception * exception = e4c_get_exception();
 
         TEST_ASSERT_EQUALS(exception->cause->type, &NullPointerException);
         TEST_ASSERT_EQUALS(exception->cause->cause->type, &CustomException);
