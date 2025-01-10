@@ -16,8 +16,6 @@ TEST_CASE{
     volatile bool caught1 = false;
     volatile bool caught2 = false;
 
-    e4c_context_begin();
-
     E4C_TRY{
 
         E4C_THROW(NullPointerException, "I'm going to be caught by the first (generic) catch block.");
@@ -30,8 +28,6 @@ TEST_CASE{
 
         caught2 = true;
     }
-
-    e4c_context_end();
 
     TEST_ASSERT(caught1);
     TEST_ASSERT(!caught2);

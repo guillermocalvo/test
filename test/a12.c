@@ -3,18 +3,15 @@
 
 
 /**
- * `e4c_get_status` call without beginning
+ * `e4c_get_status` call without starting a new exception frame
  *
  * This test uses the library improperly, by attempting to call
- * `e4c_get_status`, without calling `e4c_context_begin` first.
+ * `e4c_get_status`, without starting a new exception frame.
  *
- * The library must signal the misuse by throwing the exception
- * `ContextHasNotBegunYet`.
+ * The library must abort if NDEBUG is undefined.
  *
  */
 TEST_CASE{
 
-    TEST_EXPECTING(ContextHasNotBegunYet);
-
-    (void)e4c_get_status();
+    (void) e4c_get_status();
 }

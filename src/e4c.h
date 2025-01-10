@@ -165,7 +165,7 @@ typedef jmp_buf e4c_jump_buffer;
  */
 #define E4C_TRY                                                             \
   EXCEPTIONS4C_BLOCK(e4c_acquiring)                                         \
-  if (e4c_get_current_stage(E4C_DEBUG_INFO) == e4c_trying && e4c_next_stage())
+  if (e4c_get_current_stage() == e4c_trying && e4c_next_stage())
     /* simple optimization: e4c_next_stage will avoid disposing stage */
 
 /**
@@ -251,7 +251,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see     #e4c_is_instance_of
  */
 #define E4C_CATCH(exception_type)                                           \
-  else if (e4c_catch(&exception_type, E4C_DEBUG_INFO))
+  else if (e4c_catch(&exception_type))
 
 /**
  * Introduces a block of code responsible for cleaning up the previous
@@ -305,7 +305,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see     #e4c_status
  */
 #define E4C_FINALLY                                                         \
-  else if (e4c_get_current_stage(E4C_DEBUG_INFO) == e4c_finalizing)
+  else if (e4c_get_current_stage() == e4c_finalizing)
 
 /**
  * Repeats the previous #E4C_TRY (or #E4C_USE) block entirely
@@ -372,7 +372,7 @@ typedef jmp_buf e4c_jump_buffer;
  */
 #define E4C_RETRY(max_retry_attempts, exception_type, format, ...)          \
   e4c_restart(                                                              \
-    e4c_acquiring,                                                          \
+    false,                                                                  \
     max_retry_attempts,                                                     \
     &exception_type,                                                        \
     E4C_DEBUG_INFO,                                                         \
@@ -529,9 +529,9 @@ typedef jmp_buf e4c_jump_buffer;
  */
 #define E4C_WITH(resource, dispose)                                         \
   EXCEPTIONS4C_BLOCK(e4c_beginning)                                         \
-  if (e4c_get_current_stage(E4C_DEBUG_INFO) == e4c_disposing) {             \
-  dispose((resource), e4c_get_status() == e4c_failed);                      \
-  } else if (e4c_get_current_stage(E4C_DEBUG_INFO) == e4c_acquiring) {
+  if (e4c_get_current_stage() == e4c_disposing) {                           \
+    dispose((resource), e4c_get_status() == e4c_failed);                    \
+  } else if (e4c_get_current_stage() == e4c_acquiring) {
 
 /**
  * Closes a block of code with automatic disposal of a resource
@@ -554,7 +554,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see     #E4C_WITH
  */
 #define E4C_USE                                                             \
-  } else if (e4c_get_current_stage(E4C_DEBUG_INFO) == e4c_trying)
+  } else if (e4c_get_current_stage() == e4c_trying)
 
 /**
  * Introduces a block of code with automatic acquisition and disposal of a
@@ -667,7 +667,7 @@ typedef jmp_buf e4c_jump_buffer;
  */
 #define E4C_REACQUIRE(max_reacquire_attempts, exception_type, format, ...)  \
   e4c_restart(                                                              \
-    e4c_beginning,                                                          \
+    true,                                                                   \
     max_reacquire_attempts,                                                 \
     &exception_type,                                                        \
     E4C_DEBUG_INFO,                                                         \
@@ -693,47 +693,6 @@ typedef jmp_buf e4c_jump_buffer;
  *
  * @{
  */
-
-/**
- * Introduces a block of code which will use a new exception context.
- *
- * This macro begins a new exception context to be used by the code block right
- * next to it. When the code completes, #e4c_context_end will be called
- * implicitly.
- *
- * This macro is very convenient when the beginning and the ending of the
- * current exception context are next to each other. For example, there is no
- * semantic difference between this two blocks of code:
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   // block 1
- *   e4c_context_begin();
- *   // ...
- *   e4c_context_end();
- *
- *   // block 2
- *   e4c_using_context(){
- *       // ...
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * This macro **should be used whenever possible**, rather than doing the
- * explicit, manual calls to #e4c_context_begin and #e4c_context_end,
- * because it is less prone to errors.
- *
- * @pre
- *   - A block introduced by #e4c_using_context **must not** be exited through
- *     any of: `goto`, `break`, `continue` or `return` (but it is legal to
- *     #E4C_THROW an exception).
- * @post
- *   - A block introduced by #e4c_using_context is guaranteed to take place
- *     *inside* an exception context.
- *
- * @see     #e4c_context_begin
- * @see     #e4c_context_end
- */
-#define E4C_USING_CONTEXT                                                   \
-  for (e4c_context_begin(); e4c_context_is_ready(); e4c_context_end())
 
 /**
  * Declares an exception type
@@ -1119,10 +1078,7 @@ typedef void * (*e4c_initialize_handler)(const e4c_exception * exception);
  */
 typedef void (*e4c_finalize_handler)(void * custom_data);
 
-/*
- * Next types are undocumented on purpose, in order to hide implementation
- * details, subject to change.
- */
+/** Represents the execution stage of the current exception frame */
 enum e4c_frame_stage {
     e4c_beginning,
     e4c_acquiring,
@@ -1132,6 +1088,31 @@ enum e4c_frame_stage {
     e4c_finalizing,
     e4c_done
 };
+
+/** Represents an exception frame */
+typedef struct e4c_frame_struct {
+    struct e4c_frame_struct *   previous;
+    enum e4c_frame_stage        stage;
+    bool                        uncaught;
+    e4c_exception *             thrown_exception;
+    int                         retry_attempts;
+    int                         reacquire_attempts;
+    e4c_jump_buffer             continuation;
+} e4c_frame;
+
+/** Represents an exception context */
+typedef struct {
+    e4c_frame *                 current_frame;
+    e4c_uncaught_handler        uncaught_handler;
+    void *                      custom_data;
+    e4c_initialize_handler      initialize_handler;
+    e4c_finalize_handler        finalize_handler;
+} e4c_context;
+
+/**
+ * Represents the function that returns the current exception context.
+ */
+typedef e4c_context * (*e4c_context_supplier)(void);
 
 /**
  * @name Predefined exceptions
@@ -1178,63 +1159,11 @@ E4C_DECLARE_EXCEPTION(NullPointerException);
  */
 
 /**
- * Checks if the current exception context is ready
+ * Sets the exception context supplier.
  *
- * @return  Whether the current exception context of the program (or current
- *          thread) is ready to be used.
- *
- * This function returns whether there is an actual exception context ready to
- * be used by the program or current thread.
- *
- * @see     #e4c_context_begin
- * @see     #e4c_context_end
- * @see     #E4C_USING_CONTEXT
+ * @param context_supplier The context supplier
  */
-bool e4c_context_is_ready(void);
-
-/**
- * Begins an exception context
- *
- * This function begins the current exception context to be used by the program
- * (or current thread), until #e4c_context_end is called.
- *
- * The convenience function #e4c_print_exception will be used as the default
- * *uncaught handler*. It will be called in the event of an uncaught exception,
- * before exiting the program or thread. This handler can be set through the
- * function #e4c_context_set_handlers.
- *
- * @pre
- *   - Once `e4c_context_begin` is called, the program (or thread) **must** call
- *     `e4c_context_end` before exiting.
- *   - Calling `e4c_context_begin` *twice in a row* is considered a programming
- *     error, and therefore the program (or thread) will exit abruptly.
- *     Nevertheless, #e4c_context_begin can be called several times *if, and
- *     only if*, `e4c_context_end` is called in between.
- *
- * @see     #e4c_context_end
- * @see     #e4c_context_is_ready
- * @see     #E4C_USING_CONTEXT
- * @see     #e4c_uncaught_handler
- * @see     #e4c_print_exception
- * @see     #e4c_context_set_handlers
- */
-void e4c_context_begin(void);
-
-/**
- * Ends the current exception context
- *
- * This function ends the current exception context.
- *
- * @pre
- *   - A program (or thread) **must** begin an exception context prior to
- *     calling `e4c_context_end`. Such programming error will lead to an abrupt
- *     exit of the program (or thread).
- *
- * @see     #e4c_context_begin
- * @see     #e4c_context_is_ready
- * @see     #E4C_USING_CONTEXT
- */
-void e4c_context_end(void);
+void e4c_set_context_supplier(e4c_context_supplier supplier);
 
 /**
  * Sets the optional handlers of an exception context
@@ -1452,8 +1381,6 @@ bool e4c_is_instance_of(
  * uncaught exceptions.
  *
  * @see     #e4c_uncaught_handler
- * @see     #e4c_context_begin
- * @see     #E4C_USING_CONTEXT
  */
 void e4c_print_exception(const e4c_exception * exception);
 
@@ -1473,21 +1400,12 @@ e4c_jump_buffer * e4c_start(
 
 bool e4c_next_stage(void);
 
-enum e4c_frame_stage e4c_get_current_stage(
-    const char *                file,
-    int                         line,
-    const char *                function
-);
+enum e4c_frame_stage e4c_get_current_stage(void);
 
-bool e4c_catch(
-    const e4c_exception_type *  exception_type,
-    const char *                file,
-    int                         line,
-    const char *                function
-);
+bool e4c_catch(const e4c_exception_type * exception_type);
 
 noreturn void e4c_restart(
-    enum e4c_frame_stage        stage,
+    bool                        should_reacquire,
     int                         max_repeat_attempts,
     const e4c_exception_type *  exception_type,
     const char *                file,

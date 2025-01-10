@@ -22,8 +22,6 @@ TEST_CASE{
 
     volatile bool caught = false;
 
-    e4c_context_begin();
-
     E4C_TRY{
 
         aux1();
@@ -34,8 +32,6 @@ TEST_CASE{
 
         TEST_ASSERT_EQUALS(e4c_get_exception()->type, &RuntimeException);
     }
-
-    e4c_context_end();
 
     TEST_ASSERT(caught);
 }

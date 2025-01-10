@@ -3,19 +3,16 @@
 
 
 /**
- * `e4c_frame_get_stage` call without beginning
+ * `e4c_frame_get_stage` call without starting a new exception frame
  *
  * This test uses the library improperly, by attempting to call
- * `e4c_frame_get_stage`, without calling `e4c_context_begin` first.
+ * `e4c_get_current_stage`, without starting a new exception frame.
  *
- * The library must signal the misuse by throwing the exception
- * `ContextHasNotBegunYet`.
+ * The library must abort if NDEBUG is undefined.
  *
  */
 TEST_CASE{
 
-    TEST_EXPECTING(ContextHasNotBegunYet);
-
     /* This function must not be called like this! */
-    (void) e4c_get_current_stage(E4C_DEBUG_INFO);
+    (void) e4c_get_current_stage();
 }

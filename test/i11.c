@@ -14,8 +14,6 @@ TEST_CASE{
 
     volatile e4c_status status = e4c_succeeded;
 
-    e4c_context_begin();
-
     E4C_TRY{
 
         E4C_TRY{
@@ -31,8 +29,6 @@ TEST_CASE{
 
         TEST_DUMP("%s", e4c_get_exception()->message);
     }
-
-    e4c_context_end();
 
     TEST_ASSERT(status == e4c_failed);
 }

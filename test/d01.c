@@ -12,9 +12,5 @@ TEST_CASE{
 
     TEST_EXPECTING(RuntimeException);
 
-    e4c_context_begin();
-
     E4C_THROW(RuntimeException, "Nobody will catch me.");
-
-    e4c_context_end();
 }

@@ -11,8 +11,6 @@
  */
 TEST_CASE{
 
-    e4c_context_begin();
-
     E4C_TRY{
 
         E4C_THROW(RuntimeException, "Please catch me");
@@ -25,6 +23,4 @@ TEST_CASE{
 
         TEST_ASSERT(e4c_get_status() == e4c_recovered);
     }
-
-    e4c_context_end();
 }

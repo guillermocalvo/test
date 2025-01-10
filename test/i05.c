@@ -20,13 +20,9 @@ TEST_CASE{
 
     atexit(check_execution);
 
-    e4c_context_begin();
-
     e4c_context_set_handlers(custom_uncaught_handler, NULL, NULL, NULL);
 
     E4C_THROW(RuntimeException, "You can't stop me now!");
-
-    e4c_context_end();
 }
 
 void check_execution(void){

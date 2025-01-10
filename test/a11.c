@@ -3,10 +3,7 @@
 
 
 /**
- * `e4c_get_exception` call without beginning
- *
- * This test uses the library improperly, by attempting to call
- * `e4c_get_exception`, without calling `e4c_context_begin` first.
+ * `e4c_get_exception` call without starting a new exception frame
  *
  * The library must return NULL.
  *

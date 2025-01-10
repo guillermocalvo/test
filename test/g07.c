@@ -8,11 +8,11 @@ void throw_on_signal(int);
 int integer = 123;
 
 /**
- * Catching `BadPointerException`
+ * Catching `NullPointerException`
  *
  * This test attempts to dereference a null pointer; the library signal handling
  * is enabled. The library will convert the signal `SIGSEGV` into the exception
- * `BadPointerException`. There is a `catch(BadPointerException)` block,
+ * `NullPointerException`. There is a `catch(NullPointerException)` block,
  * therefore the exception will be caught.
  *
  * This functionality relies on the platform's ability to handle signal
@@ -25,8 +25,6 @@ TEST_CASE{
 
     signal(SIGSEGV, throw_on_signal);
 
-    e4c_context_begin();
-
     E4C_TRY{
 
         int * pointer = &integer;
@@ -34,7 +32,7 @@ TEST_CASE{
         pointer = null(integer);
         integer = *pointer;
 
-        TEST_FAIL("BadPointerException should have been thrown");
+        TEST_FAIL("NullPointerException should have been thrown");
 
         TEST_DUMP("%d", integer);
         TEST_DUMP("%p", (void *)pointer);
@@ -45,8 +43,6 @@ TEST_CASE{
 
         TEST_ASSERT(e4c_get_exception()->type == &NullPointerException);
     }
-
-    e4c_context_end();
 
     TEST_ASSERT(caught);
 }

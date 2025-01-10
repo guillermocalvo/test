@@ -24,23 +24,22 @@ int integer = 123;
  */
 TEST_CASE{
 
-    TEST_SKIP("Skip this test temporarily");
+    TEST_EXPECTING(ArithmeticException);
 
     signal(SIGFPE, throw_on_signal);
 
-    int divisor = 10;
-
-    TEST_EXPECTING(ArithmeticException);
-
-    e4c_context_begin();
-
-    divisor = zero(integer);
-    integer = integer / divisor;
-
-    e4c_context_end();
+    int divisor = zero(rand());
 
     TEST_DUMP("%d", integer);
     TEST_DUMP("%d", divisor);
+
+    int result = integer / divisor;
+
+    TEST_DUMP("%d", result);
+
+    raise(SIGFPE);
+
+    TEST_FAIL("ArithmeticException should have been thrown");
 }
 
 int zero(int dummy){

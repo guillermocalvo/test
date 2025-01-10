@@ -14,10 +14,6 @@
  */
 TEST_CASE{
 
-    TEST_EXPECTING(ExceptionSystemFatalError);
-
-    e4c_context_begin();
-
     E4C_TRY{
 
         TEST_ECHO("Inside `try` block...");
@@ -25,6 +21,4 @@ TEST_CASE{
         /* Never jump out of a `try` block! */
         break;
     }
-
-    e4c_context_end();
 }

@@ -19,8 +19,6 @@ TEST_CASE{
     volatile int foo          = 0;
     volatile int total_acquisitions = 0;
 
-    e4c_context_begin();
-
     E4C_WITH(foo, DISPOSE_FOO){
 
         total_acquisitions++;
@@ -48,8 +46,6 @@ TEST_CASE{
 
         E4C_REACQUIRE(4, RuntimeException, NULL);
     }
-
-    e4c_context_end();
 
     TEST_DUMP("%d", total_acquisitions);
 

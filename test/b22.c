@@ -18,8 +18,6 @@ TEST_CASE{
 
     TEST_EXPECTING(NullPointerException);
 
-    e4c_context_begin();
-
     E4C_TRY{
 
         thrown = true;
@@ -32,8 +30,6 @@ TEST_CASE{
 
         caught = (e4c_get_exception()->type == &NullPointerException);
     }
-
-    e4c_context_end();
 
     TEST_ASSERT(thrown);
     TEST_ASSERT(caught);

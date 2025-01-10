@@ -16,8 +16,6 @@ custom_data_t initial_data = {123, "FOOBAR"};
  */
 TEST_CASE{
 
-    e4c_context_begin();
-
     e4c_context_set_handlers(NULL, &initial_data, NULL, NULL);
 
     E4C_TRY{
@@ -31,6 +29,4 @@ TEST_CASE{
         TEST_ASSERT_EQUALS(data->id, initial_data.id);
         TEST_ASSERT_STRING_EQUALS(data->name, initial_data.name);
     }
-
-    e4c_context_end();
 }

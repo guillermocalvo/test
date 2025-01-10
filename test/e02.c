@@ -30,8 +30,6 @@ TEST_CASE{
     volatile bool cleanup1 = false;
     volatile bool cleanup2 = false;
 
-    e4c_context_begin();
-
     E4C_TRY{
 
         another_function(&cleanup1, &cleanup2);
@@ -43,8 +41,6 @@ TEST_CASE{
 
     TEST_ASSERT(cleanup1);
     TEST_ASSERT(cleanup2);
-
-    e4c_context_end();
 }
 
 void another_function(volatile bool * flag1, volatile bool * flag2){

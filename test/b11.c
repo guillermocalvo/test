@@ -16,8 +16,6 @@ TEST_CASE{
 
     volatile bool ignored = false;
 
-    e4c_context_begin();
-
     E4C_TRY{
 
         TEST_ECHO("Inside `try` block...");
@@ -37,8 +35,6 @@ TEST_CASE{
      *
      * Anyway, this test proves that the 'use' block will be ignored.
      */
-
-    e4c_context_end();
 
     TEST_ASSERT(ignored);
 }

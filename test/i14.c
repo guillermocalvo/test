@@ -15,8 +15,6 @@ void * custom_initialize_handler(const e4c_exception * exception);
  */
 TEST_CASE{
 
-    e4c_context_begin();
-
     e4c_context_set_handlers(NULL, NULL, custom_initialize_handler, NULL);
 
     E4C_TRY{
@@ -28,8 +26,6 @@ TEST_CASE{
 
         TEST_ASSERT_STRING_EQUALS(e4c_get_exception()->message, "FORMATTED_MESSAGE");
     }
-
-    e4c_context_end();
 
     TEST_ASSERT(custom_initializer_was_executed);
 

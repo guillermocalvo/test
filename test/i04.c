@@ -9,8 +9,6 @@
  */
 TEST_CASE{
 
-    e4c_context_begin();
-
     E4C_TRY{
 
         E4C_THROW(RuntimeException, "%s_%s", "FORMATTED", "MESSAGE");
@@ -19,7 +17,4 @@ TEST_CASE{
 
         TEST_ASSERT_STRING_EQUALS(e4c_get_exception()->message, "FORMATTED_MESSAGE");
     }
-
-    e4c_context_end();
-
 }

@@ -14,8 +14,6 @@ TEST_CASE{
 
     volatile int total_tries = 0;
 
-    e4c_context_begin();
-
     E4C_TRY{
 
         total_tries++;
@@ -41,8 +39,6 @@ TEST_CASE{
             E4C_RETRY(3, RuntimeException, "Too many attempts");
         }
     }
-
-    e4c_context_end();
 
     TEST_DUMP("%d", total_tries);
 

@@ -11,8 +11,6 @@
  */
 TEST_CASE{
 
-    e4c_context_begin();
-
     E4C_TRY{
 
         TEST_ASSERT( !e4c_get_exception() );
@@ -21,6 +19,4 @@ TEST_CASE{
 
         TEST_ASSERT_EQUALS(e4c_get_status(), e4c_succeeded);
     }
-
-    e4c_context_end();
 }

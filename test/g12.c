@@ -22,8 +22,6 @@ TEST_CASE{
 
     signal(SIGINT, throw_on_signal);
 
-    e4c_context_begin();
-
     E4C_TRY{
 
         raise(SIGINT);
@@ -36,8 +34,6 @@ TEST_CASE{
 
         TEST_ASSERT(e4c_get_exception()->type == &UserInterruptionException);
     }
-
-    e4c_context_end();
 
     TEST_ASSERT(caught);
 }

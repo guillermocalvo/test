@@ -22,8 +22,6 @@ TEST_CASE{
 
     signal(SIGTERM, throw_on_signal);
 
-    e4c_context_begin();
-
     E4C_TRY{
 
         raise(SIGTERM);
@@ -36,8 +34,6 @@ TEST_CASE{
 
         TEST_ASSERT(e4c_get_exception()->type == &TerminationException);
     }
-
-    e4c_context_end();
 
     TEST_ASSERT(caught);
 }

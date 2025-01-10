@@ -17,8 +17,6 @@ volatile bool custom_handler_was_finalized = false;
  */
 TEST_CASE{
 
-    e4c_context_begin();
-
     e4c_context_set_handlers(NULL, foobar, NULL, custom_finalize_handler);
 
     E4C_TRY{
@@ -29,8 +27,6 @@ TEST_CASE{
 
         custom_handler_was_initialized = ( strcmp(e4c_get_exception()->custom_data, foobar) == 0 );
     }
-
-    e4c_context_end();
 
     TEST_ASSERT(custom_handler_was_initialized);
     TEST_ASSERT(custom_handler_was_finalized);

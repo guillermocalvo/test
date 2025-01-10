@@ -39,39 +39,10 @@ endif (DOXYGEN_FOUND)
 enable_testing()
 
 set(TESTS
-        a01
-        a02
-        a03
-        a05
-        a06
-        a07
-        a08
-        a09
-        a10
         a11
-        a12
-        a13
-        a16
-        b01
-        b02
-        b03
-        b04
-        b05
-        b06
-        b07
-        b08
-        b09
-        b10
         b11
-        b12
-        b14
         b15
-        b18
-        b19
-        b21
         b22
-        c01
-        c02
         d01
         d02
         d03
@@ -120,33 +91,7 @@ foreach(TEST IN LISTS TESTS)
     set_property(TEST ${TEST} PROPERTY SKIP_RETURN_CODE 77)
 endforeach()
 
-set_property(TEST a01 PROPERTY WILL_FAIL TRUE)
-set_property(TEST a02 PROPERTY WILL_FAIL TRUE)
-set_property(TEST a03 PROPERTY WILL_FAIL TRUE)
-set_property(TEST a05 PROPERTY WILL_FAIL TRUE)
-set_property(TEST a06 PROPERTY WILL_FAIL TRUE)
-set_property(TEST a07 PROPERTY WILL_FAIL TRUE)
-set_property(TEST a08 PROPERTY WILL_FAIL TRUE)
-set_property(TEST a09 PROPERTY WILL_FAIL TRUE)
-set_property(TEST a10 PROPERTY WILL_FAIL TRUE)
-set_property(TEST a12 PROPERTY WILL_FAIL TRUE)
-set_property(TEST a16 PROPERTY WILL_FAIL TRUE)
-set_property(TEST b01 PROPERTY WILL_FAIL TRUE)
-set_property(TEST b02 PROPERTY WILL_FAIL TRUE)
-set_property(TEST b03 PROPERTY WILL_FAIL TRUE)
-set_property(TEST b04 PROPERTY WILL_FAIL TRUE)
-set_property(TEST b05 PROPERTY WILL_FAIL TRUE)
-set_property(TEST b07 PROPERTY WILL_FAIL TRUE)
-set_property(TEST b08 PROPERTY WILL_FAIL TRUE)
-set_property(TEST b09 PROPERTY WILL_FAIL TRUE)
-set_property(TEST b10 PROPERTY WILL_FAIL TRUE)
-set_property(TEST b12 PROPERTY WILL_FAIL TRUE)
 set_property(TEST b15 PROPERTY WILL_FAIL TRUE)
-set_property(TEST b18 PROPERTY WILL_FAIL TRUE)
-set_property(TEST b19 PROPERTY WILL_FAIL TRUE)
-set_property(TEST b21 PROPERTY WILL_FAIL TRUE)
-set_property(TEST c01 PROPERTY WILL_FAIL TRUE)
-set_property(TEST c02 PROPERTY WILL_FAIL TRUE)
 set_property(TEST d01 PROPERTY WILL_FAIL TRUE)
 set_property(TEST d02 PROPERTY WILL_FAIL TRUE)
 set_property(TEST d03 PROPERTY WILL_FAIL TRUE)

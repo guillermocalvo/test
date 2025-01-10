@@ -25,11 +25,7 @@ TEST_CASE{
 
     signal(SIGABRT, throw_on_signal);
 
-    e4c_context_begin();
-
     abort();
-
-    e4c_context_end();
 }
 
 void throw_on_signal(int _) {

@@ -16,11 +16,7 @@ TEST_CASE{
 
     TEST_EXPECTING(RuntimeException);
 
-    e4c_context_begin();
-
     another_function();
-
-    e4c_context_end();
 }
 
 

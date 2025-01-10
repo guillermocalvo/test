@@ -25,8 +25,6 @@ TEST_CASE{
 
     volatile bool cleanup = false;
 
-    e4c_context_begin();
-
     E4C_TRY{
 
         another_function(&cleanup);
@@ -37,8 +35,6 @@ TEST_CASE{
     }
 
     TEST_ASSERT(cleanup);
-
-    e4c_context_end();
 }
 
 void another_function(volatile bool * flag){

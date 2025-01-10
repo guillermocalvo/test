@@ -13,8 +13,6 @@ TEST_CASE{
 
     volatile bool caught = false;
 
-    e4c_context_begin();
-
     E4C_TRY{
 
         E4C_THROW(NullPointerException, "I'm going to be caught.");
@@ -23,8 +21,6 @@ TEST_CASE{
 
         caught = true;
     }
-
-    e4c_context_end();
 
     TEST_ASSERT(caught);
 }

@@ -19,10 +19,6 @@ TEST_CASE{
 
     volatile bool uncaught = false;
 
-    TEST_EXPECTING(RuntimeException);
-
-    e4c_context_begin();
-
     E4C_TRY{
 
         aux(&uncaught);
@@ -33,8 +29,6 @@ TEST_CASE{
     }
 
     TEST_ASSERT(uncaught);
-
-    e4c_context_end();
 }
 
 

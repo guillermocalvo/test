@@ -23,8 +23,6 @@ TEST_CASE{
 
     signal(SIGILL, throw_on_signal);
 
-    e4c_context_begin();
-
     E4C_TRY{
 
         raise(SIGILL);
@@ -37,8 +35,6 @@ TEST_CASE{
 
         TEST_ASSERT(e4c_get_exception()->type == &IllegalInstructionException);
     }
-
-    e4c_context_end();
 
     TEST_ASSERT(exception_was_caught);
 }

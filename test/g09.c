@@ -25,8 +25,6 @@ TEST_CASE{
 
     signal(SIGABRT, throw_on_signal);
 
-    e4c_context_begin();
-
     E4C_TRY{
 
         abort();
@@ -39,8 +37,6 @@ TEST_CASE{
 
         TEST_ASSERT(e4c_get_exception()->type == &AbortException);
     }
-
-    e4c_context_end();
 
     TEST_ASSERT(caught);
 }

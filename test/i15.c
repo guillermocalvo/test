@@ -14,8 +14,6 @@ E4C_DEFINE_EXCEPTION(CustomException, "This is a custom exception", RuntimeExcep
  */
 TEST_CASE{
 
-    e4c_context_begin();
-
     E4C_TRY{
 
         E4C_TRY{
@@ -31,6 +29,4 @@ TEST_CASE{
 
         TEST_ASSERT_EQUALS(e4c_get_exception()->cause->type, &CustomException);
     }
-
-    e4c_context_end();
 }
