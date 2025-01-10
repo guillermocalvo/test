@@ -36,7 +36,9 @@ TEST_CASE{
             TEST_DUMP("%d", reacquisitions);
         }
 
-        E4C_THROW(RuntimeException, "Simulates an error while acquiring foo");
+        if(total_acquisitions < 4) {
+            E4C_THROW(RuntimeException, "Simulates an error while acquiring foo");
+        }
 
     }E4C_USE{
 
@@ -44,7 +46,7 @@ TEST_CASE{
 
     }E4C_CATCH(RuntimeException){
 
-        E4C_REACQUIRE(3);
+        E4C_REACQUIRE(4, RuntimeException, NULL);
     }
 
     e4c_context_end();

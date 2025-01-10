@@ -16,5 +16,5 @@ TEST_CASE{
 
     TEST_EXPECTING(ContextHasNotBegunYet);
 
-    E4C_RETRY(10);
+    E4C_RETRY(10, RuntimeException, NULL);
 }

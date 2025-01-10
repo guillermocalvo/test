@@ -312,14 +312,21 @@ typedef jmp_buf e4c_jump_buffer;
  *
  * @param   max_retry_attempts
  *          The maximum number of attempts to retry
+ * @param   exception_type
+ *          The type of exception to be thrown
+ * @param   format
+ *          The detail message.
+ * @param   ...
+ *          The variadic arguments that will be formatted according to the
+ *          format control
  *
- * This macro discards any thrown exception (if any) and repeats the previous
- * `try` or `use` block, up to a specified maximum number of attempts. It is
- * intended to be used within #E4C_CATCH or #E4C_FINALLY blocks as a quick way to
- * fix an error condition and *try again*.
+ * This macro repeats the previous `try` or `use` block, up to a specified
+ * maximum number of attempts. If the block has already been *tried* at
+ * least the specified number of times, then the supplied exception will
+ * be thrown.
  *
- * If the block has already been *tried* at least the specified number of times,
- * then the program continues by the next line following `retry` clause.
+ * It is intended to be used within #E4C_CATCH or #E4C_FINALLY blocks as
+ * a quick way to fix an error condition and *try again*.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
  *   const char * file_path = config_get_user_defined_file_path();
@@ -328,43 +335,12 @@ typedef jmp_buf e4c_jump_buffer;
  *       config = read_config(file_path);
  *   }catch(ConfigException){
  *       file_path = config_get_default_file_path();
- *       retry(1);
- *       throw(ConfigException, "Wrong defaults.");
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * @warning
- * If the specified maximum number of attempts is *zero*, then the block can
- * eventually be attempted an unlimited number of times. Care should be taken in
- * order not to create an *infinite loop*.
- *
- * This macro won't return control unless the block has already been attempted,
- * at least, the specified maximum number of times.
- *
- * @note
- * Once a `catch` code block is being executed, the current exception is
- * considered caught. If you want the exception to be propagated when the
- * maximum number of attempts has been reached, then you need to throw it
- * again.
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   int dividend = 100;
- *   int divisor = 0;
- *   int result = 0;
- *
- *   try{
- *       result = dividend / divisor;
- *       do_something(result);
- *   }catch(RuntimeException){
- *       divisor = 1;
- *       retry(1);
- *       throw(RuntimeException, "Error (not a division by zero).");
+ *       retry(1, ConfigException, "Wrong defaults.");
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
  * @note
- * At a `finally` block, the current exception (if any) will be propagated when
- * the `retry` does not take place, so you don't need to throw it again.
+ * #E4C_TRY MAY be used at a `finally` block.
  *
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
  *   int dividend = 100;
@@ -377,8 +353,7 @@ typedef jmp_buf e4c_jump_buffer;
  *   }finally{
  *       if( e4c_get_status() == e4c_failed ){
  *           divisor = 1;
- *           retry(1);
- *           // when we get here, the exception will be propagated
+ *           retry(1, RuntimeException, "Retry Error");
  *       }
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -389,15 +364,21 @@ typedef jmp_buf e4c_jump_buffer;
  *     of the program (or thread).
  *   - The `retry` keyword **must** be used from a `catch` or `finally` block.
  * @post
- *   - Control does not return to the `retry` point, unless the `try` (or `use`)
- *     block has already been attempted, at least, the specified number of times.
+ *   - Control does not return to the `retry` point.
  *
  * @see     #E4C_REACQUIRE
  * @see     #E4C_TRY
  * @see     #E4C_USE
  */
-#define E4C_RETRY(max_retry_attempts)                                       \
-    e4c_restart(max_retry_attempts, e4c_acquiring, E4C_DEBUG_INFO)
+#define E4C_RETRY(max_retry_attempts, exception_type, format, ...)          \
+  e4c_restart(                                                              \
+    e4c_acquiring,                                                          \
+    max_retry_attempts,                                                     \
+    &exception_type,                                                        \
+    E4C_DEBUG_INFO,                                                         \
+    (format)                                                                \
+    __VA_OPT__(,) __VA_ARGS__                                               \
+  )
 
 /**
  * Signals an exceptional situation represented by an exception object
@@ -619,10 +600,17 @@ typedef jmp_buf e4c_jump_buffer;
  *
  * @param   max_reacquire_attempts
  *          The maximum number of attempts to reacquire
+ * @param   exception_type
+ *          The type of exception to be thrown
+ * @param   format
+ *          The detail message.
+ * @param   ...
+ *          The variadic arguments that will be formatted according to the
+ *          format control
  *
- * This macro discards any thrown exception (if any) and repeats the previous
- * `with` block, up to a specified maximum number of attempts. If the
- * acquisition completes, then the `use` block will be executed.
+ * This macro repeats the previous `with` block, up to a specified maximum
+ * number of attempts. If the acquisition completes, then the `use` block
+ * will be executed. Otherwise, the supplied exception will be thrown.
  *
  * It is intended to be used within #E4C_CATCH or #E4C_FINALLY blocks, next to a
  * #E4C_WITH... #E4C_USE or #E4C_USING block, when the resource acquisition fails,
@@ -642,11 +630,6 @@ typedef jmp_buf e4c_jump_buffer;
  *       reacquire(1);
  *   }
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * @warning
- * If the specified maximum number of attempts is *zero*, then the `with` block
- * can eventually be attempted an unlimited number of times. Care should be
- * taken in order not to create an *infinite loop*.
  *
  * Once the resource has been acquired, the `use` block can also be repeated
  * *alone* through the keyword #E4C_RETRY:
@@ -676,15 +659,21 @@ typedef jmp_buf e4c_jump_buffer;
  *     the keyword `reacquire`. Such programming error will lead to an abrupt
  *     exit of the program (or thread).
  * @post
- *   - This macro won't return control unless the `with` block has already been
- *     attempted, at least, the specified maximum number of times.
+ *   - Control does not return to the `reacquire` point.
  *
  * @see     #E4C_RETRY
  * @see     #E4C_WITH
  * @see     #E4C_USE
  */
-#define E4C_REACQUIRE(max_reacquire_attempts)                               \
-  e4c_restart(max_reacquire_attempts, e4c_beginning, E4C_DEBUG_INFO)
+#define E4C_REACQUIRE(max_reacquire_attempts, exception_type, format, ...)  \
+  e4c_restart(                                                              \
+    e4c_beginning,                                                          \
+    max_reacquire_attempts,                                                 \
+    &exception_type,                                                        \
+    E4C_DEBUG_INFO,                                                         \
+    (format)                                                                \
+    __VA_OPT__(,) __VA_ARGS__                                               \
+  )
 
 /** @} */
 
@@ -1514,12 +1503,15 @@ bool e4c_catch(
     const char *                function
 );
 
-void e4c_restart(
-    int                         max_repeat_attempts,
+noreturn void e4c_restart(
     enum e4c_frame_stage        stage,
+    int                         max_repeat_attempts,
+    const e4c_exception_type *  exception_type,
     const char *                file,
     int                         line,
-    const char *                function
+    const char *                function,
+    const char *                format,
+    ...
 );
 
 noreturn void e4c_throw(

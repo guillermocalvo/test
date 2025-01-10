@@ -455,9 +455,8 @@ bool e4c_next_stage(void) {
     frame->stage++;
 
     /* simple optimization */
-    if (frame->stage == e4c_catching && (!frame->uncaught || frame->thrown_exception == NULL || frame->thrown_exception->type == NULL)) {
-        /* if no exception was thrown, or if the thrown exception cannot be
-            caught, we don't need to go through the "catching" stage */
+    if (frame->stage == e4c_catching && (!frame->uncaught || frame->thrown_exception == NULL)) {
+        /* if no exception was thrown, we don't need to go through the "catching" stage */
         frame->stage++;
     }
 
@@ -499,7 +498,7 @@ bool e4c_next_stage(void) {
     return false;
 }
 
-void e4c_restart(int max_repeat_attempts, enum e4c_frame_stage stage, const char * file, int line, const char * function) {
+noreturn void e4c_restart(enum e4c_frame_stage stage, int max_repeat_attempts, const e4c_exception_type * exception_type, const char * file, int line, const char * function, const char * format, ...) {
 
     e4c_context *       context;
     e4c_frame *         frame;
@@ -523,28 +522,24 @@ void e4c_restart(int max_repeat_attempts, enum e4c_frame_stage stage, const char
         library_panic(&ExceptionSystemFatalError, "No E4C_TRY block to retry.", file, line, function, errno);
     }
 
-    /* check if "uncatchable" exception */
-    if (frame->uncaught && frame->thrown_exception != NULL && frame->thrown_exception->type == NULL) {
-        return;
-    }
-
     /* check if maximum number of attempts reached and update the number of attempts */
+    bool max_reached;
     switch (stage) {
 
         case e4c_beginning:
             /* reacquire */
-            if (frame->reacquire_attempts >= max_repeat_attempts) {
-                return;
+            max_reached = frame->reacquire_attempts >= max_repeat_attempts;
+            if (!max_reached) {
+                frame->reacquire_attempts++;
             }
-            frame->reacquire_attempts++;
             break;
 
         case e4c_acquiring:
             /* retry */
-            if (frame->retry_attempts >= max_repeat_attempts) {
-                return;
+            max_reached = frame->retry_attempts >= max_repeat_attempts;
+            if (!max_reached) {
+                frame->retry_attempts++;
             }
-            frame->retry_attempts++;
             break;
 
         case e4c_trying:
@@ -554,6 +549,18 @@ void e4c_restart(int max_repeat_attempts, enum e4c_frame_stage stage, const char
         case e4c_done:
         default:
             library_panic(&ExceptionSystemFatalError, "The specified stage can't be repeated.", file, line, function, errno);
+    }
+
+    if (max_reached) {
+        if (format == NULL) {
+            e4c_throw(exception_type, file, line, function, NULL);
+        }
+        char message[E4C_EXCEPTION_MESSAGE_SIZE] = {0};
+        va_list arguments_list;
+        va_start(arguments_list, format);
+        (void) vsnprintf(message, E4C_EXCEPTION_MESSAGE_SIZE, format, arguments_list);
+        va_end(arguments_list);
+        e4c_throw(exception_type, file, line, function, message);
     }
 
     /* deallocate previously thrown exception */

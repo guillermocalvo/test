@@ -31,9 +31,15 @@ TEST_CASE{
             TEST_DUMP("%d", retries);
         }
 
+        if (total_tries <= 3) {
+            E4C_THROW(RuntimeException, "Please try again");
+        }
+
     }E4C_FINALLY{
 
-        E4C_RETRY(3);
+        if (e4c_get_status() == e4c_failed) {
+            E4C_RETRY(3, RuntimeException, "Too many attempts");
+        }
     }
 
     e4c_context_end();

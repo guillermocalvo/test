@@ -18,7 +18,7 @@ TEST_CASE{
 
     e4c_context_begin();
 
-    E4C_REACQUIRE(10);
+    E4C_REACQUIRE(10, RuntimeException, NULL);
 
     e4c_context_end();
 }
