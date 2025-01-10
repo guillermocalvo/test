@@ -226,25 +226,24 @@ XFAIL_TESTS =                           \
 	bin/check/a08                       \
 	bin/check/a09                       \
 	bin/check/a10                       \
-	bin/check/a11                       \
 	bin/check/a12                       \
-	bin/check/a13                       \
 	bin/check/a16                       \
 	bin/check/b01                       \
 	bin/check/b02                       \
 	bin/check/b03                       \
 	bin/check/b04                       \
 	bin/check/b05                       \
-	bin/check/b06                       \
 	bin/check/b07                       \
 	bin/check/b08                       \
 	bin/check/b09                       \
 	bin/check/b10                       \
-	bin/check/b14                       \
+	bin/check/b12                       \
 	bin/check/b15                       \
 	bin/check/b18                       \
 	bin/check/b19                       \
 	bin/check/b21                       \
+	bin/check/c01                       \
+	bin/check/c02                       \
 	bin/check/d01                       \
 	bin/check/d02                       \
 	bin/check/d03                       \

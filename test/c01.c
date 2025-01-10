@@ -11,9 +11,6 @@
  * The exception context is begun, but it never gets ended because the program
  * exits.
  *
- * The library must signal the misuse by throwing the exception
- * `ContextNotEnded`.
- *
  */
 TEST_CASE{
 

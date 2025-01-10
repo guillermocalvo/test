@@ -8,13 +8,8 @@
  * This test uses the library in an inconsistent way, by attempting to call
  * `e4c_context_begin` twice in a row.
  *
- * The library must signal the misuse by throwing the exception
- * `ContextHasAlreadyBegun`.
- *
  */
 TEST_CASE{
-
-    TEST_EXPECTING(ContextHasAlreadyBegun);
 
     e4c_context_begin();
 

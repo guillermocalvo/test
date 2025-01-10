@@ -62,9 +62,6 @@ struct e4c_context_ {
     e4c_finalize_handler        finalize_handler;
 };
 
-/** flag to signal a critical error in the exception system */
-static volatile bool fatal_error_flag = false;
-
 /** flag to determine if the exception system is initialized */
 static volatile bool is_initialized = false;
 
@@ -79,25 +76,16 @@ static e4c_context * current_context = NULL;
 
 
 E4C_DEFINE_EXCEPTION(RuntimeException,                  "Runtime exception.",               RuntimeException);
-static E4C_DEFINE_EXCEPTION(NotEnoughMemoryException,          "Not enough memory.",               RuntimeException);
 E4C_DEFINE_EXCEPTION(NullPointerException,              "Null pointer.",                    RuntimeException);
-
-static E4C_DEFINE_EXCEPTION(ExceptionSystemFatalError,  "The exception context for this program is in an invalid state.",   RuntimeException);
-static E4C_DEFINE_EXCEPTION(ContextAlreadyBegun,        "The exception context for this program has already begun.",        ExceptionSystemFatalError);
-static E4C_DEFINE_EXCEPTION(ContextHasNotBegunYet,      "The exception context for this program has not begun yet.",        ExceptionSystemFatalError);
-static E4C_DEFINE_EXCEPTION(ContextNotEnded,            "The program did not end its exception context properly.",          ExceptionSystemFatalError);
-
 
 
 static void library_initialize(void);
 static void library_finalize(void);
 static noreturn void library_panic(
-    const e4c_exception_type *  exception_type,
-    const char *                message,
+    const char *                error_message,
     const char *                file,
     int                         line,
-    const char *                function,
-    int                         error_number
+    const char *                function
 );
 
 static void context_handle_uncaught_exception(const e4c_context * context, const e4c_exception * exception);
@@ -119,6 +107,7 @@ static void exception_initialize(
     int                         error_number
 );
 static void exception_set_cause(e4c_exception * exception, e4c_exception * cause);
+static void print_debug(const char * file, int line, const char * function);
 static void exception_print(const char * prefix, const e4c_exception * exception);
 
 
@@ -146,43 +135,16 @@ static void library_finalize(void) {
     is_finalized = true;
 
     /* check for dangling context */
-    if (!fatal_error_flag && current_context != NULL) {
-
-        e4c_exception exception;
-
-        /* create temporary exception to be printed out */
-        exception_initialize(&exception, &ContextNotEnded, true, NULL, __FILE__, __LINE__, __func__, errno);
-        context_handle_uncaught_exception(E4C_CURRENT_CONTEXT, &exception);
-
-        fatal_error_flag = true;
+    if (current_context != NULL) {
+        library_panic("The program did not end its exception context properly", E4C_DEBUG_INFO);
     }
-
-# ifndef NDEBUG
-    /* check for critical errors */
-    if (fatal_error_flag) {
-        /* print fatal error message */
-        fprintf(stderr, "\n\nException system errors occurred during program execution.\n");
-        (void) fflush(stderr);
-    }
-# endif
-
 }
 
-static void library_panic(const e4c_exception_type * exception_type, const char * message, const char * file, int line, const char * function, int error_number) {
-
-    e4c_exception exception;
-
-    exception_initialize(&exception, exception_type, true, message, file, line, function, error_number);
-
-    /* ensures library initialization so that library_finalize will be called */
-    INITIALIZE_ONCE;
-
-    /* prints this specific exception */
-    context_handle_uncaught_exception(E4C_CURRENT_CONTEXT, &exception);
-
-    /* records critical error so that an error message will be printed at exit */
-    fatal_error_flag = true;
-
+static noreturn void library_panic(const char * error_message, const char * file, int line, const char * function) {
+    perror("Fatal error");
+    fprintf(stderr, "[exceptions4c] %s\n", error_message);
+    print_debug(file, line, function);
+    fflush(stderr);
     exit(EXIT_FAILURE);
 }
 
@@ -240,7 +202,8 @@ void e4c_context_begin() {
 
     /* check if e4c_context_begin was called twice for this program */
     if (current_context != NULL) {
-        library_panic(&ContextAlreadyBegun, NULL, E4C_DEBUG_INFO, errno);
+        /* context already begun */
+        return;
     }
 
     /* make sure the current frame is not null */
@@ -267,14 +230,15 @@ void e4c_context_end(void) {
 
     /* make sure `e4c_context_begin` was called before */
     if (context == NULL) {
-        library_panic(&ContextHasNotBegunYet, NULL, E4C_DEBUG_INFO, errno);
+        /* context not begun yet */
+        return;
     }
 
     /* check if there are too many frames left (breaking out of a try block) */
     if (context->current_frame != NULL) {
         /* deallocate the dangling frames */
         frame_deallocate(context->current_frame, context->finalize_handler);
-        library_panic(&ExceptionSystemFatalError, "There are too many exception frames. Probably some try{...} block was exited through 'return' or 'break'.", __FILE__, __LINE__, __func__, errno);
+        library_panic("There are too many exception frames. Probably some try{...} block was exited through 'return' or 'break'.", E4C_DEBUG_INFO);
     }
 
     /* deactivate the current context */
@@ -311,7 +275,7 @@ void e4c_context_set_handlers(e4c_uncaught_handler uncaught_handler, void * cust
 
     /* ensure that `e4c_context_begin` was called before */
     if (context == NULL) {
-        library_panic(&ContextHasNotBegunYet, NULL, E4C_DEBUG_INFO, errno);
+        library_panic("The exception context for this program has not begun yet.\n", E4C_DEBUG_INFO);
     }
 
     context->uncaught_handler   = uncaught_handler;
@@ -335,16 +299,16 @@ e4c_jump_buffer * e4c_start(enum e4c_frame_stage stage, const char * file, int l
 
     context = E4C_CURRENT_CONTEXT;
 
-    /* check if 'try' was used before calling e4c_context_begin */
+    /* make sure e4c_context_begin was called before */
     if (context == NULL) {
-        library_panic(&ContextHasNotBegunYet, NULL, file, line, function, errno);
+        library_panic("The exception context for this program has not begun yet.", E4C_DEBUG_INFO);
     }
 
     /* allocate a new frame */
     new_frame = calloc(1, sizeof(e4c_frame));
 
     if (new_frame == NULL) {
-        library_panic(&NotEnoughMemoryException, "Could not create a new exception frame.", __FILE__, __LINE__, __func__, errno);
+        library_panic("Not enough memory to create a new exception frame", file, line, function);
     }
 
     /* initialize frame data */
@@ -387,7 +351,7 @@ enum e4c_frame_stage e4c_get_current_stage(const char * file, int line, const ch
 
     /* check if 'e4c_get_current_stage' was used before calling e4c_context_begin */
     if (context == NULL) {
-        library_panic(&ContextHasNotBegunYet, NULL, file, line, function, errno);
+        library_panic("The exception context for this program has not begun yet", file, line, function);
     }
 
     /* make sure the current frame is not null */
@@ -402,12 +366,12 @@ bool e4c_catch(const e4c_exception_type * exception_type, const char * file, int
 
     /* ensure that 'e4c_catch' was used after calling e4c_context_begin */
     if (context == NULL) {
-        library_panic(&ContextHasNotBegunYet, NULL, file, line, function, errno);
+        library_panic("The exception context for this program has not begun yet", file, line, function);
     }
 
-    /* passing NULL to a catch block is considered a fatal error */
+    /* passing NULL to a catch block will not catch any exception */
     if (exception_type == NULL) {
-        library_panic(&NullPointerException, "e4c_catch: A NULL argument was passed.", file, line, function, errno);
+        return false;
     }
 
     if (context->current_frame->stage != e4c_catching) {
@@ -506,7 +470,7 @@ noreturn void e4c_restart(enum e4c_frame_stage stage, int max_repeat_attempts, c
 
     /* check if 'e4c_restart' was used before calling e4c_context_begin */
     if (context == NULL) {
-        library_panic(&ContextHasNotBegunYet, NULL, file, line, function, errno);
+        library_panic("The exception context for this program has not begun yet", file, line, function);
     }
 
     /* get the current frame */
@@ -515,9 +479,9 @@ noreturn void e4c_restart(enum e4c_frame_stage stage, int max_repeat_attempts, c
     /* check if 'e4c_restart' was used before 'try' or 'use' */
     if (frame == NULL) {
         if (stage == e4c_beginning) {
-            library_panic(&ExceptionSystemFatalError, "No E4C_WITH block to reacquire.", file, line, function, errno);
+            library_panic("No E4C_WITH block to reacquire.", file, line, function);
         }
-        library_panic(&ExceptionSystemFatalError, "No E4C_TRY block to retry.", file, line, function, errno);
+        library_panic("No E4C_TRY block to retry.", file, line, function);
     }
 
     /* check if maximum number of attempts reached and update the number of attempts */
@@ -546,7 +510,7 @@ noreturn void e4c_restart(enum e4c_frame_stage stage, int max_repeat_attempts, c
         case e4c_finalizing:
         case e4c_done:
         default:
-            library_panic(&ExceptionSystemFatalError, "The specified stage can't be repeated.", file, line, function, errno);
+            library_panic("The specified stage can't be repeated.", file, line, function);
     }
 
     if (max_reached) {
@@ -580,26 +544,25 @@ e4c_status e4c_get_status(void) {
 
     context = E4C_CURRENT_CONTEXT;
 
-    /* ensure that `e4c_get_status` was called after calling `e4c_context_begin` */
-    if (context != NULL) {
-
-        /* make sure the current frame is not null */
-        assert(context->current_frame != NULL);
-
-        frame = context->current_frame;
-
-        if (frame->thrown_exception == NULL) {
-            return e4c_succeeded;
-        }
-
-        if (frame->uncaught) {
-            return e4c_failed;
-        }
-
-        return e4c_recovered;
+    /* make sure that e4c_context_begin was called before */
+    if (context == NULL) {
+        library_panic("The exception context for this program has not begun yet", E4C_DEBUG_INFO);
     }
 
-    library_panic(&ContextHasNotBegunYet, NULL, E4C_DEBUG_INFO, errno);
+    /* make sure the current frame is not null */
+    assert(context->current_frame != NULL);
+
+    frame = context->current_frame;
+
+    if (frame->thrown_exception == NULL) {
+        return e4c_succeeded;
+    }
+
+    if (frame->uncaught) {
+        return e4c_failed;
+    }
+
+    return e4c_recovered;
 }
 
 /* EXCEPTION TYPE
@@ -640,19 +603,9 @@ bool e4c_is_instance_of(const e4c_exception * instance, const e4c_exception_type
 
 const e4c_exception * e4c_get_exception(void) {
 
-    e4c_context *   context;
+    e4c_context * context = E4C_CURRENT_CONTEXT;
 
-    context = E4C_CURRENT_CONTEXT;
-
-    /* check if `e4c_get_exception` was called before calling `e4c_context_begin` */
-    if (context == NULL) {
-        library_panic(&ContextHasNotBegunYet, NULL, E4C_DEBUG_INFO, errno);
-    }
-
-    /* make sure the current frame is not null */
-    assert(context->current_frame != NULL);
-
-    return context->current_frame->thrown_exception;
+    return context != NULL && context->current_frame != NULL ? context->current_frame->thrown_exception : NULL;
 }
 
 void e4c_throw(const e4c_exception_type * exception_type, const char * file, int line, const char * function, const char * format, ...) {
@@ -670,7 +623,7 @@ void e4c_throw(const e4c_exception_type * exception_type, const char * file, int
 
     /* make sure e4c_context_begin was called before */
     if (context == NULL) {
-        library_panic(&ContextHasNotBegunYet, NULL, file, line, function, errno);
+        library_panic("The exception context for this program has not begun yet", file, line, function);
     }
 
     /* check context and frame; initialize exception and cause */
@@ -745,7 +698,7 @@ static e4c_exception * exception_allocate() {
 
     /* make sure there was enough memory */
     if (exception == NULL) {
-        library_panic(&NotEnoughMemoryException, "Could not create a new exception.", __FILE__, __LINE__, __func__, errno);
+        library_panic("Not enough memory to create a new exception", E4C_DEBUG_INFO);
     }
 
     return exception;
@@ -780,19 +733,23 @@ static void exception_set_cause(e4c_exception * exception, e4c_exception * cause
     cause->ref_count++;
 }
 
+static void print_debug(const char * file, int line, const char * function) {
+    if (file != NULL) {
+        if (function != NULL) {
+            fprintf(stderr, "    at %s (%s:%d)\n", function, file, line);
+        } else {
+            fprintf(stderr, "    at %s:%d\n", file, line);
+        }
+    }
+}
+
 static void exception_print(const char * prefix, const e4c_exception * exception) {
 
     assert(exception != NULL);
 
     fprintf(stderr, "%s%s: %s\n", prefix, exception->name, exception->message);
 
-    if (exception->file != NULL) {
-        if (exception->function != NULL) {
-            fprintf(stderr, "    at %s (%s:%d)\n", exception->function, exception->file, exception->line);
-        } else {
-            fprintf(stderr, "    at %s:%d\n", exception->file, exception->line);
-        }
-    }
+    print_debug(exception->file, exception->line, exception->function);
 
     if (exception->cause != NULL) {
         exception_print("Caused by: ", exception->cause);

@@ -8,13 +8,8 @@
  * This test uses the library in an inconsistent way, by breaking out of a
  * `e4c_using_context` block.
  *
- * The library must signal the misuse by throwing the exception
- * `ContextNotEnded`.
- *
  */
 TEST_CASE{
-
-    TEST_EXPECTING(ContextNotEnded);
 
     E4C_USING_CONTEXT {
 

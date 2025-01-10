@@ -8,13 +8,10 @@
  * This test uses the library improperly, by attempting to call
  * `e4c_context_end`, without calling `e4c_context_begin` first.
  *
- * The library must signal the misuse by throwing the exception
- * `ContextHasNotBegunYet`.
+ * The library must ignore the call.
  *
  */
 TEST_CASE{
-
-    TEST_EXPECTING(ContextHasNotBegunYet);
 
     e4c_context_end();
 }

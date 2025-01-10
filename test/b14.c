@@ -8,19 +8,16 @@
  * This test uses the library in an inconsistent way, by attempting to start a
  * `e4c_using_context` block when the exception context is already begun.
  *
- * The library must signal the misuse by throwing the exception
- * `ContextAlreadyBegun`.
+ * The library must ignore the call.
  *
  */
 TEST_CASE{
-
-    TEST_EXPECTING(ContextAlreadyBegun);
 
     e4c_context_begin();
 
     E4C_USING_CONTEXT {
 
-        THIS_SHOULD_NOT_HAPPEN;
+        TEST_ECHO("This is fine");
     }
 
     e4c_context_end();

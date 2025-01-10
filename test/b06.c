@@ -8,15 +8,12 @@
  * This test uses the library in an inconsistent way, by attempting to call
  * `e4c_context_end` twice in a row.
  *
- * The library must signal the misuse by throwing the exception
- * `ContextHasNotBegunYet`.
+ * The library must ignore the call.
  *
  */
 TEST_CASE{
 
-    TEST_EXPECTING(ContextHasNotBegunYet);
-
-    e4c_context_begin();;
+    e4c_context_begin();
 
     e4c_context_end();
 
