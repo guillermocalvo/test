@@ -16,5 +16,5 @@ TEST_CASE{
 
     TEST_EXPECTING(ExceptionSystemFatalError);
 
-    E4C_REACQUIRE(10, RuntimeException, NULL);
+    REACQUIRE(10, RuntimeException, NULL);
 }

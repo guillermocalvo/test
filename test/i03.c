@@ -44,7 +44,7 @@ TEST_CASE{
 
     } CATCH(RuntimeException) {
 
-        E4C_REACQUIRE(4, RuntimeException, NULL);
+        REACQUIRE(4, RuntimeException, NULL);
     }
 
     TEST_DUMP("%d", total_acquisitions);

@@ -366,7 +366,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @post
  *   - Control does not return to the #RETRY point.
  *
- * @see #E4C_REACQUIRE
+ * @see #REACQUIRE
  * @see #TRY
  * @see #USE
  */
@@ -667,7 +667,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see #WITH
  * @see #USE
  */
-#define E4C_REACQUIRE(max_reacquire_attempts, exception_type, format, ...)  \
+#define REACQUIRE(max_reacquire_attempts, exception_type, format, ...)      \
   e4c_restart(                                                              \
     true,                                                                   \
     max_reacquire_attempts,                                                 \
