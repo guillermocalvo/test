@@ -695,34 +695,6 @@ typedef jmp_buf e4c_jump_buffer;
  */
 
 /**
- * Declares an exception type
- *
- * @param   name
- *          Name of the exception type
- *
- * This macro introduces the name of an `extern`, `const` [exception type]
- * (#e4c_exception_type) which will be available to be thrown or caught:
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   E4C_DECLARE_EXCEPTION(StackException);
- *   E4C_DECLARE_EXCEPTION(StackOverflowException);
- *   E4C_DECLARE_EXCEPTION(StackUnderflowException);
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * This macro is intended to be used inside header files.
- *
- * @note
- * When you *declare* exception types, no storage is allocated. In order to
- * actually *define* them, you need to use the macro #E4C_DEFINE_EXCEPTION.
- *
- * @see     #e4c_exception_type
- * @see     #E4C_DEFINE_EXCEPTION
- */
-# define E4C_DECLARE_EXCEPTION(name) \
-    \
-    extern const struct e4c_exception_type name
-
-/**
  * Defines an exception type
  *
  * @param   name
@@ -741,13 +713,10 @@ typedef jmp_buf e4c_jump_buffer;
  *   E4C_DEFINE_EXCEPTION(StackUnderflowException, "Stack underflow", StackException);
  * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
  *
- * This macro is intended to be used inside sorce code files. The defined
- * exception types can be *declared* in a header file through the macro
- * #E4C_DECLARE_EXCEPTION.
+ * This macro is intended to be used inside sorce code files.
  *
  * @see     #e4c_exception_type
  * @see     #RuntimeException
- * @see     #E4C_DECLARE_EXCEPTION
  */
 # define E4C_DEFINE_EXCEPTION(name, default_message, supertype) \
     \
@@ -767,8 +736,7 @@ typedef char e4c_exception_message[128];
  * Represents an exception type in the exception handling system
  *
  * The types of the exceptions a program will use are **defined** in source code
- * files through the macro #E4C_DEFINE_EXCEPTION. In addition, they are
- * **declared** in header files through the macro #E4C_DECLARE_EXCEPTION.
+ * files through the macro #E4C_DEFINE_EXCEPTION.
  *
  * When defining types of exceptions, they are given a *name*, a *default
  * message* and a *supertype* to organize them into a *pseudo-hierarchy*:
@@ -786,7 +754,6 @@ typedef char e4c_exception_message[128];
  *
  * @see     #e4c_exception
  * @see     #E4C_DEFINE_EXCEPTION
- * @see     #E4C_DECLARE_EXCEPTION
  * @see     #E4C_THROW
  * @see     #E4C_CATCH
  */
@@ -1134,7 +1101,7 @@ typedef struct e4c_context * (*e4c_context_supplier)(void);
  * @par     Direct known subexceptions:
  *          #NullPointerException
  */
-E4C_DECLARE_EXCEPTION(RuntimeException);
+extern const struct e4c_exception_type RuntimeException;
 
 /**
  * This exception is thrown when an unexpected null pointer is found
@@ -1145,7 +1112,7 @@ E4C_DECLARE_EXCEPTION(RuntimeException);
  * @par     Extends:
  *          #RuntimeException
  */
-E4C_DECLARE_EXCEPTION(NullPointerException);
+extern const struct e4c_exception_type NullPointerException;
 
 /** @} */
 
