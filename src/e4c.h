@@ -55,12 +55,12 @@
 
 #ifdef HAVE_SIGSETJMP
 typedef sigjmp_buf e4c_jump_buffer;
-#define EXCEPTIONS4C_SET_JUMP(buffer) sigsetjmp(buffer, 1)
-#define EXCEPTIONS4C_LONG_JUMP(buffer) siglongjmp(buffer, 1)
+#define E4C_SET_JUMP(buffer) sigsetjmp(buffer, 1)
+#define E4C_LONG_JUMP(buffer) siglongjmp(buffer, 1)
 #else
 typedef jmp_buf e4c_jump_buffer;
-#define EXCEPTIONS4C_SET_JUMP(buffer) setjmp(buffer)
-#define EXCEPTIONS4C_LONG_JUMP(buffer) longjmp(buffer, 1)
+#define E4C_SET_JUMP(buffer) setjmp(buffer)
+#define E4C_LONG_JUMP(buffer) longjmp(buffer, 1)
 #endif
 
 
@@ -71,12 +71,12 @@ typedef jmp_buf e4c_jump_buffer;
 # endif
 
 /*
- * These undocumented macros hide implementation details from documentation.
+ * This undocumented macro hide implementation details from documentation.
  */
 
-# define EXCEPTIONS4C_BLOCK(should_acquire)                                 \
-    if (EXCEPTIONS4C_SET_JUMP(*e4c_start(should_acquire, E4C_DEBUG_INFO)) >= 0)\
-        while (e4c_next_stage())
+# define E4C_START_BLOCK(should_acquire)                                    \
+  if (E4C_SET_JUMP(*e4c_start(should_acquire, E4C_DEBUG_INFO)) >= 0)        \
+    while (e4c_next_stage())
 
 /**
  * @name Exception handling keywords
@@ -164,7 +164,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see     #e4c_get_status
  */
 #define E4C_TRY                                                             \
-  EXCEPTIONS4C_BLOCK(false)                                                 \
+  E4C_START_BLOCK(false)                                                    \
   if (e4c_get_current_stage() == e4c_trying && e4c_next_stage())
     /* simple optimization: e4c_next_stage will avoid disposing stage */
 
@@ -530,7 +530,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see     #E4C_USING
  */
 #define E4C_WITH(resource, dispose)                                         \
-  EXCEPTIONS4C_BLOCK(true)                                                  \
+  E4C_START_BLOCK(true)                                                     \
   if (e4c_get_current_stage() == e4c_disposing) {                           \
     dispose((resource), e4c_get_status() == e4c_failed);                    \
   } else if (e4c_get_current_stage() == e4c_acquiring) {

@@ -154,7 +154,7 @@ static void propagate_exception(const struct e4c_context * context, struct e4c_e
     }
 
     /* keep looping */
-    EXCEPTIONS4C_LONG_JUMP(block->continuation);
+    E4C_LONG_JUMP(block->continuation);
 }
 
 /* BLOCK
@@ -366,7 +366,7 @@ noreturn void e4c_restart(const bool should_reacquire, const int max_repeat_atte
     block->stage            = should_reacquire ? e4c_beginning : e4c_acquiring;
 
     /* keep looping */
-    EXCEPTIONS4C_LONG_JUMP(block->continuation);
+    E4C_LONG_JUMP(block->continuation);
 }
 
 enum e4c_status e4c_get_status(void) {
