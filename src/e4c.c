@@ -34,8 +34,6 @@
 # include <assert.h>
 # include "e4c.h"
 
-# define ref_count                      _
-
 static e4c_context_supplier context_supplier = NULL;
 
 /** flag to determine if the exception system is initialized */
@@ -50,8 +48,8 @@ static struct e4c_context main_context = {
     NULL
 };
 
-E4C_DEFINE_EXCEPTION(RuntimeException,                  "Runtime exception.",               RuntimeException);
-E4C_DEFINE_EXCEPTION(NullPointerException,              "Null pointer.",                    RuntimeException);
+const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
+const struct e4c_exception_type NullPointerException = {&RuntimeException, "Null pointer."};
 
 static void cleanup(void);
 static noreturn void panic(const char * error_message, const char * file, int line, const char * function);
@@ -318,7 +316,7 @@ bool e4c_next_stage(void) {
     return false;
 }
 
-noreturn void e4c_restart(const bool should_reacquire, const int max_repeat_attempts, const struct e4c_exception_type * exception_type, const char * file, const int line, const char * function, const char * format, ...) {
+noreturn void e4c_restart(const bool should_reacquire, const int max_repeat_attempts, const struct e4c_exception_type * exception_type, const char * name, const char * file, const int line, const char * function, const char * format, ...) {
 
     struct e4c_context * context = get_current_context();
 
@@ -352,14 +350,14 @@ noreturn void e4c_restart(const bool should_reacquire, const int max_repeat_atte
 
     if (max_reached) {
         if (format == NULL) {
-            e4c_throw(exception_type, file, line, function, NULL);
+            e4c_throw(exception_type, name, file, line, function, NULL);
         }
         e4c_exception_message message = {0};
         va_list arguments_list;
         va_start(arguments_list, format);
         (void) vsnprintf(message, sizeof(message), format, arguments_list);
         va_end(arguments_list);
-        e4c_throw(exception_type, file, line, function, message);
+        e4c_throw(exception_type, name, file, line, function, message);
     }
 
     /* deallocate previously thrown exception */
@@ -434,7 +432,7 @@ const struct e4c_exception * e4c_get_exception(void) {
     return context->current_frame != NULL ? context->current_frame->thrown_exception : NULL;
 }
 
-void e4c_throw(const struct e4c_exception_type * exception_type, const char * file, int line, const char * function, const char * format, ...) {
+void e4c_throw(const struct e4c_exception_type * exception_type, const char * name, const char * file, int line, const char * function, const char * format, ...) {
 
     int                     error_number;
     struct e4c_context *    context;
@@ -461,8 +459,8 @@ void e4c_throw(const struct e4c_exception_type * exception_type, const char * fi
     }
 
     /* "instantiate" the specified exception */
-    new_exception->ref_count    = 1;
-    new_exception->name         = exception_type->name;
+    new_exception->_ref_count   = 1;
+    new_exception->name         = name;
     new_exception->file         = file;
     new_exception->line         = line;
     new_exception->function     = function;
@@ -487,7 +485,7 @@ void e4c_throw(const struct e4c_exception_type * exception_type, const char * fi
     while (frame != NULL) {
         if (frame->thrown_exception != NULL) {
             new_exception->cause = frame->thrown_exception;
-            frame->thrown_exception->ref_count++;
+            frame->thrown_exception->_ref_count++;
             break;
         }
         frame = frame->previous;
@@ -508,9 +506,9 @@ static void deallocate_exception(struct e4c_exception * exception, e4c_finalize_
 
     if (exception != NULL) {
 
-        exception->ref_count--;
+        exception->_ref_count--;
 
-        if (exception->ref_count <= 0) {
+        if (exception->_ref_count <= 0) {
 
             deallocate_exception(exception->cause, finalize_handler);
 

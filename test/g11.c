@@ -3,7 +3,7 @@
 # include "testing.h"
 
 
-E4C_DEFINE_EXCEPTION(TerminationException, "Termination exception.", RuntimeException);
+static const struct e4c_exception_type TerminationException = {&RuntimeException, "Termination exception."};
 
 void throw_on_signal(int);
 

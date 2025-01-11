@@ -375,6 +375,7 @@ typedef jmp_buf e4c_jump_buffer;
     false,                                                                  \
     max_retry_attempts,                                                     \
     &exception_type,                                                        \
+    #exception_type,                                                        \
     E4C_DEBUG_INFO,                                                         \
     (format)                                                                \
     __VA_OPT__(,) __VA_ARGS__                                               \
@@ -420,6 +421,7 @@ typedef jmp_buf e4c_jump_buffer;
 #define E4C_THROW(exception_type, format, ...)                              \
   e4c_throw(                                                                \
     &exception_type,                                                        \
+    #exception_type,                                                        \
     E4C_DEBUG_INFO,                                                         \
     (format)                                                                \
     __VA_OPT__(,) __VA_ARGS__                                               \
@@ -670,6 +672,7 @@ typedef jmp_buf e4c_jump_buffer;
     true,                                                                   \
     max_reacquire_attempts,                                                 \
     &exception_type,                                                        \
+    #exception_type,                                                        \
     E4C_DEBUG_INFO,                                                         \
     (format)                                                                \
     __VA_OPT__(,) __VA_ARGS__                                               \
@@ -688,62 +691,18 @@ typedef jmp_buf e4c_jump_buffer;
 
 /** @} */
 
-/**
- * @name Other convenience macros
- *
- * @{
- */
-
-/**
- * Defines an exception type
- *
- * @param   name
- *          Name of the new exception type
- * @param   default_message
- *          Default message of the new exception type
- * @param   supertype
- *          Supertype of the new exception type
- *
- * This macro allocates a new, `const` [exception type]
- * (#e4c_exception_type).
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   E4C_DEFINE_EXCEPTION(StackException, "Stack exception", RuntimeException);
- *   E4C_DEFINE_EXCEPTION(StackOverflowException, "Stack overflow", StackException);
- *   E4C_DEFINE_EXCEPTION(StackUnderflowException, "Stack underflow", StackException);
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
- *
- * This macro is intended to be used inside sorce code files.
- *
- * @see     #e4c_exception_type
- * @see     #RuntimeException
- */
-# define E4C_DEFINE_EXCEPTION(name, default_message, supertype) \
-    \
-    const struct e4c_exception_type name = { \
-        #name, \
-        default_message, \
-        &supertype \
-    }
-
-/** @} */
-
-
 /** Represents a message exception */
 typedef char e4c_exception_message[128];
 
 /**
  * Represents an exception type in the exception handling system
  *
- * The types of the exceptions a program will use are **defined** in source code
- * files through the macro #E4C_DEFINE_EXCEPTION.
+ * When defining types of exceptions, they are given a *supertype* (that
+ * organizes them hierarchically*) and a *default message*.
  *
- * When defining types of exceptions, they are given a *name*, a *default
- * message* and a *supertype* to organize them into a *pseudo-hierarchy*:
- *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   E4C_DEFINE_EXCEPTION(SimpleException, "Simple exception", RuntimeException);
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * ```c
+ * const struct e4c_exception_type SimpleException = {&RuntimeException, "Simple exception"};
+ * ```
  *
  * Exceptions are defined as global objects. There is a set of predefined
  * exceptions built into the framework; #RuntimeException is the *root* of the
@@ -753,20 +712,16 @@ typedef char e4c_exception_message[128];
  *     - #NullPointerException
  *
  * @see     #e4c_exception
- * @see     #E4C_DEFINE_EXCEPTION
  * @see     #E4C_THROW
  * @see     #E4C_CATCH
  */
 struct e4c_exception_type {
 
-    /** The name of this exception type */
-    const char * name;
+    /** The supertype of this exception type */
+    const struct e4c_exception_type * supertype;
 
     /** The default message of this exception type */
     const e4c_exception_message default_message;
-
-    /** The supertype of this exception type */
-    const struct e4c_exception_type * supertype;
 };
 
 /**
@@ -807,35 +762,35 @@ struct e4c_exception_type {
  */
 struct e4c_exception {
 
-    /* This field is undocumented on purpose and reserved for internal use */
-    int                             _;
-
-    /** The name of this exception */
-    const char *                    name;
-
-    /** The message of this exception */
-    e4c_exception_message           message;
-
-    /** The path of the source code file from which the exception was thrown */
-    const char *                    file;
-
-    /** The number of line from which the exception was thrown */
-    int                             line;
-
-    /** The function from which the exception was thrown */
-    const char *                    function;
-
-    /** The value of errno at the time the exception was thrown */
-    int                             error_number;
-
     /** The type of this exception */
     const struct e4c_exception_type * type;
+
+    /** The name of this exception */
+    const char * name;
+
+    /** The message of this exception */
+    e4c_exception_message message;
+
+    /** The path of the source code file from which the exception was thrown */
+    const char * file;
+
+    /** The number of line from which the exception was thrown */
+    int line;
+
+    /** The function from which the exception was thrown */
+    const char * function;
+
+    /** The value of errno at the time the exception was thrown */
+    int error_number;
 
     /** The cause of this exception */
     struct e4c_exception * cause;
 
     /** Custom data associated to this exception */
-    void *                          custom_data;
+    void * custom_data;
+
+    /* Number of times this exception is referenced */
+    int _ref_count;
 };
 
 /**
@@ -1375,6 +1330,7 @@ noreturn void e4c_restart(
     bool                        should_reacquire,
     int                         max_repeat_attempts,
     const struct e4c_exception_type * exception_type,
+    const char *                name,
     const char *                file,
     int                         line,
     const char *                function,
@@ -1384,6 +1340,7 @@ noreturn void e4c_restart(
 
 noreturn void e4c_throw(
     const struct e4c_exception_type * exception_type,
+    const char *                name,
     const char *                file,
     int                         line,
     const char *                function,

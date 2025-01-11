@@ -2,7 +2,7 @@
 # include "testing.h"
 
 
-static E4C_DEFINE_EXCEPTION(NotEnoughMemoryException, "Not enough memory.", RuntimeException);
+static const struct e4c_exception_type NotEnoughMemoryException = {&RuntimeException, "Not enough memory."};
 
 void aux(volatile bool * flag);
 

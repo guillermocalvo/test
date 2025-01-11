@@ -3,7 +3,7 @@
 # include "testing.h"
 
 
-E4C_DEFINE_EXCEPTION(AbortException, "Abort exception.", RuntimeException);
+static const struct e4c_exception_type AbortException = {&RuntimeException, "Abort exception."};
 
 void throw_on_signal(int);
 

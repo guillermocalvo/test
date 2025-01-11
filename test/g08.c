@@ -3,7 +3,7 @@
 # include "testing.h"
 
 
-E4C_DEFINE_EXCEPTION(ArithmeticException, "Arithmetic exception.", RuntimeException);
+static const struct e4c_exception_type ArithmeticException = {&RuntimeException, "Arithmetic exception."};
 
 int zero(int dummy);
 void throw_on_signal(int);

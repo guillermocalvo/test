@@ -3,7 +3,7 @@
 # include "testing.h"
 
 
-E4C_DEFINE_EXCEPTION(IllegalInstructionException, "Illegal instruction exception.", RuntimeException);
+static const struct e4c_exception_type IllegalInstructionException = {&RuntimeException, "Illegal instruction exception."};
 
 void throw_on_signal(int);
 

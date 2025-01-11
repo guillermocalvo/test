@@ -3,7 +3,7 @@
 # include "testing.h"
 
 
-E4C_DEFINE_EXCEPTION(UserInterruptionException, "User interruption exception.", RuntimeException);
+static const struct e4c_exception_type UserInterruptionException = {&RuntimeException, "User interruption exception."};
 
 void throw_on_signal(int);
 
