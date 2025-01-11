@@ -16,13 +16,13 @@ TEST_CASE{
 
     volatile bool ignored = false;
 
-    E4C_TRY{
+    TRY {
 
         TEST_ECHO("Inside `try` block...");
 
         ignored = true;
 
-    /* } */ E4C_USE{
+    /* } */ USE {
 
         TEST_ECHO("Inside `use` block...");
 

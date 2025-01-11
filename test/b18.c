@@ -13,5 +13,5 @@
  */
 TEST_CASE{
 
-    E4C_RETRY(10, RuntimeException, NULL);
+    RETRY(10, RuntimeException, NULL);
 }

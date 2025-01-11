@@ -14,7 +14,7 @@ TEST_CASE{
 
     volatile int total_tries = 0;
 
-    E4C_TRY{
+    TRY {
 
         total_tries++;
 
@@ -30,13 +30,13 @@ TEST_CASE{
         }
 
         if (total_tries <= 3) {
-            E4C_THROW(RuntimeException, "Please try again");
+            THROW(RuntimeException, "Please try again");
         }
 
-    }E4C_FINALLY{
+    } FINALLY {
 
         if (e4c_get_status() == e4c_failed) {
-            E4C_RETRY(3, RuntimeException, "Too many attempts");
+            RETRY(3, RuntimeException, "Too many attempts");
         }
     }
 

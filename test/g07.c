@@ -25,7 +25,7 @@ TEST_CASE{
 
     signal(SIGSEGV, throw_on_signal);
 
-    E4C_TRY{
+    TRY {
 
         int * pointer = &integer;
 
@@ -37,7 +37,7 @@ TEST_CASE{
         TEST_DUMP("%d", integer);
         TEST_DUMP("%p", (void *)pointer);
 
-    }E4C_CATCH(NullPointerException){
+    } CATCH(NullPointerException) {
 
         caught = true;
 
@@ -53,5 +53,5 @@ void * null(int dummy){
 }
 
 void throw_on_signal(int _) {
-    E4C_THROW(NullPointerException, NULL);
+    THROW(NullPointerException, NULL);
 }

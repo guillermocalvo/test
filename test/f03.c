@@ -17,11 +17,11 @@ TEST_CASE{
 
     volatile bool uncaught = false;
 
-    E4C_TRY{
+    TRY {
 
         aux(&uncaught);
 
-    }E4C_CATCH(RuntimeException){
+    } CATCH(RuntimeException) {
 
         TEST_ASSERT( e4c_get_exception()->type == &RuntimeException );
     }
@@ -32,15 +32,15 @@ TEST_CASE{
 
 void aux(volatile bool * flag){
 
-    E4C_TRY{
+    TRY {
 
-        E4C_THROW(RuntimeException, "I am not an instance of NullPointerException.");
+        THROW(RuntimeException, "I am not an instance of NullPointerException.");
 
-    }E4C_CATCH(NullPointerException){
+    } CATCH(NullPointerException) {
 
         TEST_FAIL("Block `catch(NullPointerException)` cannot handle a RuntimeException");
 
-    }E4C_FINALLY{
+    } FINALLY {
 
         *flag = ( e4c_get_status() == e4c_failed );
     }

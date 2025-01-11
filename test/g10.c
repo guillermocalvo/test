@@ -23,13 +23,13 @@ TEST_CASE{
 
     signal(SIGILL, throw_on_signal);
 
-    E4C_TRY{
+    TRY {
 
         raise(SIGILL);
 
         TEST_FAIL("IllegalInstructionException should have been thrown");
 
-    }E4C_CATCH(RuntimeException){
+    } CATCH(RuntimeException) {
 
         exception_was_caught = true;
 
@@ -40,5 +40,5 @@ TEST_CASE{
 }
 
 void throw_on_signal(int _) {
-    E4C_THROW(IllegalInstructionException, NULL);
+    THROW(IllegalInstructionException, NULL);
 }

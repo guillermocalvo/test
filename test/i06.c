@@ -18,11 +18,11 @@ TEST_CASE{
 
     e4c_get_current_context()->custom_data = &initial_data;
 
-    E4C_TRY{
+    TRY {
 
-        E4C_THROW(RuntimeException, "Initialize my custom data with a default value");
+        THROW(RuntimeException, "Initialize my custom data with a default value");
 
-    }E4C_CATCH(RuntimeException){
+    } CATCH(RuntimeException) {
 
         custom_data_t * data = e4c_get_exception()->custom_data;
 

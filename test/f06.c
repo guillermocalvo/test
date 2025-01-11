@@ -16,15 +16,15 @@ TEST_CASE{
     volatile bool caught1 = false;
     volatile bool caught2 = false;
 
-    E4C_TRY{
+    TRY {
 
-        E4C_THROW(NullPointerException, "I'm going to be caught by the first (generic) catch block.");
+        THROW(NullPointerException, "I'm going to be caught by the first (generic) catch block.");
 
-    }E4C_CATCH(RuntimeException){
+    } CATCH(RuntimeException) {
 
         caught1 = true;
 
-    }E4C_CATCH(NullPointerException){
+    } CATCH(NullPointerException) {
 
         caught2 = true;
     }

@@ -14,18 +14,18 @@ static const struct e4c_exception_type CustomException = {&RuntimeException, "Th
  */
 TEST_CASE{
 
-    E4C_TRY{
+    TRY {
 
-        E4C_TRY{
+        TRY {
 
-            E4C_THROW(CustomException, "This is the original cause of the issue");
+            THROW(CustomException, "This is the original cause of the issue");
 
-        }E4C_CATCH(RuntimeException){
+        } CATCH(RuntimeException) {
 
-            E4C_THROW(RuntimeException, "This is the wrapper exception");
+            THROW(RuntimeException, "This is the wrapper exception");
         }
 
-    }E4C_CATCH(RuntimeException){
+    } CATCH(RuntimeException) {
 
         TEST_ASSERT_EQUALS(e4c_get_exception()->cause->type, &CustomException);
     }

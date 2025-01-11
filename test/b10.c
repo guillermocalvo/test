@@ -24,11 +24,11 @@ TEST_CASE{
 
 void aux(void){
 
-    E4C_TRY{
+    TRY {
 
         TEST_ECHO("Inside `try` block...");
 
-    }E4C_FINALLY{
+    } FINALLY {
 
         TEST_ECHO("Inside `finally` block...");
 

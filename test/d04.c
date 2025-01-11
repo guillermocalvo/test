@@ -16,7 +16,7 @@ TEST_CASE{
 
     TEST_EXPECTING(RuntimeException);
 
-    E4C_TRY{
+    TRY {
 
         another_function();
     }
@@ -24,5 +24,5 @@ TEST_CASE{
 
 void another_function(void){
 
-    E4C_THROW(RuntimeException, "Nobody will catch me.");
+    THROW(RuntimeException, "Nobody will catch me.");
 }

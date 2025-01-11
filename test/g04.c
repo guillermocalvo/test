@@ -40,5 +40,5 @@ void * null(int dummy){
 }
 
 void throw_npe(int _) {
-    E4C_THROW(NullPointerException, NULL);
+    THROW(NullPointerException, NULL);
 }

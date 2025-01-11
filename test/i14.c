@@ -17,12 +17,12 @@ TEST_CASE{
 
     e4c_get_current_context()->initialize_handler = custom_initialize_handler;
 
-    E4C_TRY{
+    TRY {
 
-        E4C_THROW(RuntimeException, "%s_%s", "FORMATTED", "MESSAGE");
+        THROW(RuntimeException, "%s_%s", "FORMATTED", "MESSAGE");
 
 
-    }E4C_CATCH(RuntimeException){
+    } CATCH(RuntimeException) {
 
         TEST_ASSERT_STRING_EQUALS(e4c_get_exception()->message, "FORMATTED_MESSAGE");
     }

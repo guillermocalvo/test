@@ -19,7 +19,7 @@ TEST_CASE{
     volatile int foo          = 0;
     volatile int total_acquisitions = 0;
 
-    E4C_WITH(foo, DISPOSE_FOO){
+    WITH(foo, DISPOSE_FOO) {
 
         total_acquisitions++;
 
@@ -35,14 +35,14 @@ TEST_CASE{
         }
 
         if(total_acquisitions < 4) {
-            E4C_THROW(RuntimeException, "Simulates an error while acquiring foo");
+            THROW(RuntimeException, "Simulates an error while acquiring foo");
         }
 
-    }E4C_USE{
+    } USE {
 
         TEST_DUMP("%d", foo);
 
-    }E4C_CATCH(RuntimeException){
+    } CATCH(RuntimeException) {
 
         E4C_REACQUIRE(4, RuntimeException, NULL);
     }

@@ -16,25 +16,25 @@ TEST_CASE{
 
     TEST_EXPECTING(RuntimeException);
 
-    E4C_TRY {
+    TRY {
 
-        E4C_TRY {
+        TRY {
 
-            E4C_TRY {
+            TRY {
 
-                E4C_THROW(CustomException, "This is the original cause of the issue");
+                THROW(CustomException, "This is the original cause of the issue");
 
-            } E4C_CATCH(CustomException) {
+            } CATCH(CustomException) {
 
-                E4C_THROW(NullPointerException, "First wrapper");
+                THROW(NullPointerException, "First wrapper");
             }
 
-        } E4C_CATCH(NullPointerException) {
+        } CATCH(NullPointerException) {
 
-            E4C_THROW(RuntimeException, "Second wrapper");
+            THROW(RuntimeException, "Second wrapper");
         }
 
-    } E4C_CATCH(RuntimeException) {
+    } CATCH(RuntimeException) {
 
         const struct e4c_exception * exception = e4c_get_exception();
 

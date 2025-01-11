@@ -16,15 +16,15 @@ TEST_CASE{
     volatile bool caught1 = false;
     volatile bool caught2 = false;
 
-    E4C_TRY{
+    TRY {
 
-        E4C_THROW(RuntimeException, "I can only be caught once for each try block.");
+        THROW(RuntimeException, "I can only be caught once for each try block.");
 
-    }E4C_CATCH(RuntimeException){
+    } CATCH(RuntimeException) {
 
         caught1 = true;
 
-    }E4C_CATCH(RuntimeException){
+    } CATCH(RuntimeException) {
 
         caught2 = true;
     }

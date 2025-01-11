@@ -48,5 +48,5 @@ int zero(int dummy){
 }
 
 void throw_on_signal(int _) {
-    E4C_THROW(ArithmeticException, NULL);
+    THROW(ArithmeticException, NULL);
 }

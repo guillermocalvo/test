@@ -14,18 +14,18 @@ TEST_CASE{
 
     volatile enum e4c_status status = e4c_succeeded;
 
-    E4C_TRY{
+    TRY {
 
-        E4C_TRY{
+        TRY {
 
-            E4C_THROW(RuntimeException, "You can't catch me!");
+            THROW(RuntimeException, "You can't catch me!");
 
-        }E4C_FINALLY{
+        } FINALLY {
 
             status = e4c_get_status();
         }
 
-    }E4C_CATCH(RuntimeException){
+    } CATCH(RuntimeException) {
 
         TEST_DUMP("%s", e4c_get_exception()->message);
     }

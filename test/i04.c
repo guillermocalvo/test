@@ -9,11 +9,11 @@
  */
 TEST_CASE{
 
-    E4C_TRY{
+    TRY {
 
-        E4C_THROW(RuntimeException, "%s_%s", "FORMATTED", "MESSAGE");
+        THROW(RuntimeException, "%s_%s", "FORMATTED", "MESSAGE");
 
-    }E4C_CATCH(RuntimeException){
+    } CATCH(RuntimeException) {
 
         TEST_ASSERT_STRING_EQUALS(e4c_get_exception()->message, "FORMATTED_MESSAGE");
     }

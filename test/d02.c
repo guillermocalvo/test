@@ -22,5 +22,5 @@ TEST_CASE{
 
 void another_function(void){
 
-    E4C_THROW(RuntimeException, "Nobody will catch me.");
+    THROW(RuntimeException, "Nobody will catch me.");
 }

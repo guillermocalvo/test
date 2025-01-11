@@ -19,11 +19,11 @@ TEST_CASE{
 
     volatile bool uncaught = false;
 
-    E4C_TRY{
+    TRY {
 
         aux(&uncaught);
 
-    }E4C_CATCH(RuntimeException){
+    } CATCH(RuntimeException) {
 
         TEST_ASSERT( e4c_get_exception()->type == &NullPointerException );
     }
@@ -34,15 +34,15 @@ TEST_CASE{
 
 void aux(volatile bool * flag){
 
-    E4C_TRY{
+    TRY {
 
-        E4C_THROW(NullPointerException, "I am not an instance of NotEnoughMemoryException.");
+        THROW(NullPointerException, "I am not an instance of NotEnoughMemoryException.");
 
-    }E4C_CATCH(NotEnoughMemoryException){
+    } CATCH(NotEnoughMemoryException) {
 
         TEST_FAIL("Block `catch(NotEnoughMemoryException)` cannot handle an NullPointerException");
 
-    }E4C_FINALLY{
+    } FINALLY {
 
         *flag = ( e4c_get_status() == e4c_failed );
     }

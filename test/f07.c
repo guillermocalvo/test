@@ -22,11 +22,11 @@ TEST_CASE{
 
     volatile bool caught = false;
 
-    E4C_TRY{
+    TRY {
 
         aux1();
 
-    }E4C_CATCH(RuntimeException){
+    } CATCH(RuntimeException) {
 
         caught = true;
 
@@ -44,11 +44,11 @@ void aux1(void){
 
 void aux2(void){
 
-    E4C_TRY{
+    TRY {
 
         aux3();
 
-    }E4C_FINALLY{
+    } FINALLY {
 
         /* The exception has not been caught yet */
         TEST_ASSERT_EQUALS(e4c_get_status(), e4c_failed);
@@ -62,11 +62,11 @@ void aux3(void){
 
 void aux4(void){
 
-    E4C_TRY{
+    TRY {
 
         aux5();
 
-    }E4C_CATCH(NullPointerException){
+    } CATCH(NullPointerException) {
 
         TEST_FAIL("Block `catch(NullPointerException)` cannot handle a RuntimeException");
     }
@@ -74,7 +74,7 @@ void aux4(void){
 
 void aux5(void){
 
-    E4C_THROW(RuntimeException, "I'm going to be caught.");
+    THROW(RuntimeException, "I'm going to be caught.");
 
     TEST_FAIL("RuntimeException should have been thrown");
 }

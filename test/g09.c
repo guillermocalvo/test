@@ -25,13 +25,13 @@ TEST_CASE{
 
     signal(SIGABRT, throw_on_signal);
 
-    E4C_TRY{
+    TRY {
 
         abort();
 
         TEST_FAIL("AbortException should have been thrown");
 
-    }E4C_CATCH(RuntimeException){
+    } CATCH(RuntimeException) {
 
         caught = true;
 
@@ -42,5 +42,5 @@ TEST_CASE{
 }
 
 void throw_on_signal(int _) {
-    E4C_THROW(AbortException, NULL);
+    THROW(AbortException, NULL);
 }

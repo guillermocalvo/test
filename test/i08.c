@@ -21,11 +21,11 @@ TEST_CASE{
     context->custom_data = foobar;
     context->finalize_handler = custom_finalize_handler;
 
-    E4C_TRY{
+    TRY {
 
-        E4C_THROW(RuntimeException, "Finalize my custom data");
+        THROW(RuntimeException, "Finalize my custom data");
 
-    }E4C_CATCH(RuntimeException){
+    } CATCH(RuntimeException) {
 
         custom_handler_was_initialized = ( strcmp(e4c_get_exception()->custom_data, foobar) == 0 );
     }

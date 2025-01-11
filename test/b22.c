@@ -18,15 +18,15 @@ TEST_CASE{
 
     TEST_EXPECTING(NullPointerException);
 
-    E4C_TRY{
+    TRY {
 
         thrown = true;
 
-        E4C_THROW( *( (const struct e4c_exception_type *)NULL ), "I see what you did there..." );
+        THROW( *( (const struct e4c_exception_type *)NULL ), "I see what you did there..." );
 
         thrown = false;
 
-    }E4C_CATCH(RuntimeException){
+    } CATCH(RuntimeException) {
 
         caught = (e4c_get_exception()->type == &NullPointerException);
     }

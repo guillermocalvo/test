@@ -30,11 +30,11 @@ TEST_CASE{
     volatile bool cleanup1 = false;
     volatile bool cleanup2 = false;
 
-    E4C_TRY{
+    TRY {
 
         another_function(&cleanup1, &cleanup2);
 
-    }E4C_CATCH(RuntimeException){
+    } CATCH(RuntimeException) {
 
         TEST_ASSERT(  e4c_is_instance_of(e4c_get_exception(), &NullPointerException) );
     }
@@ -45,11 +45,11 @@ TEST_CASE{
 
 void another_function(volatile bool * flag1, volatile bool * flag2){
 
-    E4C_TRY{
+    TRY {
 
         yet_another_function(flag2);
 
-    }E4C_FINALLY{
+    } FINALLY {
 
         *flag1 = true;
     }
@@ -59,11 +59,11 @@ void another_function(volatile bool * flag1, volatile bool * flag2){
 
 void yet_another_function(volatile bool * flag2){
 
-    E4C_TRY{
+    TRY {
 
-        E4C_THROW(NullPointerException, "Get me out of here.");
+        THROW(NullPointerException, "Get me out of here.");
 
-    }E4C_FINALLY{
+    } FINALLY {
 
         *flag2 = true;
     }

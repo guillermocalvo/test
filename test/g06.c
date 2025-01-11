@@ -29,5 +29,5 @@ TEST_CASE{
 }
 
 void throw_on_signal(int _) {
-    E4C_THROW(AbortException, NULL);
+    THROW(AbortException, NULL);
 }

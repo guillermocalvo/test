@@ -15,11 +15,11 @@ TEST_CASE{
 
     TEST_EXPECTING(RuntimeException);
 
-    E4C_TRY {
+    TRY {
 
-        E4C_THROW(RuntimeException, NULL);
+        THROW(RuntimeException, NULL);
 
-    } E4C_CATCH(  *( (struct e4c_exception_type *)NULL )  ) {
+    } CATCH(*((struct e4c_exception_type *) NULL)) {
 
         THIS_SHOULD_NOT_HAPPEN;
     }

@@ -28,7 +28,7 @@ TEST_CASE{
 
     volatile bool caught = false;
 
-    E4C_TRY{
+    TRY {
 
         int divisor = zero(rand());
 
@@ -43,7 +43,7 @@ TEST_CASE{
 
         TEST_FAIL("ArithmeticException should have been thrown");
 
-    }E4C_CATCH(RuntimeException){
+    } CATCH(RuntimeException) {
 
         caught = true;
 
@@ -59,5 +59,5 @@ int zero(int dummy){
 }
 
 void throw_on_signal(int _) {
-    E4C_THROW(ArithmeticException, NULL);
+    THROW(ArithmeticException, NULL);
 }

@@ -11,11 +11,11 @@
  */
 TEST_CASE{
 
-    E4C_TRY{
+    TRY {
 
         TEST_ASSERT( !e4c_get_exception() );
 
-    }E4C_FINALLY{
+    } FINALLY {
 
         TEST_ASSERT_EQUALS(e4c_get_status(), e4c_succeeded);
     }

@@ -14,7 +14,7 @@
  */
 TEST_CASE{
 
-    E4C_TRY{
+    TRY {
 
         TEST_ECHO("Inside `try` block...");
 

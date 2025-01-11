@@ -18,11 +18,11 @@ TEST_CASE{
 
     e4c_get_current_context()->initialize_handler = custom_initialize_handler;
 
-    E4C_TRY{
+    TRY {
 
-        E4C_THROW(RuntimeException, "Initialize my custom data with the result of a function");
+        THROW(RuntimeException, "Initialize my custom data with the result of a function");
 
-    }E4C_CATCH(RuntimeException){
+    } CATCH(RuntimeException) {
 
         custom_handler_was_initialized = ( strcmp(e4c_get_exception()->custom_data, foobar) == 0 );
     }

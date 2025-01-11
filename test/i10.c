@@ -11,15 +11,15 @@
  */
 TEST_CASE{
 
-    E4C_TRY{
+    TRY {
 
-        E4C_THROW(RuntimeException, "Please catch me");
+        THROW(RuntimeException, "Please catch me");
 
-    }E4C_CATCH(RuntimeException){
+    } CATCH(RuntimeException) {
 
         TEST_ASSERT( e4c_get_exception() );
 
-    }E4C_FINALLY{
+    } FINALLY {
 
         TEST_ASSERT(e4c_get_status() == e4c_recovered);
     }

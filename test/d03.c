@@ -13,8 +13,8 @@ TEST_CASE{
 
     TEST_EXPECTING(RuntimeException);
 
-    E4C_TRY{
+    TRY {
 
-        E4C_THROW(RuntimeException, "Nobody will catch me.");
+        THROW(RuntimeException, "Nobody will catch me.");
     }
 }

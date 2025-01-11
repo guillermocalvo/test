@@ -12,12 +12,12 @@
  * This header file needs to be included in order to be able to use any of the
  * exception handling system keywords:
  *
- *   - #E4C_TRY
- *   - #E4C_CATCH
- *   - #E4C_FINALLY
- *   - #E4C_THROW
- *   - #E4C_WITH
- *   - #E4C_USING
+ *   - #TRY
+ *   - #CATCH
+ *   - #FINALLY
+ *   - #THROW
+ *   - #WITH
+ *   - #USING
  *
  * @section license License
  *
@@ -89,81 +89,81 @@ typedef jmp_buf e4c_jump_buffer;
 /**
  * Introduces a block of code aware of exceptions
  *
- * A #E4C_TRY statement executes a block of code. If an exception is thrown and
- * there is a #E4C_CATCH block that can handle it, then control will be
- * transferred to it. If there is a #E4C_FINALLY block, then it will be executed,
- * no matter whether the `try` block completes normally or abruptly, and no
- * matter whether a `catch` block is first given control.
+ * A #TRY statement executes a block of code. If an exception is thrown and
+ * there is a #CATCH block that can handle it, then control will be
+ * transferred to it. If there is a #FINALLY block, then it will be executed,
+ * no matter whether the #TRY block completes normally or abruptly, and no
+ * matter whether a #CATCH block is first given control.
  *
- * The block of code immediately after the keyword `try` is called **the `try`
- * block** of the `try` statement. The block of code immediately after the
- * keyword `finally` is called **the `finally` block** of the `try` statement.
+ * The block of code immediately after the keyword #TRY is called **the #TRY
+ * block** of the #TRY statement. The block of code immediately after the
+ * keyword #FINALLY is called **the #FINALLY block** of the #TRY statement.
  *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   stack_t * stack = stack_new();
- *   try{
- *       // the try block
- *       int value = stack_pop(stack);
- *       stack_push(stack, 16);
- *       stack_push(stack, 32);
- *   }catch(StackOverflowException){
- *       // a catch block
- *       printf("Could not push.");
- *   }catch(StackUnderflowException){
- *       // another catch block
- *       printf("Could not pop.");
- *   }finally{
- *       // the finally block
- *       stack_delete(stack);
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * ```c
+ * stack_t * stack = stack_new();
+ * TRY {
+ *   // the try block
+ *   int value = stack_pop(stack);
+ *   stack_push(stack, 16);
+ *   stack_push(stack, 32);
+ * } CATCH(StackOverflowException) {
+ *   // a catch block
+ *   printf("Could not push.");
+ * } CATCH(StackUnderflowException) {
+ *   // another catch block
+ *   printf("Could not pop.");
+ * } FINALLY {
+ *   // the finally block
+ *   stack_delete(stack);
+ * }
+ * ```
  *
- * One `try` block may precede many `catch` blocks (also called *exception
- * handlers*). A `catch` block **must** have exactly one parameter, which is the
- * exception type it is capable of handling. Within the `catch` block, the
+ * One #TRY block may precede many #CATCH blocks (also called *exception
+ * handlers*). A #CATCH block **must** have exactly one parameter, which is the
+ * exception type it is capable of handling. Within the #CATCH block, the
  * exception can be accessed through the function #e4c_get_exception.
  * Exception handlers are considered in left-to-right order: the earliest
- * possible `catch` block handles the exception. If no `catch` block can handle
+ * possible #CATCH block handles the exception. If no #CATCH block can handle
  * the thrown exception, it will be *propagated*.
  *
- * Sometimes it may come in handy to #E4C_RETRY an entire `try` block; for
+ * Sometimes it may come in handy to #RETRY an entire #TRY block; for
  * instance, once the exception has been caught and the error condition has been
  * solved.
  *
- * A `try` block has an associated [status](#e4c_status) according to the
+ * A #TRY block has an associated [status](#e4c_status) according to the
  * way it has been executed:
  *
  *   - It *succeeds* when the execution reaches the end of the block without
  *     any exceptions.
- *   - It *recovers* when an exception is thrown but a `catch` block handles it.
+ *   - It *recovers* when an exception is thrown but a #CATCH block handles it.
  *   - It *fails* when an exception is thrown and it's not caught.
  *
- * The status of the current `try` block can be retrieved through the function
+ * The status of the current #TRY block can be retrieved through the function
  * #e4c_get_status.
  *
  * @pre
  *   - A program (or thread) **must** begin an exception context prior to using
- *     the keyword `try`. Such programming error will lead to an abrupt exit of
+ *     the keyword #TRY. Such programming error will lead to an abrupt exit of
  *     the program (or thread).
- *   - A `try` block **must** precede, at least, another block of code,
- *     introduced by either `catch` or `finally`.
- *     - A `try` block may precede several `catch` blocks.
- *     - A `try` block can precede, at most, one `finally` block.
- *   - A `try` block **must not** be exited through any of: `goto`, `break`,
- *     `continue` or `return` (but it is legal to #E4C_THROW an exception).
+ *   - A #TRY block **must** precede, at least, another block of code,
+ *     introduced by either #CATCH or #FINALLY.
+ *     - A #TRY block may precede several #CATCH blocks.
+ *     - A #TRY block can precede, at most, one #FINALLY block.
+ *   - A #TRY block **must not** be exited through any of: `goto`, `break`,
+ *     `continue` or `return` (but it is legal to #THROW an exception).
  *
  * @post
- *   - A `finally` block will be executed after the `try` block and any `catch`
- *     block that might be executed, no matter whether the `try` block
+ *   - A #FINALLY block will be executed after the #TRY block and any #CATCH
+ *     block that might be executed, no matter whether the #TRY block
  *     *succeeds*, *recovers* or *fails*.
  *
- * @see     #E4C_CATCH
- * @see     #E4C_FINALLY
- * @see     #E4C_RETRY
- * @see     #e4c_status
- * @see     #e4c_get_status
+ * @see #CATCH
+ * @see #FINALLY
+ * @see #RETRY
+ * @see #e4c_status
+ * @see #e4c_get_status
  */
-#define E4C_TRY                                                             \
+#define TRY                                                                 \
   E4C_START_BLOCK(false)                                                    \
   if (e4c_get_current_stage() == e4c_trying && e4c_next_stage())
     /* simple optimization: e4c_next_stage will avoid disposing stage */
@@ -174,141 +174,141 @@ typedef jmp_buf e4c_jump_buffer;
  * @param   exception_type
  *          The type of exceptions to be handled
  *
- * #E4C_CATCH blocks are optional code blocks that **must** be preceded by #E4C_TRY,
- * #E4C_WITH... #E4C_USE or #E4C_USING blocks. Several `catch` blocks can be placed
+ * #CATCH blocks are optional code blocks that **must** be preceded by #TRY,
+ * #WITH... #USE or #USING blocks. Several #CATCH blocks can be placed
  * next to one another.
  *
- * When an exception is thrown, the system looks for a `catch` block to handle
+ * When an exception is thrown, the system looks for a #CATCH block to handle
  * it. The first capable block (in order of appearance) will be executed. The
- * exception is said to be *caught* and the `try` block is in *recovered*
+ * exception is said to be *caught* and the #TRY block is in *recovered*
  * (status)[@ ref e4c_status].
  *
  * The caught exception can be accessed through the function #e4c_get_exception.
  *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   try{
- *       ...
- *   }catch(RuntimeException){
- *       const e4c_exception * exception = e4c_get_exception();
- *       printf("Error: %s", exception->message);
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * ```c
+ * TRY {
+ *   ...
+ * } CATCH(RuntimeException) {
+ *   const e4c_exception * exception = e4c_get_exception();
+ *   printf("Error: %s", exception->message);
+ * }
+ * ```
  *
  * The actual type of the exception can be checked against other exception types
  * through the function #e4c_is_instance_of.
  *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   try{
- *       ...
- *   }catch(RuntimeException){
- *       const e4c_exception * exception = e4c_get_exception();
- *       if( e4c_is_instance_of(exception, &SignalException) ){
- *           // the exception type is SignalException or any subtype
- *       }
+ * ```c
+ * TRY {
+ *   ...
+ * } CATCH(RuntimeException) {
+ *   const e4c_exception * exception = e4c_get_exception();
+ *   if (e4c_is_instance_of(exception, &SignalException)) {
+ *     // the exception type is SignalException or any subtype
  *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * }
+ * ```
  *
  * The type might also be compared directly against another specific exception
  * type.
  *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   try{
- *       ...
- *   }catch(RuntimeException){
- *       const e4c_exception * exception = e4c_get_exception();
- *       if(exception->type == &NullPointerException){
- *           // the exception type is precisely NullPointerException
- *       }
+ * ```c
+ * TRY {
+ *   ...
+ * } CATCH(RuntimeException) {
+ *   const e4c_exception * exception = e4c_get_exception();
+ *   if (exception->type == &NullPointerException) {
+ *     // the exception type is precisely NullPointerException
  *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * }
+ * ```
  *
- * After the `catch` block completes, the #E4C_FINALLY block (if any) is executed.
- * Then the program continues by the next line following the set of `try`...
- * `catch`... `finally` blocks.
+ * After the #CATCH block completes, the #FINALLY block (if any) is executed.
+ * Then the program continues by the next line following the set of #TRY...
+ * #CATCH... #FINALLY blocks.
  *
- * However, if an exception is thrown in a `catch` block, then the `finally`
+ * However, if an exception is thrown in a #CATCH block, then the #FINALLY
  * block will be executed right away and the system will look for an outter
- * `catch` block to handle it.
+ * #CATCH block to handle it.
  *
- * Only one of all the `catch` blocks will be executed for each `try` block,
- * even though the executed `catch` block throws another exception. The only
- * possible way to execute more than one `catch` block would be by [retrying](#E4C_RETRY)
- * the entire `try` block.
+ * Only one of all the #CATCH blocks will be executed for each #TRY block,
+ * even though the executed #CATCH block throws another exception. The only
+ * possible way to execute more than one #CATCH block would be by [retrying](#RETRY)
+ * the entire #TRY block.
  *
  * @pre
- *   - A `catch` block **must** be preceded by one of these blocks:
- *     - A #E4C_TRY block
- *     - A #E4C_WITH... #E4C_USE block
- *     - A #E4C_USING block
- *     - Another #E4C_CATCH block
- *   - A `catch` block **must not** be exited through any of: `goto`, `break`,
- *     `continue` or `return` (but it is legal to #E4C_THROW an exception).
+ *   - A #CATCH block **must** be preceded by one of these blocks:
+ *     - A #TRY block
+ *     - A #WITH... #USE block
+ *     - A #USING block
+ *     - Another #CATCH block
+ *   - A #CATCH block **must not** be exited through any of: `goto`, `break`,
+ *     `continue` or `return` (but it is legal to #THROW an exception).
  *
- * @see     #E4C_TRY
- * @see     #e4c_exception_type
- * @see     #e4c_get_exception
- * @see     #e4c_exception
- * @see     #e4c_is_instance_of
+ * @see #TRY
+ * @see #e4c_exception_type
+ * @see #e4c_get_exception
+ * @see #e4c_exception
+ * @see #e4c_is_instance_of
  */
-#define E4C_CATCH(exception_type)                                           \
+#define CATCH(exception_type)                                               \
   else if (e4c_catch(&exception_type))
 
 /**
  * Introduces a block of code responsible for cleaning up the previous
  * exception-aware block
  *
- * #E4C_FINALLY blocks are optional code blocks that **must** be preceded by
- * #E4C_TRY, #E4C_WITH... #E4C_USE or #E4C_USING blocks. It is allowed to place, at
- * most, one `finally` block for each one of these.
+ * #FINALLY blocks are optional code blocks that **must** be preceded by
+ * #TRY, #WITH... #USE or #USING blocks. It is allowed to place, at
+ * most, one #FINALLY block for each one of these.
  *
- * The `finally` block can determine the completeness of the *exception-aware*
+ * The #FINALLY block can determine the completeness of the *exception-aware*
  * block through the function #e4c_get_status. The thrown exception (if any)
  * can also be accessed through the function #e4c_get_exception.
  *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   try{
- *      ...
- *   }finally{
- *      switch( e4c_get_status() ){
- *
- *          case e4c_succeeded:
- *              ...
- *              break;
- *
- *          case e4c_recovered:
- *              ...
- *              break;
- *
- *          case e4c_failed:
- *              ...
- *              break;
- *      }
+ * ```c
+ * TRY {
+ *   ...
+ * } FINALLY {
+ *   switch (e4c_get_status()) {
+ *   
+ *     case e4c_succeeded:
+ *       ...
+ *       break;
+ *   
+ *     case e4c_recovered:
+ *       ...
+ *       break;
+ *   
+ *     case e4c_failed:
+ *       ...
+ *       break;
  *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * }
+ * ```
  *
- * The finally block will be executed only **once**. The only possible way to
- * execute it again would be by [retrying](#E4C_RETRY) the entire #E4C_TRY block.
+ * The #FINALLY block will be executed only **once**. The only possible way to
+ * execute it again would be by [retrying](#RETRY) the entire #TRY block.
  *
  * @pre
- *   - A `finally` block **must** be preceded by a `try`, `with`... `use`,
- *     `using` or `catch` block.
- *   - A `finally` block **must not** be exited through any of: `goto`, `break`,
- *     `continue` or `return` (but it is legal to #E4C_THROW an exception).
+ *   - A #FINALLY block **must** be preceded by a #TRY, `with`... `use`,
+ *     `using` or #CATCH block.
+ *   - A #FINALLY block **must not** be exited through any of: `goto`, `break`,
+ *     `continue` or `return` (but it is legal to #THROW an exception).
  * @pre
  *   - A program (or thread) **must** begin an exception context prior to using
- *     the keyword `finally`. Such programming error will lead to an abrupt exit
+ *     the keyword #FINALLY. Such programming error will lead to an abrupt exit
  *     of the program (or thread).
  *
- * @see     #e4c_exception
- * @see     #e4c_get_exception
- * @see     #e4c_get_status
- * @see     #e4c_status
+ * @see #e4c_exception
+ * @see #e4c_get_exception
+ * @see #e4c_get_status
+ * @see #e4c_status
  */
-#define E4C_FINALLY                                                         \
+#define FINALLY                                                             \
   else if (e4c_get_current_stage() == e4c_finalizing)
 
 /**
- * Repeats the previous #E4C_TRY (or #E4C_USE) block entirely
+ * Repeats the previous #TRY (or #USE) block entirely
  *
  * @param   max_retry_attempts
  *          The maximum number of attempts to retry
@@ -320,57 +320,57 @@ typedef jmp_buf e4c_jump_buffer;
  *          The variadic arguments that will be formatted according to the
  *          format control
  *
- * This macro repeats the previous `try` or `use` block, up to a specified
+ * This macro repeats the previous #TRY or `use` block, up to a specified
  * maximum number of attempts. If the block has already been *tried* at
  * least the specified number of times, then the supplied exception will
  * be thrown.
  *
- * It is intended to be used within #E4C_CATCH or #E4C_FINALLY blocks as
+ * It is intended to be used within #CATCH or #FINALLY blocks as
  * a quick way to fix an error condition and *try again*.
  *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   const char * file_path = config_get_user_defined_file_path();
+ * ```c
+ * const char * file_path = config_get_user_defined_file_path();
  *
- *   try{
- *       config = read_config(file_path);
- *   }catch(ConfigException){
- *       file_path = config_get_default_file_path();
- *       retry(1, ConfigException, "Wrong defaults.");
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * TRY {
+ *   config = read_config(file_path);
+ * } CATCH(ConfigException) {
+ *   file_path = config_get_default_file_path();
+ *   RETRY(1, ConfigException, "Wrong defaults.");
+ * }
+ * ```
  *
  * @note
- * #E4C_TRY MAY be used at a `finally` block.
+ * #TRY MAY be used at a #FINALLY block.
  *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   int dividend = 100;
- *   int divisor = 0;
- *   int result = 0;
+ * ```c
+ * int dividend = 100;
+ * int divisor = 0;
+ * int result = 0;
  *
- *   try{
- *       result = dividend / divisor;
- *       do_something(result);
- *   }finally{
- *       if( e4c_get_status() == e4c_failed ){
- *           divisor = 1;
- *           retry(1, RuntimeException, "Retry Error");
- *       }
+ * TRY {
+ *   result = dividend / divisor;
+ *   do_something(result);
+ * } FINALLY {
+ *   if (e4c_get_status() == e4c_failed) {
+ *     divisor = 1;
+ *     RETRY(1, RuntimeException, "Retry Error");
  *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * }
+ * ```
  *
  * @pre
  *   - A program (or thread) **must** begin an exception context prior to using
- *     the keyword `retry`. Such programming error will lead to an abrupt exit
+ *     the keyword #RETRY. Such programming error will lead to an abrupt exit
  *     of the program (or thread).
- *   - The `retry` keyword **must** be used from a `catch` or `finally` block.
+ *   - The #RETRY keyword **must** be used from a #CATCH or #FINALLY block.
  * @post
- *   - Control does not return to the `retry` point.
+ *   - Control does not return to the #RETRY point.
  *
- * @see     #E4C_REACQUIRE
- * @see     #E4C_TRY
- * @see     #E4C_USE
+ * @see #E4C_REACQUIRE
+ * @see #TRY
+ * @see #USE
  */
-#define E4C_RETRY(max_retry_attempts, exception_type, format, ...)          \
+#define RETRY(max_retry_attempts, exception_type, format, ...)              \
   e4c_restart(                                                              \
     false,                                                                  \
     max_retry_attempts,                                                     \
@@ -399,26 +399,26 @@ typedef jmp_buf e4c_jump_buffer;
  * determine how the variadic arguments will be interpreted.
  *
  * When an exception is thrown, the exception handling framework looks for the
- * appropriate #E4C_CATCH block that can handle the exception. The system unwinds
- * the call chain of the program and executes the #E4C_FINALLY blocks it finds.
+ * appropriate #CATCH block that can handle the exception. The system unwinds
+ * the call chain of the program and executes the #FINALLY blocks it finds.
  *
- * When no `catch` block is able to handle an exception, the system eventually
+ * When no #CATCH block is able to handle an exception, the system eventually
  * gets to the main function of the program. This situation is called an
  * **uncaught exception**.
  *
  * @pre
  *   - A program (or thread) **must** begin an exception context prior to using
- *     the keyword `throw`. Such programming error will lead to an abrupt exit
+ *     the keyword #THROW. Such programming error will lead to an abrupt exit
  *     of the program (or thread).
  * @post
- *   - Control does not return to the `throw` point.
+ *   - Control does not return to the #THROW point.
  *
- * @see     #e4c_exception_type
- * @see     #e4c_exception
- * @see     #e4c_uncaught_handler
- * @see     #e4c_get_exception
+ * @see #e4c_exception_type
+ * @see #e4c_exception
+ * @see #e4c_uncaught_handler
+ * @see #e4c_get_exception
  */
-#define E4C_THROW(exception_type, format, ...)                              \
+#define THROW(exception_type, format, ...)                                  \
   e4c_throw(                                                                \
     &exception_type,                                                        \
     #exception_type,                                                        \
@@ -446,7 +446,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @param   dispose
  *          The name of the disposal function (or macro)
  *
- * The combination of keywords `with`... #E4C_USE encapsules the *Dispose
+ * The combination of keywords #WITH... #USE encapsules the *Dispose
  * Pattern*. This pattern consists of two separate blocks and an implicit call
  * to a given function:
  *
@@ -455,17 +455,17 @@ typedef jmp_buf e4c_jump_buffer;
  *   - the disposal function will be called implicitly
  *
  * A `with` block **must** be followed by a `use` block. In addition, the `use`
- * block may be followed by several #E4C_CATCH blocks and/or one #E4C_FINALLY block.
+ * block may be followed by several #CATCH blocks and/or one #FINALLY block.
  *
  * The `with` keyword guarantees that the disposal function will be called **if,
  * and only if**, the acquisition block is *completed* without any errors (i.e.
- * the acquisition block does not #E4C_THROW any exceptions).
+ * the acquisition block does not #THROW any exceptions).
  *
  * If the `with` block does not complete, neither the disposal function nor the
  * `use` block will be executed.
  *
  * The disposal function is called right after the `use` block. If an exception
- * is thrown, the `catch` or `finally` blocks (if any) will take place **after**
+ * is thrown, the #CATCH or #FINALLY blocks (if any) will take place **after**
  * the disposal of the resource.
  *
  * When called, the disposal function will receive two arguments:
@@ -482,37 +482,37 @@ typedef jmp_buf e4c_jump_buffer;
  * resource needs to be closed regardless of the errors occurred. Since the
  * function `fclose` only takes one parameter, we could define the next macro:
  *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   # define e4c_dispose_file(file , failed) fclose(file)
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * ```c
+ * # define e4c_dispose_file(file , failed) fclose(file)
+ * ```
  *
- * Here is the typical usage of `with`... `use`:
+ * Here is the typical usage of #WITH... #USE:
  *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   with(foo, e4c_dispose_foo){
- *       foo = e4c_acquire_foo(foobar);
- *       validate_foo(foo, bar);
- *       ...
- *   }use{
- *       do_something(foo);
- *       ...
- *   }catch(FooAcquisitionFailed){
- *       recover1(foobar);
- *       ...
- *   }catch(SomethingElseFailed){
- *       recover2(foo);
- *       ...
- *   }finally{
- *       cleanup();
- *       ...
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * ```c
+ * WITH(foo, e4c_dispose_foo) {
+ *   foo = e4c_acquire_foo(foobar);
+ *   validate_foo(foo, bar);
+ *   ...
+ * } USE {
+ *   do_something(foo);
+ *   ...
+ * } CATCH(FooAcquisitionFailed) {
+ *   recover1(foobar);
+ *   ...
+ * } CATCH(SomethingElseFailed) {
+ *   recover2(foo);
+ *   ...
+ * } FINALLY {
+ *   cleanup();
+ *   ...
+ * }
+ * ```
  *
  * Nonetheless, *one-liners* fit nicely too:
  *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   with(bar, e4c_dispose_bar) bar = e4c_acquire_bar(baz, 123); use foo(bar);
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * ```c
+ * WITH(bar, e4c_dispose_bar) bar = e4c_acquire_bar(baz, 123); use foo(bar);
+ * ```
  *
  * There is a way to lighten up even more this pattern by defining convenience
  * macros, customized for a specific kind of resources. For example,
@@ -526,10 +526,10 @@ typedef jmp_buf e4c_jump_buffer;
  *     `continue` or `return` (but it is legal to `throw` an exception).
  *   - A `with` block **must** always be followed by a `use` block.
  *
- * @see     #E4C_USE
- * @see     #E4C_USING
+ * @see #USE
+ * @see #USING
  */
-#define E4C_WITH(resource, dispose)                                         \
+#define WITH(resource, dispose)                                             \
   E4C_START_BLOCK(true)                                                     \
   if (e4c_get_current_stage() == e4c_disposing) {                           \
     dispose((resource), e4c_get_status() == e4c_failed);                    \
@@ -538,9 +538,9 @@ typedef jmp_buf e4c_jump_buffer;
 /**
  * Closes a block of code with automatic disposal of a resource
  *
- * A #E4C_USE block **must** always be preceded by a #E4C_WITH block. These two
+ * A #USE block **must** always be preceded by a #WITH block. These two
  * keywords are designed so the compiler will complain about *dangling*
- * #E4C_WITH... #E4C_USE blocks.
+ * #WITH... #USE blocks.
  *
  * A code block introduced by the `use` keyword will only be executed *if, and
  * only if*, the acquisition of the resource *completes* without exceptions.
@@ -549,13 +549,13 @@ typedef jmp_buf e4c_jump_buffer;
  * or not.
  *
  * @pre
- *   - A #E4C_USE block **must** be preceded by a #E4C_WITH block.
- *   - A #E4C_USE block **must not** be exited through any of: `goto`, `break`,
- *     `continue` or `return`  (but it is legal to #E4C_THROW an exception).
+ *   - A #USE block **must** be preceded by a #WITH block.
+ *   - A #USE block **must not** be exited through any of: `goto`, `break`,
+ *     `continue` or `return`  (but it is legal to #THROW an exception).
  *
- * @see     #E4C_WITH
+ * @see #WITH
  */
-#define E4C_USE                                                             \
+#define USE                                                                 \
   } else if (e4c_get_current_stage() == e4c_trying)
 
 /**
@@ -580,25 +580,25 @@ typedef jmp_buf e4c_jump_buffer;
  * *macros*.
  *
  * The semantics of the automatic acquisition and disposal are the same as for
- * blocks introduced by #E4C_WITH... #E4C_USE. For example, a #E4C_USING block can also
- * precede #E4C_CATCH and #E4C_FINALLY blocks.
+ * blocks introduced by #WITH... #USE. For example, a #USING block can also
+ * precede #CATCH and #FINALLY blocks.
  *
  * @pre
  *   - A program (or thread) **must** begin an exception context prior to using
  *     the keyword `using`. Such programming error will lead to an abrupt exit
  *     of the program (or thread).
  *   - A `using` block **must not** be exited through any of: `goto`, `break`,
- *     `continue` or `return`  (but it is legal to #E4C_THROW an exception).
+ *     `continue` or `return`  (but it is legal to #THROW an exception).
  *
- * @see     #E4C_WITH
+ * @see #WITH
  */
-#define E4C_USING(type, resource, args)                                     \
-  E4C_WITH((resource), e4c_dispose_##type) {                                \
+#define USING(type, resource, args)                                         \
+  WITH((resource), e4c_dispose_##type) {                                    \
     (resource) = e4c_acquire_##type args;                                   \
-  } E4C_USE
+  } USE
 
 /**
- * Repeats the previous #E4C_WITH block entirely
+ * Repeats the previous #WITH block entirely
  *
  * @param   max_reacquire_attempts
  *          The maximum number of attempts to reacquire
@@ -614,48 +614,48 @@ typedef jmp_buf e4c_jump_buffer;
  * number of attempts. If the acquisition completes, then the `use` block
  * will be executed. Otherwise, the supplied exception will be thrown.
  *
- * It is intended to be used within #E4C_CATCH or #E4C_FINALLY blocks, next to a
- * #E4C_WITH... #E4C_USE or #E4C_USING block, when the resource acquisition fails,
+ * It is intended to be used within #CATCH or #FINALLY blocks, next to a
+ * #WITH... #USE or #USING block, when the resource acquisition fails,
  * as a quick way to fix an error condition and try to acquire the resource
  * again.
  *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   image_type * image;
- *   const char * image_path = image_get_user_avatar();
+ * ```c
+ * image_type * image;
+ * const char * image_path = image_get_user_avatar();
  *
- *   with(image, e4c_image_dispose){
- *       image = e4c_image_acquire(image_path);
- *   }use{
- *       image_show(image);
- *   }catch(ImageNotFoundException){
- *       image_path = image_get_default_avatar();
- *       reacquire(1);
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * WITH(image, e4c_image_dispose) {
+ *   image = e4c_image_acquire(image_path);
+ * } USE {
+ *   image_show(image);
+ * } CATCH(ImageNotFoundException) {
+ *   image_path = image_get_default_avatar();
+ *   REACQUIRE(1);
+ * }
+ * ```
  *
  * Once the resource has been acquired, the `use` block can also be repeated
- * *alone* through the keyword #E4C_RETRY:
+ * *alone* through the keyword #RETRY:
  *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   image_type * image;
- *   const char * image_path = image_get_user_avatar();
- *   display_type * display = display_get_user_screen();
- *
- *   with(image, e4c_image_dispose){
- *       image = e4c_image_acquire(image_path);
- *   }use{
- *       image_show(image, display);
- *   }catch(ImageNotFoundException){
- *       image_path = image_get_default_avatar();
- *       reacquire(1);
- *   }catch(DisplayException){
- *       display = display_get_default_screen();
- *       retry(1);
- *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * ```c
+ * image_type * image;
+ * const char * image_path = image_get_user_avatar();
+ * display_type * display = display_get_user_screen();
+ * 
+ * WITH(image, e4c_image_dispose) {
+ *   image = e4c_image_acquire(image_path);
+ * } USE {
+ *   image_show(image, display);
+ * } CATCH(ImageNotFoundException) {
+ *   image_path = image_get_default_avatar();
+ *   REACQUIRE(1);
+ * } CATCH(DisplayException) {
+ *   display = display_get_default_screen();
+ *   RETRY(1);
+ * }
+ * ```
  *
  * @pre
- *   - The `reacquire` keyword **must** be used from a `catch` or `finally`
+ *   - The #REACQUIRE keyword **must** be used from a #CATCH or #FINALLY
  *     block, preceded by `with`... `use` or `using` blocks.
  *   - A program (or thread) **must** begin an exception context prior to using
  *     the keyword `reacquire`. Such programming error will lead to an abrupt
@@ -663,9 +663,9 @@ typedef jmp_buf e4c_jump_buffer;
  * @post
  *   - Control does not return to the `reacquire` point.
  *
- * @see     #E4C_RETRY
- * @see     #E4C_WITH
- * @see     #E4C_USE
+ * @see #RETRY
+ * @see #WITH
+ * @see #USE
  */
 #define E4C_REACQUIRE(max_reacquire_attempts, exception_type, format, ...)  \
   e4c_restart(                                                              \
@@ -711,9 +711,9 @@ typedef char e4c_exception_message[128];
  *   - #RuntimeException
  *     - #NullPointerException
  *
- * @see     #e4c_exception
- * @see     #E4C_THROW
- * @see     #E4C_CATCH
+ * @see #e4c_exception
+ * @see #THROW
+ * @see #CATCH
  */
 struct e4c_exception_type {
 
@@ -729,8 +729,8 @@ struct e4c_exception_type {
  *
  * Exceptions are a means of breaking out of the normal flow of control of a
  * code block in order to handle errors or other exceptional conditions. An
- * exception should be [thrown](#E4C_THROW) at the point where the error is
- * detected; it may be [handled](#E4C_CATCH) by the surrounding code block or by
+ * exception should be [thrown](#THROW) at the point where the error is
+ * detected; it may be [handled](#CATCH) by the surrounding code block or by
  * any code block that directly or indirectly invoked the code block where the
  * error occurred.
  *
@@ -745,19 +745,19 @@ struct e4c_exception_type {
  *   - The `cause` of the exception, which is the previous exception (if any),
  *     when the exception was thrown
  *   - The specific `type` of the exception, convenient when handling an
- *     abstract type of exceptions from a #E4C_CATCH block
+ *     abstract type of exceptions from a #CATCH block
  *   - Optional, *user-defined*, `custom_data`, which can be initialized and
  *     finalized throught context *handlers*
  *
  * @note
  * **Any** exception can be caught by a block introduced by
- * `catch(RuntimeException)`.
+ * `CATCH(RuntimeException)`.
  *
- * @see     #e4c_exception_type
- * @see     #E4C_THROW
- * @see     #E4C_CATCH
- * @see     #e4c_get_exception
- * @see     #RuntimeException
+ * @see #e4c_exception_type
+ * @see #THROW
+ * @see #CATCH
+ * @see #e4c_get_exception
+ * @see #RuntimeException
  */
 struct e4c_exception {
 
@@ -796,32 +796,32 @@ struct e4c_exception {
  * Represents the completeness of a code block aware of exceptions
  *
  * The symbolic values representing the status of a block help to distinguish
- * between different possible situations inside a #E4C_FINALLY block. For example,
+ * between different possible situations inside a #FINALLY block. For example,
  * different cleanup actions can be taken, depending on the status of the block.
  *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   try{
- *      ...
- *   }finally{
- *      switch( e4c_get_status() ){
+ * ```c
+ * TRY {
+ *   ...
+ * } FINALLY {
+ *   switch (e4c_get_status()) {
  *
- *          case e4c_succeeded:
- *              ...
- *              break;
+ *     case e4c_succeeded:
+ *       ...
+ *       break;
  *
- *          case e4c_recovered:
- *              ...
- *              break;
+ *     case e4c_recovered:
+ *       ...
+ *       break;
  *
- *          case e4c_failed:
- *              ...
- *              break;
- *      }
+ *     case e4c_failed:
+ *       ...
+ *       break;
  *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * }
+ * ```
  *
- * @see     #e4c_get_status
- * @see     #E4C_FINALLY
+ * @see #e4c_get_status
+ * @see #FINALLY
  */
 enum e4c_status {
 
@@ -940,7 +940,7 @@ struct e4c_context * e4c_get_current_context(void);
  *
  * The status of the current block can be obtained any time, provided that the
  * exception context has begun at the time of the function call. However, it is
- * sensible to call this function only during the execution of #E4C_FINALLY
+ * sensible to call this function only during the execution of #FINALLY
  * blocks.
  *
  * @pre
@@ -948,8 +948,8 @@ struct e4c_context * e4c_get_current_context(void);
  *     calling `e4c_get_status`. Such programming error will lead to an abrupt
  *     exit of the program (or thread).
  *
- * @see     #e4c_status
- * @see     #E4C_FINALLY
+ * @see #e4c_status
+ * @see #FINALLY
  */
 enum e4c_status e4c_get_status(void);
 
@@ -966,29 +966,29 @@ enum e4c_status e4c_get_status(void);
  * an instance of any of the defined exception types. The `type` of the thrown
  * exception can also be compared for an exact type match.
  *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   try{
- *      ...
- *   }catch(RuntimeException){
- *      const e4c_exception * exception = e4c_get_exception();
- *      if( e4c_is_instance_of(exception, &SignalException) ){
- *          ...
- *      }else if(exception->type == &NullPointerException){
- *          ...
- *      }
+ * ```c
+ * TRY {
+ *   ...
+ * } CATCH(RuntimeException) {
+ *   const e4c_exception * exception = e4c_get_exception();
+ *   if (e4c_is_instance_of(exception, &SignalException)) {
+ *     ...
+ *   } else if (exception->type == &NullPointerException) {
+ *     ...
  *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * }
+ * ```
  *
  * The thrown exception can be obtained any time, provided that the exception
  * context has begun at the time of the function call. However, it is sensible
- * to call this function only during the execution of #E4C_FINALLY or #E4C_CATCH
+ * to call this function only during the execution of #FINALLY or #CATCH
  * blocks.
  *
- * Moreover, a pointer to the thrown exception obtained *inside* a #E4C_FINALLY
- * or #E4C_CATCH block **must not** be used *outside* these blocks.
+ * Moreover, a pointer to the thrown exception obtained *inside* a #FINALLY
+ * or #CATCH block **must not** be used *outside* these blocks.
  *
  * The exception system objects are dinamically allocated and deallocated, as
- * the program enters or exits #E4C_TRY... #E4C_CATCH... #E4C_FINALLY blocks. While
+ * the program enters or exits #TRY... #CATCH... #FINALLY blocks. While
  * it would be legal to *copy* the thrown exception and access to its `name`
  * and `message` outside these blocks, care should be taken in order not to
  * dereference the `cause` of the exception, unless it is a **deep copy**
@@ -999,11 +999,11 @@ enum e4c_status e4c_get_status(void);
  *     calling `e4c_get_exception`. Such programming error will lead to an
  *     abrupt exit of the program (or thread).
  *
- * @see     #e4c_exception
- * @see     #e4c_is_instance_of
- * @see     #E4C_THROW
- * @see     #E4C_CATCH
- * @see     #E4C_FINALLY
+ * @see #e4c_exception
+ * @see #e4c_is_instance_of
+ * @see #THROW
+ * @see #CATCH
+ * @see #FINALLY
  */
 const struct e4c_exception * e4c_get_exception(void);
 
@@ -1033,7 +1033,7 @@ const struct e4c_exception * e4c_get_exception(void);
  * The library **must** be compiled with the corresponding header (i.e. library
  * version number should be equal to header version number).
  *
- * @see     #EXCEPTIONS4C_VERSION
+ * @see #EXCEPTIONS4C_VERSION
  */
 int e4c_library_version(void);
 
@@ -1049,33 +1049,33 @@ int e4c_library_version(void);
  * #e4c_is_instance_of can be used to determine if a thrown exception **is an
  * instance of** a given exception type.
  *
- * This function is intended to be used in a #E4C_CATCH block, or in a #E4C_FINALLY
+ * This function is intended to be used in a #CATCH block, or in a #FINALLY
  * block provided that some exception was actually thrown (i.e.
  * #e4c_get_status returs #e4c_failed or #e4c_recovered).
  *
  * This function will return `false` if either `instance` or `type` are
  * `NULL`.
  *
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~{.c}
- *   try{
- *      ...
- *   }catch(RuntimeException){
- *      const e4c_exception * exception = e4c_get_exception();
- *      if( e4c_is_instance_of(exception, &SignalException) ){
- *          ...
- *      }else if(exception->type == &NullPointerException){
- *          ...
- *      }
+ * ```c
+ * TRY {
+ *   ...
+ * } CATCH(RuntimeException) {
+ *   const e4c_exception * exception = e4c_get_exception();
+ *   if (e4c_is_instance_of(exception, &SignalException)) {
+ *     ...
+ *   } else if (exception->type == &NullPointerException) {
+ *     ...
  *   }
- * ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+ * }
+ * ```
  *
  * @pre
  *   - `instance` **must not** be `NULL`
  *   - `type` **must not** be `NULL`
  *
- * @see     #e4c_exception
- * @see     #e4c_exception_type
- * @see     #e4c_get_exception
+ * @see #e4c_exception
+ * @see #e4c_exception_type
+ * @see #e4c_get_exception
  */
 bool e4c_is_instance_of(
     const struct e4c_exception * instance,
@@ -1092,7 +1092,7 @@ bool e4c_is_instance_of(
  * standard error output. It will be used by default as the handler for
  * uncaught exceptions.
  *
- * @see     #e4c_uncaught_handler
+ * @see #e4c_uncaught_handler
  */
 void e4c_print_exception(const struct e4c_exception * exception);
 

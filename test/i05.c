@@ -22,7 +22,7 @@ TEST_CASE{
 
     e4c_get_current_context()->uncaught_handler = custom_uncaught_handler;
 
-    E4C_THROW(RuntimeException, "You can't stop me now!");
+    THROW(RuntimeException, "You can't stop me now!");
 }
 
 void check_execution(void){
