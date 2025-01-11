@@ -160,7 +160,7 @@ static void propagate_exception(const struct e4c_context * context, struct e4c_e
 /* BLOCK
  ================================================================ */
 
-e4c_jump_buffer * e4c_start(enum e4c_block_stage stage, const char * file, int line, const char * function) {
+e4c_jump_buffer * e4c_start(bool should_acquire, const char * file, int line, const char * function) {
 
     if (!is_initialized) {
         /* registers the function cleanup to be called when the program exits */
@@ -182,7 +182,7 @@ e4c_jump_buffer * e4c_start(enum e4c_block_stage stage, const char * file, int l
     /* initialize block data */
     assert(new_block->previous == NULL);
     new_block->previous             = context->current_block;
-    new_block->stage                = stage;
+    new_block->stage                = should_acquire ? e4c_beginning : e4c_acquiring;
     new_block->uncaught             = false;
     new_block->reacquire_attempts   = 0;
     new_block->retry_attempts       = 0;

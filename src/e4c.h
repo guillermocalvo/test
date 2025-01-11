@@ -74,8 +74,8 @@ typedef jmp_buf e4c_jump_buffer;
  * These undocumented macros hide implementation details from documentation.
  */
 
-# define EXCEPTIONS4C_BLOCK(stage)                                          \
-    if (EXCEPTIONS4C_SET_JUMP(*e4c_start(stage, E4C_DEBUG_INFO)) >= 0)      \
+# define EXCEPTIONS4C_BLOCK(should_acquire)                                 \
+    if (EXCEPTIONS4C_SET_JUMP(*e4c_start(should_acquire, E4C_DEBUG_INFO)) >= 0)\
         while (e4c_next_stage())
 
 /**
@@ -164,7 +164,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see     #e4c_get_status
  */
 #define E4C_TRY                                                             \
-  EXCEPTIONS4C_BLOCK(e4c_acquiring)                                         \
+  EXCEPTIONS4C_BLOCK(false)                                                 \
   if (e4c_get_current_stage() == e4c_trying && e4c_next_stage())
     /* simple optimization: e4c_next_stage will avoid disposing stage */
 
@@ -530,7 +530,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see     #E4C_USING
  */
 #define E4C_WITH(resource, dispose)                                         \
-  EXCEPTIONS4C_BLOCK(e4c_beginning)                                         \
+  EXCEPTIONS4C_BLOCK(true)                                                  \
   if (e4c_get_current_stage() == e4c_disposing) {                           \
     dispose((resource), e4c_get_status() == e4c_failed);                    \
   } else if (e4c_get_current_stage() == e4c_acquiring) {
@@ -1104,7 +1104,7 @@ void e4c_print_exception(const struct e4c_exception * exception);
  */
 
 e4c_jump_buffer * e4c_start(
-    enum e4c_block_stage        stage,
+    bool                        should_acquire,
     const char *                file,
     int                         line,
     const char *                function
