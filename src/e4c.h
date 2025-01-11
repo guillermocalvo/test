@@ -76,7 +76,7 @@ typedef jmp_buf e4c_jump_buffer;
 
 # define E4C_START_BLOCK(should_acquire)                                    \
   if (E4C_SET_JUMP(*e4c_start(should_acquire, E4C_DEBUG_INFO)) >= 0)        \
-    while (e4c_next_stage())
+    while (e4c_next(E4C_DEBUG_INFO))
 
 /**
  * @name Exception handling keywords
@@ -165,8 +165,7 @@ typedef jmp_buf e4c_jump_buffer;
  */
 #define TRY                                                                 \
   E4C_START_BLOCK(false)                                                    \
-  if (e4c_get_current_stage() == e4c_trying && e4c_next_stage())
-    /* simple optimization: e4c_next_stage will avoid disposing stage */
+  if (e4c_try(E4C_DEBUG_INFO))
 
 /**
  * Introduces a block of code capable of handling a specific type of exceptions
@@ -251,7 +250,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see #e4c_is_instance_of
  */
 #define CATCH(exception_type)                                               \
-  else if (e4c_catch(&exception_type))
+  else if (e4c_catch(&exception_type, E4C_DEBUG_INFO))
 
 /**
  * Introduces a block of code responsible for cleaning up the previous
@@ -305,7 +304,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see #e4c_status
  */
 #define FINALLY                                                             \
-  else if (e4c_get_current_stage() == e4c_finalizing)
+  else if (e4c_finally(E4C_DEBUG_INFO))
 
 /**
  * Repeats the previous #TRY (or #USE) block entirely
@@ -531,9 +530,9 @@ typedef jmp_buf e4c_jump_buffer;
  */
 #define WITH(resource, dispose)                                             \
   E4C_START_BLOCK(true)                                                     \
-  if (e4c_get_current_stage() == e4c_disposing) {                           \
+  if (e4c_dispose(E4C_DEBUG_INFO)) {                                        \
     dispose((resource), e4c_get_status() == e4c_failed);                    \
-  } else if (e4c_get_current_stage() == e4c_acquiring) {
+  } else if (e4c_acquire(E4C_DEBUG_INFO)) {
 
 /**
  * Closes a block of code with automatic disposal of a resource
@@ -556,7 +555,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see #WITH
  */
 #define USE                                                                 \
-  } else if (e4c_get_current_stage() == e4c_trying)
+  } else if (e4c_try(E4C_DEBUG_INFO))
 
 /**
  * Introduces a block of code with automatic acquisition and disposal of a
@@ -835,17 +834,6 @@ enum e4c_status {
     e4c_failed
 };
 
-/** Represents the execution stage of the current exception block */
-enum e4c_block_stage {
-    e4c_beginning,
-    e4c_acquiring,
-    e4c_trying,
-    e4c_disposing,
-    e4c_catching,
-    e4c_finalizing,
-    e4c_done
-};
-
 /** Represents the exception context of the running program */
 struct e4c_context {
 
@@ -1103,40 +1091,15 @@ void e4c_print_exception(const struct e4c_exception * exception);
  * directly (but through the "keywords").
  */
 
-e4c_jump_buffer * e4c_start(
-    bool                        should_acquire,
-    const char *                file,
-    int                         line,
-    const char *                function
-);
-
-bool e4c_next_stage(void);
-
-enum e4c_block_stage e4c_get_current_stage(void);
-
-bool e4c_catch(const struct e4c_exception_type * exception_type);
-
-noreturn void e4c_restart(
-    bool                        should_reacquire,
-    int                         max_repeat_attempts,
-    const struct e4c_exception_type * exception_type,
-    const char *                name,
-    const char *                file,
-    int                         line,
-    const char *                function,
-    const char *                format,
-    ...
-);
-
-noreturn void e4c_throw(
-    const struct e4c_exception_type * exception_type,
-    const char *                name,
-    const char *                file,
-    int                         line,
-    const char *                function,
-    const char *                format,
-    ...
-);
+e4c_jump_buffer * e4c_start(bool should_acquire, const char * file, int line, const char * function);
+bool e4c_next(const char * file, int line, const char * function);
+bool e4c_try(const char * file, int line, const char * function);
+bool e4c_catch(const struct e4c_exception_type * exception_type, const char * file, int line, const char * function);
+bool e4c_finally(const char * file, int line, const char * function);
+bool e4c_acquire(const char * file, int line, const char * function);
+bool e4c_dispose(const char * file, int line, const char * function);
+noreturn void e4c_restart(bool should_reacquire, int max_repeat_attempts, const struct e4c_exception_type * exception_type, const char * name, const char * file, int line, const char * function, const char * format, ...);
+noreturn void e4c_throw(const struct e4c_exception_type * exception_type, const char * name, const char * file, int line, const char * function, const char * format, ...);
 
 
 # endif
