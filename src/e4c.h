@@ -835,8 +835,8 @@ enum e4c_status {
     e4c_failed
 };
 
-/** Represents the execution stage of the current exception frame */
-enum e4c_frame_stage {
+/** Represents the execution stage of the current exception block */
+enum e4c_block_stage {
     e4c_beginning,
     e4c_acquiring,
     e4c_trying,
@@ -846,26 +846,15 @@ enum e4c_frame_stage {
     e4c_done
 };
 
-/** Represents an exception frame */
-struct e4c_frame {
-    struct e4c_frame *          previous;
-    enum e4c_frame_stage        stage;
-    bool                        uncaught;
-    struct e4c_exception *      thrown_exception;
-    int                         retry_attempts;
-    int                         reacquire_attempts;
-    e4c_jump_buffer             continuation;
-};
-
 /** Represents the exception context of the running program */
 struct e4c_context {
 
     /**
-     * The current exception frame of the running program
+     * The current exception block of the running program
      *
      * It represents the innermost exception block.
      */
-    struct e4c_frame * current_frame;
+    struct e4c_block * current_block;
 
     /** The initial value assigned to the custom_data of a new exception */
     void * custom_data;
@@ -1115,7 +1104,7 @@ void e4c_print_exception(const struct e4c_exception * exception);
  */
 
 e4c_jump_buffer * e4c_start(
-    enum e4c_frame_stage        stage,
+    enum e4c_block_stage        stage,
     const char *                file,
     int                         line,
     const char *                function
@@ -1123,7 +1112,7 @@ e4c_jump_buffer * e4c_start(
 
 bool e4c_next_stage(void);
 
-enum e4c_frame_stage e4c_get_current_stage(void);
+enum e4c_block_stage e4c_get_current_stage(void);
 
 bool e4c_catch(const struct e4c_exception_type * exception_type);
 

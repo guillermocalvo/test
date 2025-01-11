@@ -34,6 +34,17 @@
 # include <assert.h>
 # include "e4c.h"
 
+/** Represents an exception block */
+struct e4c_block {
+    struct e4c_block *          previous;
+    enum e4c_block_stage        stage;
+    bool                        uncaught;
+    struct e4c_exception *      thrown_exception;
+    int                         retry_attempts;
+    int                         reacquire_attempts;
+    e4c_jump_buffer             continuation;
+};
+
 static struct e4c_context * (*context_supplier)(void) = NULL;
 
 /** flag to determine if the exception system is initialized */
@@ -41,7 +52,7 @@ static volatile bool is_initialized = false;
 
 /** main exception context of the program */
 static struct e4c_context main_context = {
-    .current_frame = NULL,
+    .current_block = NULL,
     .custom_data = NULL,
     .initialize_handler = NULL,
     .finalize_handler = NULL,
@@ -54,7 +65,7 @@ const struct e4c_exception_type NullPointerException = {&RuntimeException, "Null
 static void cleanup(void);
 static noreturn void panic(const char * error_message, const char * file, int line, const char * function);
 static noreturn void propagate_exception(const struct e4c_context * context, struct e4c_exception * exception);
-static void deallocate_frame(const struct e4c_context * context, struct e4c_frame * frame);
+static void deallocate_block(const struct e4c_context * context, struct e4c_block * block);
 static void deallocate_exception(const struct e4c_context * context, struct e4c_exception * exception);
 static void print_debug_info(const char * file, int line, const char * function);
 static void print_exception(const char * prefix, const struct e4c_exception * exception);
@@ -71,11 +82,11 @@ static void cleanup(void) {
     struct e4c_context * context = e4c_get_current_context();
 
     /* check for dangling context */
-    /* check if there are too many frames left (breaking out of a try block) */
-    if (context->current_frame != NULL) {
-        /* deallocate the dangling frames */
-        deallocate_frame(context, context->current_frame);
-        panic("Dangling exception frame found. Some `TRY` block may have been exited improperly (via `return`, `break`, or `goto`).", E4C_DEBUG_INFO);
+    /* check if there are too many blocks left (breaking out of a try block) */
+    if (context->current_block != NULL) {
+        /* deallocate the dangling blocks */
+        deallocate_block(context, context->current_block);
+        panic("Dangling exception block found. Some `TRY` block may have been exited improperly (via `return`, `break`, or `goto`).", E4C_DEBUG_INFO);
     }
 }
 
@@ -114,42 +125,42 @@ static void propagate_exception(const struct e4c_context * context, struct e4c_e
     assert(context != NULL);
     assert(exception != NULL);
 
-    struct e4c_frame * frame = context->current_frame;
+    struct e4c_block * block = context->current_block;
 
-    /* if this is the upper frame, then this is an uncaught exception */
-    if (frame == NULL) {
+    /* if this is the outermost block, then this is an uncaught exception */
+    if (block == NULL) {
         if (context->uncaught_handler != NULL) {
             context->uncaught_handler(exception);
         }
         exit(EXIT_FAILURE);
     }
 
-    /* update the frame with the exception information */
-    frame->uncaught = true;
+    /* update the block with the exception information */
+    block->uncaught = true;
 
     /* deallocate previously thrown exception */
-    deallocate_exception(context, frame->thrown_exception);
+    deallocate_exception(context, block->thrown_exception);
 
     /* update current thrown exception */
-    frame->thrown_exception = exception;
+    block->thrown_exception = exception;
 
-    /* otherwise, we will jump to the upper frame */
+    /* otherwise, we will jump to the outer block */
 
     /* simple optimization */
-    if (frame->stage == e4c_acquiring) {
+    if (block->stage == e4c_acquiring) {
         /* if we are in the middle of an acquisition, we don't need to dispose the resource */
-        frame->stage = e4c_disposing;
+        block->stage = e4c_disposing;
         /* (that actually jumps over the "disposing" stage) */
     }
 
     /* keep looping */
-    EXCEPTIONS4C_LONG_JUMP(frame->continuation);
+    EXCEPTIONS4C_LONG_JUMP(block->continuation);
 }
 
-/* FRAME
+/* BLOCK
  ================================================================ */
 
-e4c_jump_buffer * e4c_start(enum e4c_frame_stage stage, const char * file, int line, const char * function) {
+e4c_jump_buffer * e4c_start(enum e4c_block_stage stage, const char * file, int line, const char * function) {
 
     if (!is_initialized) {
         /* registers the function cleanup to be called when the program exits */
@@ -161,52 +172,52 @@ e4c_jump_buffer * e4c_start(enum e4c_frame_stage stage, const char * file, int l
 
     struct e4c_context * context = e4c_get_current_context();
 
-    /* allocate a new frame */
-    struct e4c_frame * new_frame = calloc(1, sizeof(*new_frame));
+    /* allocate a new block */
+    struct e4c_block * new_block = calloc(1, sizeof(*new_block));
 
-    if (new_frame == NULL) {
-        panic("Not enough memory to create a new exception frame", file, line, function);
+    if (new_block == NULL) {
+        panic("Not enough memory to create a new exception block", file, line, function);
     }
 
-    /* initialize frame data */
-    assert(new_frame->previous == NULL);
-    new_frame->previous             = context->current_frame;
-    new_frame->stage                = stage;
-    new_frame->uncaught             = false;
-    new_frame->reacquire_attempts   = 0;
-    new_frame->retry_attempts       = 0;
-    new_frame->thrown_exception     = NULL;
+    /* initialize block data */
+    assert(new_block->previous == NULL);
+    new_block->previous             = context->current_block;
+    new_block->stage                = stage;
+    new_block->uncaught             = false;
+    new_block->reacquire_attempts   = 0;
+    new_block->retry_attempts       = 0;
+    new_block->thrown_exception     = NULL;
     /* jmp_buf is an implementation-defined type */
 
-    /* make it the new current frame */
-    context->current_frame = new_frame;
+    /* make it the new current block */
+    context->current_block = new_block;
 
-    return &new_frame->continuation;
+    return &new_block->continuation;
 }
 
-static void deallocate_frame(const struct e4c_context * context, struct e4c_frame * frame) {
+static void deallocate_block(const struct e4c_context * context, struct e4c_block * block) {
 
-    if (frame != NULL) {
+    if (block != NULL) {
 
-        /* delete previous frame */
-        deallocate_frame(context, frame->previous);
-        frame->previous = NULL;
+        /* delete previous block */
+        deallocate_block(context, block->previous);
+        block->previous = NULL;
 
         /* delete thrown exception */
-        deallocate_exception(context, frame->thrown_exception);
-        frame->thrown_exception = NULL;
+        deallocate_exception(context, block->thrown_exception);
+        block->thrown_exception = NULL;
 
-        free(frame);
+        free(block);
     }
 }
 
-enum e4c_frame_stage e4c_get_current_stage(void) {
+enum e4c_block_stage e4c_get_current_stage(void) {
 
     struct e4c_context * context = e4c_get_current_context();
 
-    assert(context->current_frame != NULL);
+    assert(context->current_block != NULL);
 
-    return context->current_frame->stage;
+    return context->current_block->stage;
 }
 
 bool e4c_catch(const struct e4c_exception_type * exception_type) {
@@ -218,22 +229,22 @@ bool e4c_catch(const struct e4c_exception_type * exception_type) {
         return false;
     }
 
-    assert(context->current_frame != NULL);
+    assert(context->current_block != NULL);
 
-    if (context->current_frame->stage != e4c_catching) {
+    if (context->current_block->stage != e4c_catching) {
         return false;
     }
 
-    assert(context->current_frame->thrown_exception != NULL);
-    assert(context->current_frame->thrown_exception->type != NULL);
+    assert(context->current_block->thrown_exception != NULL);
+    assert(context->current_block->thrown_exception->type != NULL);
 
     /* thrown exception is catchable (otherwise we would have skipped the "catching" stage in e4c_next_stage) */
 
     /* does this block catch current exception? */
-    if (context->current_frame->thrown_exception->type == exception_type || exception_type_extends(context->current_frame->thrown_exception->type, exception_type)) {
+    if (context->current_block->thrown_exception->type == exception_type || exception_type_extends(context->current_block->thrown_exception->type, exception_type)) {
 
         /* yay, catch current exception by executing the handler */
-        context->current_frame->uncaught = false;
+        context->current_block->uncaught = false;
 
         return true;
     }
@@ -245,54 +256,54 @@ bool e4c_catch(const struct e4c_exception_type * exception_type) {
 bool e4c_next_stage(void) {
 
     struct e4c_context *    context;
-    struct e4c_frame *      frame;
-    struct e4c_frame *      previous;
+    struct e4c_block *      block;
+    struct e4c_block *      previous;
     struct e4c_exception *  thrown_exception;
 
     context = e4c_get_current_context();
 
-    /* make sure the current frame is not null */
-    assert(context->current_frame != NULL);
+    /* make sure the current block is not null */
+    assert(context->current_block != NULL);
 
-    frame = context->current_frame;
+    block = context->current_block;
 
-    frame->stage++;
+    block->stage++;
 
     /* simple optimization */
-    if (frame->stage == e4c_catching && (!frame->uncaught || frame->thrown_exception == NULL)) {
+    if (block->stage == e4c_catching && (!block->uncaught || block->thrown_exception == NULL)) {
         /* if no exception was thrown, we don't need to go through the "catching" stage */
-        frame->stage++;
+        block->stage++;
     }
 
     /* keep looping until we reach the "done" stage */
-    if (frame->stage < e4c_done) {
+    if (block->stage < e4c_done) {
         return true;
     }
 
     /* the exception loop is finished */
 
     /* deallocate caught exception */
-    if (frame->thrown_exception != NULL && !frame->uncaught) {
-        deallocate_exception(context, frame->thrown_exception);
-        frame->thrown_exception = NULL;
+    if (block->thrown_exception != NULL && !block->uncaught) {
+        deallocate_exception(context, block->thrown_exception);
+        block->thrown_exception = NULL;
     }
 
-    /* capture temporarily the information of the current frame */
+    /* capture temporarily the information of the current block */
     /* so we can propagate an exception (if it was thrown) */
-    previous            = frame->previous;
-    thrown_exception    = frame->thrown_exception;
+    previous            = block->previous;
+    thrown_exception    = block->thrown_exception;
 
-    /* modify the current frame so that previous and thrown_exception don't get deallocated */
-    frame->previous         = NULL;
-    frame->thrown_exception = NULL;
+    /* modify the current block so that previous and thrown_exception don't get deallocated */
+    block->previous         = NULL;
+    block->thrown_exception = NULL;
 
-    /* delete the current frame */
-    deallocate_frame(context, frame);
+    /* delete the current block */
+    deallocate_block(context, block);
 
-    /* promote the previous frame to the current one */
-    context->current_frame = previous;
+    /* promote the previous block to the current one */
+    context->current_block = previous;
 
-    /* if the current frame has an uncaught exception, then we will propagate it */
+    /* if the current block has an uncaught exception, then we will propagate it */
     if (thrown_exception != NULL) {
         propagate_exception(context, thrown_exception);
     }
@@ -306,11 +317,11 @@ noreturn void e4c_restart(const bool should_reacquire, const int max_repeat_atte
 
     struct e4c_context * context = e4c_get_current_context();
 
-    /* get the current frame */
-    struct e4c_frame * frame = context->current_frame;
+    /* get the current block */
+    struct e4c_block * block = context->current_block;
 
     /* check if 'e4c_restart' was used before 'try' or 'use' */
-    if (frame == NULL) {
+    if (block == NULL) {
         if (should_reacquire) {
             panic("No `WITH` block to reacquire.", file, line, function);
         }
@@ -322,15 +333,15 @@ noreturn void e4c_restart(const bool should_reacquire, const int max_repeat_atte
 
     if (should_reacquire) {
         /* reacquire */
-        max_reached = frame->reacquire_attempts >= max_repeat_attempts;
+        max_reached = block->reacquire_attempts >= max_repeat_attempts;
         if (!max_reached) {
-            frame->reacquire_attempts++;
+            block->reacquire_attempts++;
         }
     } else {
         /* retry */
-        max_reached = frame->retry_attempts >= max_repeat_attempts;
+        max_reached = block->retry_attempts >= max_repeat_attempts;
         if (!max_reached) {
-            frame->retry_attempts++;
+            block->retry_attempts++;
         }
     }
 
@@ -347,28 +358,28 @@ noreturn void e4c_restart(const bool should_reacquire, const int max_repeat_atte
     }
 
     /* deallocate previously thrown exception */
-    deallocate_exception(context, frame->thrown_exception);
+    deallocate_exception(context, block->thrown_exception);
 
     /* reset exception information */
-    frame->thrown_exception = NULL;
-    frame->uncaught         = false;
-    frame->stage            = should_reacquire ? e4c_beginning : e4c_acquiring;
+    block->thrown_exception = NULL;
+    block->uncaught         = false;
+    block->stage            = should_reacquire ? e4c_beginning : e4c_acquiring;
 
     /* keep looping */
-    EXCEPTIONS4C_LONG_JUMP(frame->continuation);
+    EXCEPTIONS4C_LONG_JUMP(block->continuation);
 }
 
 enum e4c_status e4c_get_status(void) {
 
     struct e4c_context * context = e4c_get_current_context();
 
-    assert(context->current_frame != NULL);
+    assert(context->current_block != NULL);
 
-    if (context->current_frame->thrown_exception == NULL) {
+    if (context->current_block->thrown_exception == NULL) {
         return e4c_succeeded;
     }
 
-    if (context->current_frame->uncaught) {
+    if (context->current_block->uncaught) {
         return e4c_failed;
     }
 
@@ -415,14 +426,14 @@ const struct e4c_exception * e4c_get_exception(void) {
 
     struct e4c_context * context = e4c_get_current_context();
 
-    return context->current_frame != NULL ? context->current_frame->thrown_exception : NULL;
+    return context->current_block != NULL ? context->current_block->thrown_exception : NULL;
 }
 
 void e4c_throw(const struct e4c_exception_type * exception_type, const char * name, const char * file, int line, const char * function, const char * format, ...) {
 
     int                     error_number;
     struct e4c_context *    context;
-    struct e4c_frame *      frame;
+    struct e4c_block *      block;
     struct e4c_exception *  new_exception;
 
     /* store the current error number up front */
@@ -436,7 +447,7 @@ void e4c_throw(const struct e4c_exception_type * exception_type, const char * na
     /* get the current context */
     context = e4c_get_current_context();
 
-    /* check context and frame; initialize exception and cause */
+    /* allocate new exception */
     new_exception = calloc(1, sizeof(*new_exception));
 
     /* make sure there was enough memory */
@@ -464,17 +475,17 @@ void e4c_throw(const struct e4c_exception_type * exception_type, const char * na
         va_end(arguments_list);
     }
 
-    /* get the current frame */
-    frame = context->current_frame;
+    /* get the current block */
+    block = context->current_block;
 
     /* capture the cause of this exception */
-    while (frame != NULL) {
-        if (frame->thrown_exception != NULL) {
-            new_exception->cause = frame->thrown_exception;
-            frame->thrown_exception->_ref_count++;
+    while (block != NULL) {
+        if (block->thrown_exception != NULL) {
+            new_exception->cause = block->thrown_exception;
+            block->thrown_exception->_ref_count++;
             break;
         }
-        frame = frame->previous;
+        block = block->previous;
     }
 
     /* set initial value for custom data */
