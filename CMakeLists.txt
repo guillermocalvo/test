@@ -40,6 +40,7 @@ enable_testing()
 
 set(TESTS
         a11
+        a12
         b11
         b15
         b22

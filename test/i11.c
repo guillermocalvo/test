@@ -12,7 +12,7 @@
  */
 TEST_CASE{
 
-    volatile enum e4c_status status = e4c_succeeded;
+    volatile bool is_uncaught = false;
 
     TRY {
 
@@ -22,7 +22,7 @@ TEST_CASE{
 
         } FINALLY {
 
-            status = e4c_get_status();
+            is_uncaught = e4c_is_uncaught();
         }
 
     } CATCH(RuntimeException) {
@@ -30,5 +30,5 @@ TEST_CASE{
         TEST_DUMP("%s", e4c_get_exception()->message);
     }
 
-    TEST_ASSERT(status == e4c_failed);
+    TEST_ASSERT(is_uncaught);
 }

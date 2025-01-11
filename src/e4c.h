@@ -138,9 +138,6 @@ typedef jmp_buf e4c_jump_buffer;
  *   - It *recovers* when an exception is thrown but a #CATCH block handles it.
  *   - It *fails* when an exception is thrown and it's not caught.
  *
- * The status of the current #TRY block can be retrieved through the function
- * #e4c_get_status.
- *
  * @pre
  *   - A program (or thread) **must** begin an exception context prior to using
  *     the keyword #TRY. Such programming error will lead to an abrupt exit of
@@ -161,7 +158,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see #FINALLY
  * @see #RETRY
  * @see #e4c_status
- * @see #e4c_get_status
+ * @see #e4c_is_uncaught
  */
 #define TRY                                                                 \
   E4C_START_BLOCK(false)                                                    \
@@ -261,26 +258,21 @@ typedef jmp_buf e4c_jump_buffer;
  * most, one #FINALLY block for each one of these.
  *
  * The #FINALLY block can determine the completeness of the *exception-aware*
- * block through the function #e4c_get_status. The thrown exception (if any)
+ * block through the function #e4c_is_uncaught. The thrown exception (if any)
  * can also be accessed through the function #e4c_get_exception.
  *
  * ```c
  * TRY {
  *   ...
  * } FINALLY {
- *   switch (e4c_get_status()) {
- *   
- *     case e4c_succeeded:
- *       ...
- *       break;
- *   
- *     case e4c_recovered:
- *       ...
- *       break;
- *   
- *     case e4c_failed:
- *       ...
- *       break;
+ *   if (e4c_get_exception() != NULL) {
+ *     if (e4c_is_uncaught()) {
+ *       // The TRY block failed with an uncaught exception
+ *     } else {
+ *       // The TRY block failed but the exception was caught
+ *     }
+ *   } else {
+ *     // The TRY block completed successfully
  *   }
  * }
  * ```
@@ -300,7 +292,7 @@ typedef jmp_buf e4c_jump_buffer;
  *
  * @see #e4c_exception
  * @see #e4c_get_exception
- * @see #e4c_get_status
+ * @see #e4c_is_uncaught
  * @see #e4c_status
  */
 #define FINALLY                                                             \
@@ -350,7 +342,7 @@ typedef jmp_buf e4c_jump_buffer;
  *   result = dividend / divisor;
  *   do_something(result);
  * } FINALLY {
- *   if (e4c_get_status() == e4c_failed) {
+ *   if (e4c_is_uncaught()) {
  *     divisor = 1;
  *     RETRY(1, RuntimeException, "Retry Error");
  *   }
@@ -368,6 +360,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see #REACQUIRE
  * @see #TRY
  * @see #USE
+ * @see #e4c_is_uncaught
  */
 #define RETRY(max_retry_attempts, exception_type, format, ...)              \
   e4c_restart(                                                              \
@@ -531,7 +524,7 @@ typedef jmp_buf e4c_jump_buffer;
 #define WITH(resource, dispose)                                             \
   E4C_START_BLOCK(true)                                                     \
   if (e4c_dispose(E4C_DEBUG_INFO)) {                                        \
-    dispose((resource), e4c_get_status() == e4c_failed);                    \
+    dispose((resource), e4c_is_uncaught());                                 \
   } else if (e4c_acquire(E4C_DEBUG_INFO)) {
 
 /**
@@ -665,6 +658,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see #RETRY
  * @see #WITH
  * @see #USE
+ * @see #e4c_is_uncaught
  */
 #define REACQUIRE(max_reacquire_attempts, exception_type, format, ...)      \
   e4c_restart(                                                              \
@@ -791,49 +785,6 @@ struct e4c_exception {
     int _ref_count;
 };
 
-/**
- * Represents the completeness of a code block aware of exceptions
- *
- * The symbolic values representing the status of a block help to distinguish
- * between different possible situations inside a #FINALLY block. For example,
- * different cleanup actions can be taken, depending on the status of the block.
- *
- * ```c
- * TRY {
- *   ...
- * } FINALLY {
- *   switch (e4c_get_status()) {
- *
- *     case e4c_succeeded:
- *       ...
- *       break;
- *
- *     case e4c_recovered:
- *       ...
- *       break;
- *
- *     case e4c_failed:
- *       ...
- *       break;
- *   }
- * }
- * ```
- *
- * @see #e4c_get_status
- * @see #FINALLY
- */
-enum e4c_status {
-
-    /** There were no exceptions */
-    e4c_succeeded,
-
-    /** There was an exception, but it was caught */
-    e4c_recovered,
-
-    /** There was an exception and it wasn't caught */
-    e4c_failed
-};
-
 /** Represents the exception context of the running program */
 struct e4c_context {
 
@@ -918,28 +869,17 @@ void e4c_set_context_supplier(struct e4c_context * (*supplier)(void));
 struct e4c_context * e4c_get_current_context(void);
 
 /**
- * Returns the completeness status of the executing code block
+ * Returns whether the current exception block has an uncaught exception
  *
- * @return  The completeness status of the executing code block
+ * @return  `true` if the current exception block has an uncaught
+ *          exception; otherwise `false`
  *
- * Exception-aware code blocks have a completeness status regarding the
- * exception handling system. This status determines whether an exception was
- * actually thrown or not, and whether the exception was caught or not.
+ * This function MAY be called during the execution of #FINALLY blocks.
  *
- * The status of the current block can be obtained any time, provided that the
- * exception context has begun at the time of the function call. However, it is
- * sensible to call this function only during the execution of #FINALLY
- * blocks.
- *
- * @pre
- *   - A program (or thread) **must** begin an exception context prior to
- *     calling `e4c_get_status`. Such programming error will lead to an abrupt
- *     exit of the program (or thread).
- *
- * @see #e4c_status
  * @see #FINALLY
+ * @see #e4c_get_exception
  */
-enum e4c_status e4c_get_status(void);
+bool e4c_is_uncaught(void);
 
 /**
  * Returns the exception that was thrown
@@ -1038,8 +978,7 @@ int e4c_library_version(void);
  * instance of** a given exception type.
  *
  * This function is intended to be used in a #CATCH block, or in a #FINALLY
- * block provided that some exception was actually thrown (i.e.
- * #e4c_get_status returs #e4c_failed or #e4c_recovered).
+ * block.
  *
  * This function will return `false` if either `instance` or `type` are
  * `NULL`.

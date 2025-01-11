@@ -42,7 +42,7 @@ void aux(volatile bool * flag){
 
     } FINALLY {
 
-        *flag = ( e4c_get_status() == e4c_failed );
+        *flag = e4c_is_uncaught();
     }
 
     THIS_SHOULD_NOT_HAPPEN;

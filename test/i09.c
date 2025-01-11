@@ -17,6 +17,6 @@ TEST_CASE{
 
     } FINALLY {
 
-        TEST_ASSERT_EQUALS(e4c_get_status(), e4c_succeeded);
+        TEST_ASSERT(e4c_get_exception() == NULL && !e4c_is_uncaught());
     }
 }

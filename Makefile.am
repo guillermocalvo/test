@@ -172,7 +172,6 @@ TESTS =                                 \
 
 XFAIL_TESTS =                           \
 	bin/check/a10                       \
-	bin/check/a12                       \
 	bin/check/b08                       \
 	bin/check/b10                       \
 	bin/check/b15                       \

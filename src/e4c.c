@@ -194,7 +194,6 @@ e4c_jump_buffer * e4c_start(bool should_acquire, const char * file, int line, co
     }
 
     /* initialize block data */
-    assert(new_block->previous == NULL);
     new_block->previous             = context->current_block;
     new_block->stage                = should_acquire ? BEGINNING : ACQUIRING;
     new_block->uncaught             = false;
@@ -402,22 +401,11 @@ noreturn void e4c_restart(const bool should_reacquire, const int max_repeat_atte
     E4C_LONG_JUMP(block->continuation);
 }
 
-enum e4c_status e4c_get_status(void) {
+bool e4c_is_uncaught(void) {
 
     struct e4c_context * context = e4c_get_current_context();
 
-    assert(context != NULL);
-    assert(context->current_block != NULL);
-
-    if (context->current_block->thrown_exception == NULL) {
-        return e4c_succeeded;
-    }
-
-    if (context->current_block->uncaught) {
-        return e4c_failed;
-    }
-
-    return e4c_recovered;
+    return context != NULL && context->current_block != NULL && context->current_block->uncaught;
 }
 
 /* EXCEPTION TYPE

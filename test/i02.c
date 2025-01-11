@@ -35,7 +35,7 @@ TEST_CASE{
 
     } FINALLY {
 
-        if (e4c_get_status() == e4c_failed) {
+        if (e4c_is_uncaught()) {
             RETRY(3, RuntimeException, "Too many attempts");
         }
     }

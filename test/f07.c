@@ -51,7 +51,7 @@ void aux2(void){
     } FINALLY {
 
         /* The exception has not been caught yet */
-        TEST_ASSERT_EQUALS(e4c_get_status(), e4c_failed);
+        TEST_ASSERT(e4c_is_uncaught());
     }
 }
 
