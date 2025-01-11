@@ -10,12 +10,12 @@
 This library provides you with a simple set of keywords (*macros*, actually)
 which map the semantics of exception handling you're probably already used to:
 
-- #E4C_TRY
-- #E4C_CATCH
-- #E4C_FINALLY
-- #E4C_THROW
+- #TRY
+- #CATCH
+- #FINALLY
+- #THROW
 
-You can use exceptions in C by writing `try/catch/finally` blocks:
+You can use exceptions in C by writing #TRY/#CATCH/#FINALLY blocks:
 
 ```c
 #include "e4c.h"
@@ -25,15 +25,15 @@ int foobar(){
     int foo;
     void * buffer = malloc(1024);
 
-    if(buffer == NULL){
-        throw(NotEnoughMemoryException, "Could not allocate buffer.");
+    if (buffer == NULL) {
+        THROW(NotEnoughMemoryException, "Could not allocate buffer.");
     }
 
-    E4C_TRY {
+    TRY {
         foo = get_user_input(buffer, 1024);
-    } E4C_CATCH(BadUserInputException) {
+    } CATCH(BadUserInputException) {
         foo = 123;
-    } E4C_FINALLY {
+    } FINALLY {
         free(buffer);
     }
 
@@ -49,51 +49,51 @@ return values every time you call a function.
 
 The possible exceptions in a program are organized in a *pseudo-hierarchy* of
 exceptions. `RuntimeException` is the root of the exceptions *pseudo-hierarchy*.
-**Any** exception can be caught by a `catch(RuntimeException)` block, **except**
+**Any** exception can be caught by a `CATCH(RuntimeException)` block, **except**
 `AssertionException`.
 
 When an exception is thrown, control is transferred to the nearest
-dynamically-enclosing `catch` code block that handles the exception. Whether a
-particular `catch` block handles an exception is found out by comparing the type
+dynamically-enclosing #CATCH code block that handles the exception. Whether a
+particular #CATCH block handles an exception is found out by comparing the type
 (and supertypes) of the actual thrown exception against the specified exception
-in the `catch` clause.
+in the #CATCH clause.
 
-A `catch` block is given an exception as a parameter. This parameter determines
+A #CATCH block is given an exception as a parameter. This parameter determines
 the set of exceptions that can be handled by the code block. A block handles an
 actual exception that was thrown if the specified parameter is either:
 
 - the same type of that exception.
 - the same type of any of the *supertypes* of that exception.
 
-If you write a `catch` block that handles an exception with no defined
+If you write a #CATCH block that handles an exception with no defined
 *subtype*, it will only handle that very specific exception. By grouping
-exceptions in *hierarchies*, you can design generic `catch` blocks that deal
+exceptions in *hierarchies*, you can design generic #CATCH blocks that deal
 with several exceptions:
 
 ```c
-/*                   Name             Default message   Supertype */
-E4C_DEFINE_EXCEPTION(ColorException, "Colorful error.", RuntimeException);
-E4C_DEFINE_EXCEPTION(RedException,   "Red error.",      ColorException);
-E4C_DEFINE_EXCEPTION(GreenException, "Green error.",    ColorException);
-E4C_DEFINE_EXCEPTION(BlueException,  "Blue error.",     ColorException);
+const struct e4c_exception_type
+    ColorException = {"Colorful error.",    &RuntimeException};
+    RedException   = {"Red error.",         &ColorException};
+    GreenException = {"Green error.",       &ColorException};
+    BlueException  = {"Blue error.",        &ColorException};
 
 ...
 
-E4C_TRY {
-    int color = chooseColor();
-    if(color == 0xff0000) throw(RedException, "I don't like it.");
-    if(color == 0x00ff00) throw(GreenException, NULL);
-    if(color == 0x0000ff) throw(BlueException, "It's way too blue.");
-    doSomething(color);
-} E4C_CATCH(GreenException) {
-    printf("You cannot use green.");
-} E4C_CATCH(ColorException) {
-    const e4c_exception * e = e4c_get_exception();
-    printf("You cannot use that color: %s (%s).", e->name, e->message);
+TRY {
+  int color = chooseColor();
+  if (color == 0xff0000) THROW(RedException, "I don't like it.");
+  if (color == 0x00ff00) THROW(GreenException, NULL);
+  if (color == 0x0000ff) THROW(BlueException, "It's way too blue.");
+  doSomething(color);
+} CATCH(GreenException) {
+  printf("You cannot use green.");
+} CATCH(ColorException) {
+  const e4c_exception * e = e4c_get_exception();
+  printf("You cannot use that color: %s (%s).", e->name, e->message);
 }
 ```
 
-When looking for a match, `catch` blocks are inspected in the order they appear
+When looking for a match, #CATCH blocks are inspected in the order they appear
 *in the code*. If you place a handler for a superclass before a subclass
 handler, the second block will in fact be **unreachable**.
 
@@ -102,19 +102,19 @@ handler, the second block will in fact be **unreachable**.
 
 There are other keywords related to resource handling:
 
-- #E4C_WITH ... #E4C_USE
-- #E4C_USING
+- #WITH ... #USE
+- #USING
 
 They allow you to express the *Dispose Pattern* in your code:
 
 ```c
 /* syntax #1 */
 FOO f;
-E4C_WITH(f, e4c_dispose_FOO) f = e4c_acquire_FOO(foo, bar); use do_something(f);
+WITH(f, e4c_dispose_FOO) f = e4c_acquire_FOO(foo, bar); use do_something(f);
 
 /* syntax #2 (relies on 'e4c_acquire_BAR' and 'e4c_dispose_BAR') */
 BAR bar;
-E4C_USING(BAR, bar, ("BAR", 123) ){
+USING(BAR, bar, ("BAR", 123) ){
     do_something_else(bar);
 }
 
@@ -133,15 +133,15 @@ acquisition and automatic disposal.
 
 In addition, signals such as `SIGHUP`, `SIGFPE` and `SIGSEGV` can be handled in
 an *exceptional* way. Forget about scary segmentation faults, all you need is to
-catch `BadPointerException`:
+#CATCH `BadPointerException`:
 
 ```c
 int * pointer = NULL;
 
-E4C_TRY {
-    int oops = *pointer;
-} E4C_CATCH(BadPointerException) {
-    printf("No problem ;-)");
+TRY {
+  int oops = *pointer;
+} CATCH(BadPointerException) {
+  printf("No problem ;-)");
 }
 ```
 
@@ -164,7 +164,7 @@ provides services to independent programs, you can integrate `exceptions4c` in
 your code very easily.
 
 The system provides a mechanism for implicit initialization and finalization of
-the exception framework, so that it is safe to use `try`, `catch`, `throw`, etc.
+the exception framework, so that it is safe to use #TRY, #CATCH, #THROW, etc.
 from any external function, even if its caller is not exception-aware
 whatsoever.
 
