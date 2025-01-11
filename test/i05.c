@@ -20,7 +20,7 @@ TEST_CASE{
 
     atexit(check_execution);
 
-    e4c_context_set_handlers(custom_uncaught_handler, NULL, NULL, NULL);
+    e4c_get_current_context()->uncaught_handler = custom_uncaught_handler;
 
     E4C_THROW(RuntimeException, "You can't stop me now!");
 }

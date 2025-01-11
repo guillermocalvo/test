@@ -16,7 +16,7 @@ volatile bool custom_handler_was_initialized = false;
  */
 TEST_CASE{
 
-    e4c_context_set_handlers(NULL, NULL, custom_initialize_handler, NULL);
+    e4c_get_current_context()->initialize_handler = custom_initialize_handler;
 
     E4C_TRY{
 

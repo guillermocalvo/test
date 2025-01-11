@@ -15,7 +15,7 @@ void * custom_initialize_handler(const struct e4c_exception * exception);
  */
 TEST_CASE{
 
-    e4c_context_set_handlers(NULL, NULL, custom_initialize_handler, NULL);
+    e4c_get_current_context()->initialize_handler = custom_initialize_handler;
 
     E4C_TRY{
 
