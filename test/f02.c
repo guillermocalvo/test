@@ -1,6 +1,7 @@
 
 # include "testing.h"
 
+static const struct e4c_exception_type NullPointerException = {&RuntimeException, "Null pointer."};
 
 /**
  * Catching a generic exception

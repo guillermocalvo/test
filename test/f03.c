@@ -4,6 +4,7 @@
 
 void aux(volatile bool * flag);
 
+static const struct e4c_exception_type NullPointerException = {&RuntimeException, "Null pointer."};
 
 /**
  * Leaking a *parent* exception

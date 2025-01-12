@@ -8,6 +8,7 @@ void aux3(void);
 void aux4(void);
 void aux5(void);
 
+static const struct e4c_exception_type NullPointerException = {&RuntimeException, "Null pointer."};
 
 /**
  * Catching an exception thrown deep down the call stack

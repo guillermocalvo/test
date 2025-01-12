@@ -175,6 +175,7 @@ XFAIL_TESTS =                           \
 	bin/check/b15                       \
 	bin/check/b18                       \
 	bin/check/b19                       \
+	bin/check/b22                       \
 	bin/check/d01                       \
 	bin/check/d02                       \
 	bin/check/d03                       \

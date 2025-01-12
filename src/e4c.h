@@ -673,7 +673,6 @@ typedef char e4c_exception_message[128];
  * exceptions *pseudo-hierarchy*:
  *
  *   - #RuntimeException
- *     - #NullPointerException
  *
  * @see #e4c_exception
  * @see #THROW
@@ -795,22 +794,8 @@ struct e4c_context {
  * This is the root of the exception *pseudo-hierarchy*
  *
  * #RuntimeException is the common *supertype* of all exceptions.
- *
- * @par     Direct known subexceptions:
- *          #NullPointerException
  */
 extern const struct e4c_exception_type RuntimeException;
-
-/**
- * This exception is thrown when an unexpected null pointer is found
- *
- * #NullPointerException is thrown when some part of the program gets a
- * pointer which was expected or required to contain a valid memory address.
- *
- * @par     Extends:
- *          #RuntimeException
- */
-extern const struct e4c_exception_type NullPointerException;
 
 /** @} */
 

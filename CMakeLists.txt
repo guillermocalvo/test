@@ -43,7 +43,6 @@ set(TESTS
         a12
         b11
         b15
-        b22
         d01
         d02
         d03

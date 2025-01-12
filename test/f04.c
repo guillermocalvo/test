@@ -2,6 +2,7 @@
 # include "testing.h"
 
 
+static const struct e4c_exception_type NullPointerException = {&RuntimeException, "Null pointer."};
 static const struct e4c_exception_type NotEnoughMemoryException = {&RuntimeException, "Not enough memory."};
 
 void aux(volatile bool * flag);

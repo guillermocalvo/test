@@ -4,6 +4,7 @@
 
 void another_function(volatile bool * flag);
 
+static const struct e4c_exception_type NullPointerException = {&RuntimeException, "Null pointer."};
 
 /**
  * Uncaught exception with a `finally` block

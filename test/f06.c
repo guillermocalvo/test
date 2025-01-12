@@ -1,6 +1,7 @@
 
 # include "testing.h"
 
+static const struct e4c_exception_type NullPointerException = {&RuntimeException, "Null pointer."};
 
 /**
  * Only one `catch` block will handle the exception

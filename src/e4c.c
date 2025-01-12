@@ -84,8 +84,6 @@ static struct e4c_context default_context = {
 static volatile bool is_initialized = false;
 
 const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
-const struct e4c_exception_type NullPointerException = {&RuntimeException, "Null pointer."};
-
 
 /* LIBRARY
  ================================================================ */
@@ -445,7 +443,7 @@ void e4c_throw(const struct e4c_exception_type * exception_type, const char * na
 
     /* convert NULL exception type to NPE */
     if (exception_type == NULL) {
-        exception_type = &NullPointerException;
+        panic("Missing exception type", file, line, function);
     }
 
     /* get the current context */
