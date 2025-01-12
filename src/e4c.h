@@ -283,6 +283,52 @@ typedef jmp_buf e4c_jump_buffer;
   else if (e4c_finally(E4C_DEBUG_INFO))
 
 /**
+ * Signals an exceptional situation represented by an exception object
+ *
+ * @param   exception_type
+ *          The type of exception to be thrown
+ * @param   format
+ *          The detail message.
+ * @param   ...
+ *          The variadic arguments that will be formatted according to the
+ *          format control
+ *
+ * Creates a new instance of the specified type of exception and then throws it.
+ *
+ * If `format` is `NULL`, then the default message for that type of exception will
+ * be used. Otherwise, it MAY contain printf-like format specifications that
+ * determine how the variadic arguments will be interpreted.
+ *
+ * When an exception is thrown, the exception handling framework looks for the
+ * appropriate #CATCH block that can handle the exception. The system unwinds
+ * the call chain of the program and executes the #FINALLY blocks it finds.
+ *
+ * When no #CATCH block is able to handle an exception, the system eventually
+ * gets to the main function of the program. This situation is called an
+ * **uncaught exception**.
+ *
+ * @pre
+ *   - A program (or thread) **must** begin an exception context prior to using
+ *     the keyword #THROW. Such programming error will lead to an abrupt exit
+ *     of the program (or thread).
+ * @post
+ *   - Control does not return to the #THROW point.
+ *
+ * @see #e4c_exception_type
+ * @see #e4c_exception
+ * @see #e4c_uncaught_handler
+ * @see #e4c_get_exception
+ */
+#define THROW(exception_type, format, ...)                                  \
+  e4c_throw(                                                                \
+    &exception_type,                                                        \
+    #exception_type,                                                        \
+    E4C_DEBUG_INFO,                                                         \
+    (format)                                                                \
+    __VA_OPT__(,) __VA_ARGS__                                               \
+  )
+
+/**
  * Repeats the previous #TRY (or #USE) block entirely
  *
  * @param   max_retry_attempts
@@ -350,52 +396,6 @@ typedef jmp_buf e4c_jump_buffer;
   e4c_restart(                                                              \
     false,                                                                  \
     max_retry_attempts,                                                     \
-    &exception_type,                                                        \
-    #exception_type,                                                        \
-    E4C_DEBUG_INFO,                                                         \
-    (format)                                                                \
-    __VA_OPT__(,) __VA_ARGS__                                               \
-  )
-
-/**
- * Signals an exceptional situation represented by an exception object
- *
- * @param   exception_type
- *          The type of exception to be thrown
- * @param   format
- *          The detail message.
- * @param   ...
- *          The variadic arguments that will be formatted according to the
- *          format control
- *
- * Creates a new instance of the specified type of exception and then throws it.
- *
- * If `format` is `NULL`, then the default message for that type of exception will
- * be used. Otherwise, it MAY contain printf-like format specifications that
- * determine how the variadic arguments will be interpreted.
- *
- * When an exception is thrown, the exception handling framework looks for the
- * appropriate #CATCH block that can handle the exception. The system unwinds
- * the call chain of the program and executes the #FINALLY blocks it finds.
- *
- * When no #CATCH block is able to handle an exception, the system eventually
- * gets to the main function of the program. This situation is called an
- * **uncaught exception**.
- *
- * @pre
- *   - A program (or thread) **must** begin an exception context prior to using
- *     the keyword #THROW. Such programming error will lead to an abrupt exit
- *     of the program (or thread).
- * @post
- *   - Control does not return to the #THROW point.
- *
- * @see #e4c_exception_type
- * @see #e4c_exception
- * @see #e4c_uncaught_handler
- * @see #e4c_get_exception
- */
-#define THROW(exception_type, format, ...)                                  \
-  e4c_throw(                                                                \
     &exception_type,                                                        \
     #exception_type,                                                        \
     E4C_DEBUG_INFO,                                                         \
