@@ -4,6 +4,7 @@
 
 void another_function(void);
 
+static const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
 
 /**
  * Uncaught exception, thrown from another function, called from `try` block

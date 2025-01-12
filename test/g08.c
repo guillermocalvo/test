@@ -3,6 +3,7 @@
 # include "testing.h"
 
 
+static const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
 static const struct e4c_exception_type ArithmeticException = {&RuntimeException, "Arithmetic exception."};
 
 int zero(int dummy);

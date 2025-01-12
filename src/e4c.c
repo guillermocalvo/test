@@ -83,7 +83,6 @@ static struct e4c_context default_context = {
 /** flag to determine if the exception system is initialized */
 static volatile bool is_initialized = false;
 
-const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
 
 /* LIBRARY
  ================================================================ */
@@ -441,7 +440,6 @@ void e4c_throw(const struct e4c_exception_type * exception_type, const char * na
     /* store the current error number up front */
     error_number = errno;
 
-    /* convert NULL exception type to NPE */
     if (exception_type == NULL) {
         panic("Missing exception type", file, line, function);
     }

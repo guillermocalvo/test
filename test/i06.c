@@ -4,7 +4,7 @@
 
 typedef struct{ int id; const char * name; } custom_data_t;
 custom_data_t initial_data = {123, "FOOBAR"};
-
+static const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
 
 /**
  * Defining custom data

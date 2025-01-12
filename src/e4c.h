@@ -184,7 +184,7 @@ typedef jmp_buf e4c_jump_buffer;
  * ```c
  * TRY {
  *   ...
- * } CATCH(RuntimeException) {
+ * } CATCH(MyExceptionType) {
  *   const e4c_exception * exception = e4c_get_exception();
  *   printf("Error: %s", exception->message);
  * }
@@ -315,7 +315,7 @@ typedef jmp_buf e4c_jump_buffer;
  * } FINALLY {
  *   if (e4c_is_uncaught()) {
  *     divisor = 1;
- *     RETRY(1, RuntimeException, "Retry Error");
+ *     RETRY(1, NoMoreRetriesException, "Retry Error");
  *   }
  * }
  * ```
@@ -665,14 +665,8 @@ typedef char e4c_exception_message[128];
  * organizes them hierarchically*) and a *default message*.
  *
  * ```c
- * const struct e4c_exception_type SimpleException = {&RuntimeException, "Simple exception"};
+ * const struct e4c_exception_type SimpleException = {NULL, "Simple exception"};
  * ```
- *
- * Exceptions are defined as global objects. There is a set of predefined
- * exceptions built into the framework; #RuntimeException is the *root* of the
- * exceptions *pseudo-hierarchy*:
- *
- *   - #RuntimeException
  *
  * @see #e4c_exception
  * @see #THROW
@@ -712,15 +706,10 @@ struct e4c_exception_type {
  *   - Optional, *user-defined*, `custom_data`, which can be initialized and
  *     finalized throught context *handlers*
  *
- * @note
- * **Any** exception can be caught by a block introduced by
- * `CATCH(RuntimeException)`.
- *
  * @see #e4c_exception_type
  * @see #THROW
  * @see #CATCH
  * @see #e4c_get_exception
- * @see #RuntimeException
  */
 struct e4c_exception {
 
@@ -777,27 +766,6 @@ struct e4c_context {
     /** The function to be executed in the event of an uncaught exception */
     void (*uncaught_handler)(const struct e4c_exception * exception);
 };
-
-/**
- * @name Predefined exceptions
- *
- * Built-in exceptions represent usual error conditions that might occur during
- * the course of any program.
- *
- * They are organized into a *pseudo-hierarchy*; #RuntimeException is the
- * common *supertype* of all exceptions.
- *
- * @{
- */
-
-/**
- * This is the root of the exception *pseudo-hierarchy*
- *
- * #RuntimeException is the common *supertype* of all exceptions.
- */
-extern const struct e4c_exception_type RuntimeException;
-
-/** @} */
 
 /**
  * @name Exception context handling functions

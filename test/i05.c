@@ -6,6 +6,7 @@ volatile bool custom_handler_was_executed = false;
 void check_execution(void);
 void custom_uncaught_handler(const struct e4c_exception * exception);
 
+static const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
 
 /**
  * Setting a custom uncaught handler

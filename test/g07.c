@@ -5,7 +5,7 @@
 void * null(int dummy);
 void throw_on_signal(int);
 
-static const struct e4c_exception_type NullPointerException = {&RuntimeException, "Null pointer."};
+static const struct e4c_exception_type NullPointerException = {NULL, "Null pointer."};
 
 int integer = 123;
 

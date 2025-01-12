@@ -4,7 +4,7 @@
 
 volatile bool custom_initializer_was_executed = false;
 void * custom_initialize_handler(const struct e4c_exception * exception);
-
+static const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
 
 /**
  * Mixing custom initialization handler and formatted message

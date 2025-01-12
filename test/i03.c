@@ -4,6 +4,7 @@
 
 # define DISPOSE_FOO(IGNORE1, IGNORE2)
 
+static const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
 
 /**
  * Reacquiring a resource

@@ -6,7 +6,7 @@ char foobar[64] = "FOOBAR";
 void custom_finalize_handler(void * custom_data);
 volatile bool custom_handler_was_initialized = false;
 volatile bool custom_handler_was_finalized = false;
-
+static const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
 
 /**
  * Setting a custom finalization handler

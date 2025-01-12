@@ -5,7 +5,7 @@
 char foobar[64] = "FOOBAR";
 void * custom_initialize_handler(const struct e4c_exception * exception);
 volatile bool custom_handler_was_initialized = false;
-
+static const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
 
 /**
  * Setting a custom initialization handler

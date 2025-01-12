@@ -2,8 +2,7 @@
 # include <signal.h>
 # include "testing.h"
 
-
-static const struct e4c_exception_type AbortException = {&RuntimeException, "Abort exception."};
+static const struct e4c_exception_type AbortException = {NULL, "Abort exception."};
 
 void throw_on_signal(int);
 

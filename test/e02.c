@@ -5,6 +5,7 @@
 void another_function(volatile bool * flag1, volatile bool * flag2);
 void yet_another_function(volatile bool * flag2);
 
+static const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
 static const struct e4c_exception_type NullPointerException = {&RuntimeException, "Null pointer."};
 
 /**

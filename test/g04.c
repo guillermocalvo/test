@@ -5,6 +5,7 @@
 void * null(int dummy);
 void throw_npe(int);
 
+static const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
 static const struct e4c_exception_type NullPointerException = {&RuntimeException, "Null pointer."};
 
 int integer = 123;
