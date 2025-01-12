@@ -95,7 +95,7 @@ static void cleanup(void) {
     if (context != NULL && context->current_block != NULL) {
         /* deallocate the dangling blocks */
         deallocate_block(context, context->current_block);
-        panic("Dangling exception block found. Some `TRY` block may have been exited improperly (via `return`, `break`, or `goto`).", E4C_DEBUG_INFO);
+        panic("Dangling exception block found. Some `TRY` block may have been exited improperly (via `return`, `break`, or `goto`).", NULL, 0, NULL);
     }
 }
 
