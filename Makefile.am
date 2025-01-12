@@ -106,7 +106,6 @@ check_PROGRAMS =                        \
 	bin/check/i11                       \
 	bin/check/i14                       \
 	bin/check/i15                       \
-	bin/check/i16                       \
 	bin/check/i17                       \
     bin/check/lite/uncaught             \
     bin/check/lite/caught               \
@@ -161,7 +160,6 @@ TESTS =                                 \
 	bin/check/i11                       \
 	bin/check/i14                       \
 	bin/check/i15                       \
-	bin/check/i16                       \
 	bin/check/i17                       \
     bin/check/lite/uncaught             \
     bin/check/lite/caught               \
@@ -250,7 +248,6 @@ bin_check_i10_SOURCES                   = src/e4c.c test/i10.c
 bin_check_i11_SOURCES                   = src/e4c.c test/i11.c
 bin_check_i14_SOURCES                   = src/e4c.c test/i14.c
 bin_check_i15_SOURCES                   = src/e4c.c test/i15.c
-bin_check_i16_SOURCES                   = src/e4c.c test/i16.c
 bin_check_i17_SOURCES                   = src/e4c.c test/i17.c
 
 

@@ -890,36 +890,6 @@ const struct e4c_exception * e4c_get_exception(void);
 
 /** @} */
 
-/**
- * @name Other integration and convenience functions
- *
- * @{
- */
-
-/**
- * Gets the library major version number
- *
- * @return  The major version number associated with the library
- *
- * This function provides the same information as #EXCEPTIONS4C_VERSION,
- * but the returned version number is associated with the actual,
- * compiled library.
- *
- * @note
- * This version number can be considered as the *run-time* library version
- * number, as opposed to the *compile-time* library version number (specified by
- * the header file).
- *
- * @remark
- * The library **must** be compiled with the corresponding header (i.e. library
- * version number should be equal to header version number).
- *
- * @see #EXCEPTIONS4C_VERSION
- */
-int e4c_library_version(void);
-
-/** @} */
-
 /*
  * Next functions are undocumented on purpose, because they shouldn't be used
  * directly (but through the "keywords").

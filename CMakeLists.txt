@@ -79,7 +79,6 @@ set(TESTS
         i11
         i14
         i15
-        i16
         i17
 )
 

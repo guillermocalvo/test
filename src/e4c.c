@@ -110,11 +110,6 @@ static noreturn void panic(const char * error_message, const char * file, int li
     abort();
 }
 
-int e4c_library_version(void) {
-
-    return EXCEPTIONS4C_VERSION;
-}
-
 /* CONTEXT
  ================================================================ */
 
