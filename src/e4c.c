@@ -31,7 +31,6 @@
 # include <stdio.h>
 # include <errno.h>
 # include <stdarg.h>
-# include <assert.h>
 # include "e4c.h"
 
 /** Represents the execution stage of the current exception block */
@@ -66,7 +65,7 @@ static enum block_stage get_stage(const char * file, int line, const char * func
 static void deallocate_exception(const struct e4c_context * context, struct e4c_exception * exception);
 static void print_debug_info(const char * file, int line, const char * function);
 static void print_exception(const char * prefix, const struct e4c_exception * exception);
-static bool exception_type_extends(const struct e4c_exception_type * child, const struct e4c_exception_type * parent);
+static bool exception_type_extends(const struct e4c_exception * exception, const struct e4c_exception_type * parent);
 
 /** exception context supplier */
 static struct e4c_context * (*context_supplier)(void) = NULL;
@@ -127,9 +126,6 @@ static struct e4c_context * get_context(const char * file, int line, const char 
 }
 
 static void propagate_exception(const struct e4c_context * context, struct e4c_exception * exception) {
-
-    assert(context != NULL);
-    assert(exception != NULL);
 
     struct e4c_block * block = context->current_block;
 
@@ -247,24 +243,16 @@ bool e4c_catch(const struct e4c_exception_type * exception_type, const char * fi
 
     struct e4c_context * context = get_context(file, line, function);
 
-    /* passing NULL to a catch block will not catch any exception */
-    if (exception_type == NULL) {
-        return false;
-    }
-
     if (context->current_block == NULL) {
         panic("Invalid exception context state.", file, line, function);
     }
 
-    if (context->current_block->stage != CATCHING) {
+    if (context->current_block->stage != CATCHING || context->current_block->thrown_exception == NULL) {
         return false;
     }
 
-    assert(context->current_block->thrown_exception != NULL);
-    assert(context->current_block->thrown_exception->type != NULL);
-
     /* does this block catch current exception? */
-    if (context->current_block->thrown_exception->type == exception_type || exception_type_extends(context->current_block->thrown_exception->type, exception_type)) {
+    if (exception_type == NULL || exception_type_extends(context->current_block->thrown_exception, exception_type)) {
 
         /* yay, catch current exception by executing the handler */
         context->current_block->uncaught = false;
@@ -403,15 +391,13 @@ bool e4c_is_uncaught(void) {
 /* EXCEPTION TYPE
  ================================================================ */
 
-static bool exception_type_extends(const struct e4c_exception_type * child, const struct e4c_exception_type * parent) {
+static bool exception_type_extends(const struct e4c_exception * exception, const struct e4c_exception_type * parent) {
 
-    assert(child != parent);
-    assert(child != NULL);
-    assert(parent != NULL);
+    const struct e4c_exception_type * child;
 
-    for (; child->supertype != NULL && child->supertype != child; child = child->supertype) {
+    for (child = exception->type; child != NULL; child = child != child->supertype ? child->supertype : NULL) {
 
-        if (child->supertype == parent) {
+        if (child == parent) {
 
             return true;
         }

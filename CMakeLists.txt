@@ -90,7 +90,6 @@ foreach(TEST IN LISTS TESTS)
     set_property(TEST ${TEST} PROPERTY SKIP_RETURN_CODE 77)
 endforeach()
 
-set_property(TEST b15 PROPERTY WILL_FAIL TRUE)
 set_property(TEST d01 PROPERTY WILL_FAIL TRUE)
 set_property(TEST d02 PROPERTY WILL_FAIL TRUE)
 set_property(TEST d03 PROPERTY WILL_FAIL TRUE)

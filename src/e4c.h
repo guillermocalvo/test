@@ -213,12 +213,25 @@ typedef jmp_buf e4c_jump_buffer;
  *     `continue` or `return` (but it is legal to #THROW an exception).
  *
  * @see #TRY
+ * @see #CATCH_ALL
  * @see #e4c_exception_type
  * @see #e4c_get_exception
  * @see #e4c_exception
  */
 #define CATCH(exception_type)                                               \
   else if (e4c_catch(&exception_type, E4C_DEBUG_INFO))
+
+/**
+ * Introduces a block of code capable of handling any exception
+ *
+ * #CATCH_ALL blocks are optional code blocks that **must** be preceded by #TRY,
+ * #WITH... #USE or #USING blocks. No other #CATCH_ALL or #CATCH blocks can be placed
+ * next to a #CATCH_ALL block.
+ *
+ * @see #CATCH
+ */
+#define CATCH_ALL                                                           \
+  else if (e4c_catch(NULL, E4C_DEBUG_INFO))
 
 /**
  * Introduces a block of code responsible for cleaning up the previous
