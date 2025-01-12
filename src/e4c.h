@@ -75,8 +75,10 @@ typedef jmp_buf e4c_jump_buffer;
  */
 
 # define E4C_START_BLOCK(should_acquire)                                    \
-  if (E4C_SET_JUMP(*e4c_start(should_acquire, E4C_DEBUG_INFO)) >= 0)        \
-    while (e4c_next(E4C_DEBUG_INFO))
+  for (                                                                     \
+      E4C_SET_JUMP(*e4c_start(should_acquire, E4C_DEBUG_INFO));             \
+      e4c_next(E4C_DEBUG_INFO);                                             \
+  )
 
 /**
  * @name Exception handling keywords
