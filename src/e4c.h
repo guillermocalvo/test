@@ -668,9 +668,6 @@ typedef jmp_buf e4c_jump_buffer;
 
 /** @} */
 
-/** Represents a message exception */
-typedef char e4c_exception_message[128];
-
 /**
  * Represents an exception type in the exception handling system
  *
@@ -691,7 +688,7 @@ struct e4c_exception_type {
     const struct e4c_exception_type * supertype;
 
     /** The default message of this exception type */
-    const e4c_exception_message default_message;
+    const char * default_message;
 };
 
 /**
@@ -733,7 +730,7 @@ struct e4c_exception {
     const char * name;
 
     /** The message of this exception */
-    e4c_exception_message message;
+    char message[256];
 
     /** The path of the source code file from which the exception was thrown */
     const char * file;
@@ -864,12 +861,12 @@ const struct e4c_exception * e4c_get_exception(void);
 e4c_jump_buffer * e4c_start(bool should_acquire, const char * file, int line, const char * function);
 bool e4c_next(const char * file, int line, const char * function);
 bool e4c_try(const char * file, int line, const char * function);
-bool e4c_catch(const struct e4c_exception_type * exception_type, const char * file, int line, const char * function);
+bool e4c_catch(const struct e4c_exception_type * type, const char * file, int line, const char * function);
 bool e4c_finally(const char * file, int line, const char * function);
 bool e4c_acquire(const char * file, int line, const char * function);
 bool e4c_dispose(const char * file, int line, const char * function);
-noreturn void e4c_restart(bool should_reacquire, int max_repeat_attempts, const struct e4c_exception_type * exception_type, const char * name, const char * file, int line, const char * function, const char * format, ...);
-noreturn void e4c_throw(const struct e4c_exception_type * exception_type, const char * name, const char * file, int line, const char * function, const char * format, ...);
+noreturn void e4c_restart(bool should_reacquire, int max_repeat_attempts, const struct e4c_exception_type * type, const char * name, const char * file, int line, const char * function, const char * format, ...);
+noreturn void e4c_throw(const struct e4c_exception_type * type, const char * name, const char * file, int line, const char * function, const char * format, ...);
 
 
 # endif

@@ -66,6 +66,7 @@ static void deallocate_exception(const struct e4c_context * context, struct e4c_
 static void print_debug_info(const char * file, int line, const char * function);
 static void print_exception(const char * prefix, const struct e4c_exception * exception);
 static bool exception_type_extends(const struct e4c_exception * exception, const struct e4c_exception_type * parent);
+static struct e4c_exception * new_exception(const struct e4c_context * context, const struct e4c_exception_type * type, const char * name, int error_number, const char * file, int line, const char * function, const char * format, va_list arguments_list);
 
 /** exception context supplier */
 static struct e4c_context * (*context_supplier)(void) = NULL;
@@ -214,7 +215,7 @@ static void deallocate_block(const struct e4c_context * context, struct e4c_bloc
 
 static enum block_stage get_stage(const char * file, int line, const char * function) {
 
-    struct e4c_context * context = get_context(file, line, function);
+    const struct e4c_context * context = get_context(file, line, function);
 
     if (context->current_block == NULL) {
         panic("Invalid exception context state.", file, line, function);
@@ -239,9 +240,9 @@ bool e4c_dispose(const char * file, int line, const char * function) {
     return get_stage(file, line, function) == DISPOSING;
 }
 
-bool e4c_catch(const struct e4c_exception_type * exception_type, const char * file, int line, const char * function) {
+bool e4c_catch(const struct e4c_exception_type * type, const char * file, int line, const char * function) {
 
-    struct e4c_context * context = get_context(file, line, function);
+    const struct e4c_context * context = get_context(file, line, function);
 
     if (context->current_block == NULL) {
         panic("Invalid exception context state.", file, line, function);
@@ -252,7 +253,7 @@ bool e4c_catch(const struct e4c_exception_type * exception_type, const char * fi
     }
 
     /* does this block catch current exception? */
-    if (exception_type == NULL || exception_type_extends(context->current_block->thrown_exception, exception_type)) {
+    if (type == NULL || exception_type_extends(context->current_block->thrown_exception, type)) {
 
         /* yay, catch current exception by executing the handler */
         context->current_block->uncaught = false;
@@ -325,9 +326,12 @@ bool e4c_next(const char * file, int line, const char * function) {
     return false;
 }
 
-noreturn void e4c_restart(const bool should_reacquire, const int max_repeat_attempts, const struct e4c_exception_type * exception_type, const char * name, const char * file, const int line, const char * function, const char * format, ...) {
+noreturn void e4c_restart(const bool should_reacquire, const int max_repeat_attempts, const struct e4c_exception_type * type, const char * name, const char * file, const int line, const char * function, const char * format, ...) {
 
-    struct e4c_context * context = get_context(file, line, function);
+    /* store the current error number up front */
+    const int error_number = errno;
+
+    const struct e4c_context * context = get_context(file, line, function);
 
     /* get the current block */
     struct e4c_block * block = context->current_block;
@@ -358,15 +362,11 @@ noreturn void e4c_restart(const bool should_reacquire, const int max_repeat_atte
     }
 
     if (max_reached) {
-        if (format == NULL) {
-            e4c_throw(exception_type, name, file, line, function, NULL);
-        }
-        e4c_exception_message message = {0};
         va_list arguments_list;
         va_start(arguments_list, format);
-        (void) vsnprintf(message, sizeof(message), format, arguments_list);
+        struct e4c_exception * exception = new_exception(context, type, name, error_number, file, line, function, format, arguments_list);
         va_end(arguments_list);
-        e4c_throw(exception_type, name, file, line, function, message);
+        propagate_exception(context, exception);
     }
 
     /* deallocate previously thrown exception */
@@ -416,73 +416,64 @@ const struct e4c_exception * e4c_get_exception(void) {
     return context != NULL && context->current_block != NULL ? context->current_block->thrown_exception : NULL;
 }
 
-void e4c_throw(const struct e4c_exception_type * exception_type, const char * name, const char * file, int line, const char * function, const char * format, ...) {
-
-    int                     error_number;
-    struct e4c_context *    context;
-    struct e4c_block *      block;
-    struct e4c_exception *  new_exception;
-
-    /* store the current error number up front */
-    error_number = errno;
-
-    if (exception_type == NULL) {
-        panic("Missing exception type", file, line, function);
-    }
-
-    /* get the current context */
-    context = get_context(file, line, function);
+static struct e4c_exception * new_exception(const struct e4c_context * context, const struct e4c_exception_type * type, const char * name, int error_number, const char * file, int line, const char * function, const char * format, va_list arguments_list) {
 
     /* allocate new exception */
-    new_exception = calloc(1, sizeof(*new_exception));
+    struct e4c_exception * exception = calloc(1, sizeof(*exception));
 
     /* make sure there was enough memory */
-    if (new_exception == NULL) {
+    if (exception == NULL) {
         panic("Not enough memory to create a new exception", file, line, function);
     }
 
     /* "instantiate" the specified exception */
-    new_exception->_ref_count   = 1;
-    new_exception->name         = name;
-    new_exception->file         = file;
-    new_exception->line         = line;
-    new_exception->function     = function;
-    new_exception->error_number = error_number;
-    new_exception->type         = exception_type;
-    new_exception->cause        = NULL;
+    exception->_ref_count   = 1;
+    exception->name         = name;
+    exception->file         = file;
+    exception->line         = line;
+    exception->function     = function;
+    exception->error_number = error_number;
+    exception->type         = type;
+    exception->cause        = NULL;
+    exception->custom_data  = context->custom_data;
 
-    if (format == NULL) {
-        (void) snprintf(new_exception->message, sizeof(new_exception->message), "%s", exception_type->default_message);
-    } else {
-        /* format the message */
-        va_list arguments_list;
-        va_start(arguments_list, format);
-        (void) vsnprintf(new_exception->message, sizeof(new_exception->message), format, arguments_list);
-        va_end(arguments_list);
+    if (format == NULL && type != NULL) {
+        (void) snprintf(exception->message, sizeof(exception->message), "%s", type->default_message);
+    } else if (format != NULL) {
+        (void) vsnprintf(exception->message, sizeof(exception->message), format, arguments_list);
     }
 
-    /* get the current block */
-    block = context->current_block;
-
     /* capture the cause of this exception */
-    while (block != NULL) {
+    const struct e4c_block * block;
+    for (block = context->current_block; block != NULL; block = block->previous) {
         if (block->thrown_exception != NULL) {
-            new_exception->cause = block->thrown_exception;
+            exception->cause = block->thrown_exception;
             block->thrown_exception->_ref_count++;
             break;
         }
-        block = block->previous;
     }
 
-    /* set initial value for custom data */
-    new_exception->custom_data = context->custom_data;
     /* initialize custom data */
     if (context->initialize_handler != NULL) {
-        new_exception->custom_data = context->initialize_handler(new_exception);
+        exception->custom_data = context->initialize_handler(exception);
     }
 
-    /* propagate the exception up the call stack */
-    propagate_exception(context, new_exception);
+    return exception;
+}
+
+void e4c_throw(const struct e4c_exception_type * type, const char * name, const char * file, int line, const char * function, const char * format, ...) {
+
+    /* store the current error number up front */
+    const int error_number = errno;
+
+    const struct e4c_context * context = get_context(file, line, function);
+
+    va_list arguments_list;
+    va_start(arguments_list, format);
+    struct e4c_exception * exception = new_exception(context, type, name, error_number, file, line, function, format, arguments_list);
+    va_end(arguments_list);
+
+    propagate_exception(context, exception);
 }
 
 static void deallocate_exception(const struct e4c_context * context, struct e4c_exception * exception) {
