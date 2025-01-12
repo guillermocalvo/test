@@ -190,34 +190,6 @@ typedef jmp_buf e4c_jump_buffer;
  * }
  * ```
  *
- * The actual type of the exception can be checked against other exception types
- * through the function #e4c_is_instance_of.
- *
- * ```c
- * TRY {
- *   ...
- * } CATCH(RuntimeException) {
- *   const e4c_exception * exception = e4c_get_exception();
- *   if (e4c_is_instance_of(exception, &SignalException)) {
- *     // the exception type is SignalException or any subtype
- *   }
- * }
- * ```
- *
- * The type might also be compared directly against another specific exception
- * type.
- *
- * ```c
- * TRY {
- *   ...
- * } CATCH(RuntimeException) {
- *   const e4c_exception * exception = e4c_get_exception();
- *   if (exception->type == &NullPointerException) {
- *     // the exception type is precisely NullPointerException
- *   }
- * }
- * ```
- *
  * After the #CATCH block completes, the #FINALLY block (if any) is executed.
  * Then the program continues by the next line following the set of #TRY...
  * #CATCH... #FINALLY blocks.
@@ -244,7 +216,6 @@ typedef jmp_buf e4c_jump_buffer;
  * @see #e4c_exception_type
  * @see #e4c_get_exception
  * @see #e4c_exception
- * @see #e4c_is_instance_of
  */
 #define CATCH(exception_type)                                               \
   else if (e4c_catch(&exception_type, E4C_DEBUG_INFO))
@@ -890,23 +861,6 @@ bool e4c_is_uncaught(void);
  * This function returns a pointer to the exception that was thrown in the
  * surrounding *exception-aware* block, if any; otherwise `NULL`.
  *
- * The function #e4c_is_instance_of will determine if the thrown exception is
- * an instance of any of the defined exception types. The `type` of the thrown
- * exception can also be compared for an exact type match.
- *
- * ```c
- * TRY {
- *   ...
- * } CATCH(RuntimeException) {
- *   const e4c_exception * exception = e4c_get_exception();
- *   if (e4c_is_instance_of(exception, &SignalException)) {
- *     ...
- *   } else if (exception->type == &NullPointerException) {
- *     ...
- *   }
- * }
- * ```
- *
  * The thrown exception can be obtained any time, provided that the exception
  * context has begun at the time of the function call. However, it is sensible
  * to call this function only during the execution of #FINALLY or #CATCH
@@ -928,7 +882,6 @@ bool e4c_is_uncaught(void);
  *     abrupt exit of the program (or thread).
  *
  * @see #e4c_exception
- * @see #e4c_is_instance_of
  * @see #THROW
  * @see #CATCH
  * @see #FINALLY
@@ -964,50 +917,6 @@ const struct e4c_exception * e4c_get_exception(void);
  * @see #EXCEPTIONS4C_VERSION
  */
 int e4c_library_version(void);
-
-/**
- * Returns whether an exception instance is of a given type
- *
- * @param   instance
- *          The thrown exception
- * @param   exception_type
- *          A previously defined type of exceptions
- * @return  Whether the specified exception is an instance of the given type
- *
- * #e4c_is_instance_of can be used to determine if a thrown exception **is an
- * instance of** a given exception type.
- *
- * This function is intended to be used in a #CATCH block, or in a #FINALLY
- * block.
- *
- * This function will return `false` if either `instance` or `type` are
- * `NULL`.
- *
- * ```c
- * TRY {
- *   ...
- * } CATCH(RuntimeException) {
- *   const e4c_exception * exception = e4c_get_exception();
- *   if (e4c_is_instance_of(exception, &SignalException)) {
- *     ...
- *   } else if (exception->type == &NullPointerException) {
- *     ...
- *   }
- * }
- * ```
- *
- * @pre
- *   - `instance` **must not** be `NULL`
- *   - `type` **must not** be `NULL`
- *
- * @see #e4c_exception
- * @see #e4c_exception_type
- * @see #e4c_get_exception
- */
-bool e4c_is_instance_of(
-    const struct e4c_exception * instance,
-    const struct e4c_exception_type * exception_type
-);
 
 /**
  * Prints the supplied exception to the standard error output

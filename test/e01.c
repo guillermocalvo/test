@@ -31,7 +31,7 @@ TEST_CASE{
 
     } CATCH(RuntimeException) {
 
-        TEST_ASSERT(  e4c_is_instance_of(e4c_get_exception(), &NullPointerException) );
+        TEST_ASSERT_EQUALS(e4c_get_exception()->type, &NullPointerException);
     }
 
     TEST_ASSERT(cleanup);

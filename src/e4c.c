@@ -428,19 +428,6 @@ static bool exception_type_extends(const struct e4c_exception_type * child, cons
     return false;
 }
 
-bool e4c_is_instance_of(const struct e4c_exception * instance, const struct e4c_exception_type * exception_type) {
-
-    if (instance == NULL || instance->type == NULL || exception_type == NULL) {
-        return false;
-    }
-
-    if (instance->type == exception_type) {
-        return true;
-    }
-
-    return exception_type_extends(instance->type, exception_type);
-}
-
 /* EXCEPTION
  ================================================================ */
 
