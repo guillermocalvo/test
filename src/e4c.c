@@ -56,23 +56,7 @@ struct e4c_block {
     e4c_jump_buffer continuation;
 };
 
-static struct e4c_context * (*context_supplier)(void) = NULL;
-
-/** flag to determine if the exception system is initialized */
-static volatile bool is_initialized = false;
-
-/** main exception context of the program */
-static struct e4c_context main_context = {
-    .current_block = NULL,
-    .custom_data = NULL,
-    .initialize_handler = NULL,
-    .finalize_handler = NULL,
-    .uncaught_handler = e4c_print_exception
-};
-
-const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
-const struct e4c_exception_type NullPointerException = {&RuntimeException, "Null pointer."};
-
+static void default_uncaught_handler(const struct e4c_exception * exception);
 static struct e4c_context * get_context(const char * file, int line, const char * function);
 static void cleanup(void);
 static noreturn void panic(const char * error_message, const char * file, int line, const char * function);
@@ -84,7 +68,23 @@ static void print_debug_info(const char * file, int line, const char * function)
 static void print_exception(const char * prefix, const struct e4c_exception * exception);
 static bool exception_type_extends(const struct e4c_exception_type * child, const struct e4c_exception_type * parent);
 
+/** exception context supplier */
+static struct e4c_context * (*context_supplier)(void) = NULL;
 
+/** default exception context of the program */
+static struct e4c_context default_context = {
+    .current_block = NULL,
+    .custom_data = NULL,
+    .initialize_handler = NULL,
+    .finalize_handler = NULL,
+    .uncaught_handler = default_uncaught_handler
+};
+
+/** flag to determine if the exception system is initialized */
+static volatile bool is_initialized = false;
+
+const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
+const struct e4c_exception_type NullPointerException = {&RuntimeException, "Null pointer."};
 
 
 /* LIBRARY
@@ -123,7 +123,7 @@ void e4c_set_context_supplier(struct e4c_context * (*supplier)(void)) {
 }
 
 struct e4c_context * e4c_get_current_context(void) {
-    return context_supplier != NULL ? context_supplier() : &main_context;
+    return context_supplier != NULL ? context_supplier() : &default_context;
 }
 
 static struct e4c_context * get_context(const char * file, int line, const char * function) {
@@ -539,24 +539,17 @@ static void print_debug_info(const char * file, int line, const char * function)
 
 static void print_exception(const char * prefix, const struct e4c_exception * exception) {
 
-    assert(exception != NULL);
-
     fprintf(stderr, "%s%s: %s\n", prefix, exception->name, exception->message);
 
     print_debug_info(exception->file, exception->line, exception->function);
 
-    if (exception->cause != NULL) {
+    if (exception->cause != NULL && exception->cause != exception) {
         print_exception("Caused by: ", exception->cause);
     }
 }
 
-void e4c_print_exception(const struct e4c_exception * exception) {
+static void default_uncaught_handler(const struct e4c_exception * exception) {
 
-    if (exception == NULL) {
-        fprintf(stderr, "No exception\n");
-    } else {
-        print_exception("\n", exception);
-    }
-
+    print_exception("\n", exception);
     (void) fflush(stderr);
 }

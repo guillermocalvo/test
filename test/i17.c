@@ -41,6 +41,8 @@ TEST_CASE{
         TEST_ASSERT_EQUALS(exception->cause->type, &NullPointerException);
         TEST_ASSERT_EQUALS(exception->cause->cause->type, &CustomException);
 
-        e4c_print_exception(exception);
+        fprintf(stderr, "CAUGHT: %s: %s\n", exception->name, exception->message);
+        fprintf(stderr, "  CAUSED BY: %s: %s\n", exception->cause->name, exception->cause->message);
+        fprintf(stderr, "    CAUSED BY: %s: %s\n", exception->cause->cause->name, exception->cause->cause->message);
     }
 }

@@ -918,20 +918,6 @@ const struct e4c_exception * e4c_get_exception(void);
  */
 int e4c_library_version(void);
 
-/**
- * Prints the supplied exception to the standard error output
- *
- * @param   exception
- *          The exception to print
- *
- * This is a convenience function for showing an error message through the
- * standard error output. It will be used by default as the handler for
- * uncaught exceptions.
- *
- * @see #e4c_uncaught_handler
- */
-void e4c_print_exception(const struct e4c_exception * exception);
-
 /** @} */
 
 /*
