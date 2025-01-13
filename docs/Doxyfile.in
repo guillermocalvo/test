@@ -6,8 +6,8 @@
 PROJECT_NAME           = "exceptions4c"
 PROJECT_NUMBER         = "@E4C_VERSION@"
 PROJECT_BRIEF          = "Exceptions for C"
-PROJECT_LOGO           = @CMAKE_CURRENT_SOURCE_DIR@/doc/logo.svg
-PROJECT_ICON           = @CMAKE_CURRENT_SOURCE_DIR@/doc/icon.svg
+PROJECT_LOGO           = @CMAKE_CURRENT_SOURCE_DIR@/docs/logo.svg
+PROJECT_ICON           = @CMAKE_CURRENT_SOURCE_DIR@/docs/icon.svg
 OUTPUT_DIRECTORY       = @CMAKE_CURRENT_BINARY_DIR@/doxygen/
 CREATE_SUBDIRS         = NO
 ALWAYS_DETAILED_SEC    = YES
@@ -42,12 +42,12 @@ WARN_AS_ERROR          = NO
 #---------------------------------------------------------------------------
 
 INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/src/ \
-                         @CMAKE_CURRENT_SOURCE_DIR@/doc/README.md
+                         @CMAKE_CURRENT_SOURCE_DIR@/docs/README.md
 FILE_PATTERNS          = *.c \
                          *.h \
                          *.md
 IMAGE_PATH             = @CMAKE_CURRENT_SOURCE_DIR@/doc
-USE_MDFILE_AS_MAINPAGE = @CMAKE_CURRENT_SOURCE_DIR@/doc/README.md
+USE_MDFILE_AS_MAINPAGE = @CMAKE_CURRENT_SOURCE_DIR@/docs/README.md
 
 
 #---------------------------------------------------------------------------

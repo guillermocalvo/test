@@ -32,8 +32,8 @@ include_HEADERS =                       \
 
 # Documentation
 
-docdir = $(datadir)/doc/exceptions4c
-doc_DATA = doc/*
+docsdir = $(datadir)/docs/exceptions4c
+docs_DATA = docs/*
 
 
 # Cleanup
@@ -269,7 +269,7 @@ e4c_lite.c.gcov:
 
 # generate documentation
 
-docs: doc/html/index.html
+docs: docs/html/index.html
 
-doc/html/index.html:
+docs/html/index.html:
 	doxygen ./etc/Doxyfile
