@@ -6,7 +6,7 @@
 # include <stdlib.h>
 # include <stdio.h>
 # include <string.h>
-# include <e4c.h>
+# include <exceptions4c.h>
 
 
 /* Output */

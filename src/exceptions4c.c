@@ -1,6 +1,6 @@
 /*
  *
- * @file        e4c.c
+ * @file        exceptions4c.c
  *
  * exceptions4c source code file
  *
@@ -24,7 +24,7 @@
  */
 
 /*
- * e4c.c is undocumented on purpose (everything is documented in e4c.h)
+ * exceptions4c.c is undocumented on purpose (everything is documented in exceptions4c.h)
  */
 
 
@@ -32,7 +32,7 @@
 # include <errno.h>
 # include <stdarg.h>
 # include <stdnoreturn.h>
-# include "e4c.h"
+# include "exceptions4c.h"
 
 /** Represents the execution stage of the current exception block */
 enum block_stage {

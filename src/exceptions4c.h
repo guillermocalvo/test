@@ -1,6 +1,6 @@
 /**
  *
- * @file        e4c.h
+ * @file        exceptions4c.h
  *
  * exceptions4c header file
  *

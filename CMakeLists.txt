@@ -3,13 +3,13 @@ cmake_minimum_required(VERSION 3.29)
 project(exceptions4c C)
 
 set(CMAKE_C_STANDARD 90)
-set(E4C_VERSION "4.0")
+set(EXCEPTIONS4C_VERSION "4.0")
 
 add_library(exceptions4c
-        src/e4c.c)
+        src/exceptions4c.c)
 
 add_library(exceptions4c_lite
-        lite/src/e4c_lite.c)
+        lite/src/exceptions4c-lite.c)
 
 include(FetchContent)
 FetchContent_Declare(

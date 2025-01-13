@@ -5,7 +5,7 @@
 
 # include <stdlib.h>
 # include <stdio.h>
-# include <e4c_lite.h>
+# include <exceptions4c-lite.h>
 
 
 /* Test Results */

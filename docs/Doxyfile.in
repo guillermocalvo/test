@@ -4,7 +4,7 @@
 #---------------------------------------------------------------------------
 
 PROJECT_NAME           = "exceptions4c"
-PROJECT_NUMBER         = "@E4C_VERSION@"
+PROJECT_NUMBER         = "@EXCEPTIONS4C_VERSION@"
 PROJECT_BRIEF          = "Exceptions for C"
 PROJECT_LOGO           = @CMAKE_CURRENT_SOURCE_DIR@/docs/logo.svg
 PROJECT_ICON           = @CMAKE_CURRENT_SOURCE_DIR@/docs/icon.svg

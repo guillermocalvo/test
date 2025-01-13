@@ -7,7 +7,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "e4c_lite.h"
+#include "exceptions4c-lite.h"
 
 E4C_DEFINE_EXCEPTION(RuntimeException, "Runtime exception.", RuntimeException);
 E4C_DEFINE_EXCEPTION(NullPointerException, "Null pointer.", RuntimeException);
