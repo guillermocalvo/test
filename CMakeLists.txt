@@ -70,7 +70,6 @@ set(TESTS
         i03
         i04
         i05
-        i06
         i07
         i08
         i09

@@ -761,9 +761,6 @@ struct e4c_context {
      */
     void * current_block;
 
-    /** The initial value assigned to the custom_data of a new exception */
-    void * custom_data;
-
     /** The function to be executed whenever a new exception is thrown */
     void * (*initialize_handler)(const struct e4c_exception * exception);
 

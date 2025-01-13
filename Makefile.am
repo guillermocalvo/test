@@ -98,7 +98,6 @@ check_PROGRAMS =                        \
 	bin/check/i03                       \
 	bin/check/i04                       \
 	bin/check/i05                       \
-	bin/check/i06                       \
 	bin/check/i07                       \
 	bin/check/i08                       \
 	bin/check/i09                       \
@@ -152,7 +151,6 @@ TESTS =                                 \
 	bin/check/i03                       \
 	bin/check/i04                       \
 	bin/check/i05                       \
-	bin/check/i06                       \
 	bin/check/i07                       \
 	bin/check/i08                       \
 	bin/check/i09                       \
@@ -240,7 +238,6 @@ bin_check_i02_SOURCES                   = src/e4c.c test/i02.c
 bin_check_i03_SOURCES                   = src/e4c.c test/i03.c
 bin_check_i04_SOURCES                   = src/e4c.c test/i04.c
 bin_check_i05_SOURCES                   = src/e4c.c test/i05.c
-bin_check_i06_SOURCES                   = src/e4c.c test/i06.c
 bin_check_i07_SOURCES                   = src/e4c.c test/i07.c
 bin_check_i08_SOURCES                   = src/e4c.c test/i08.c
 bin_check_i09_SOURCES                   = src/e4c.c test/i09.c

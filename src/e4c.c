@@ -75,7 +75,6 @@ static struct e4c_context * (*context_supplier)(void) = NULL;
 /** default exception context of the program */
 static struct e4c_context default_context = {
     .current_block = NULL,
-    .custom_data = NULL,
     .initialize_handler = NULL,
     .finalize_handler = NULL,
     .uncaught_handler = default_uncaught_handler
@@ -439,7 +438,7 @@ static void throw(const struct e4c_context * context, const struct e4c_exception
     exception->error_number = error_number;
     exception->type         = type;
     exception->cause        = NULL;
-    exception->custom_data  = context->custom_data;
+    exception->custom_data  = NULL;
 
     if (format == NULL && type != NULL) {
         (void) snprintf(exception->message, sizeof(exception->message), "%s", type->default_message);
