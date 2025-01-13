@@ -89,7 +89,7 @@ static volatile bool is_initialized = false;
 
 static void cleanup(void) {
 
-    struct e4c_context * context = e4c_get_current_context();
+    const struct e4c_context * context = e4c_get_current_context();
 
     /* check for dangling context */
     /* check if there are too many blocks left (breaking out of a try block) */
@@ -100,7 +100,7 @@ static void cleanup(void) {
     }
 }
 
-static noreturn void panic(const char * error_message, const char * file, int line, const char * function) {
+static noreturn void panic(const char * error_message, const char * file, const int line, const char * function) {
     fprintf(stderr, "[exceptions4c] %s\n", error_message);
     print_debug_info(file, line, function);
     fflush(stderr);
@@ -118,7 +118,7 @@ struct e4c_context * e4c_get_current_context(void) {
     return context_supplier != NULL ? context_supplier() : &default_context;
 }
 
-static struct e4c_context * get_context(const char * file, int line, const char * function) {
+static struct e4c_context * get_context(const char * file, const int line, const char * function) {
     struct e4c_context * context = e4c_get_current_context();
     if (context == NULL) {
         panic("Context supplier returned NULL.", file, line, function);
@@ -163,7 +163,7 @@ static void propagate_exception(const struct e4c_context * context, struct e4c_e
 /* BLOCK
  ================================================================ */
 
-e4c_jump_buffer * e4c_start(bool should_acquire, const char * file, int line, const char * function) {
+e4c_jump_buffer * e4c_start(const bool should_acquire, const char * file, const int line, const char * function) {
 
     if (!is_initialized) {
         /* registers the function cleanup to be called when the program exits */
@@ -213,7 +213,7 @@ static void deallocate_block(const struct e4c_context * context, struct e4c_bloc
     }
 }
 
-static enum block_stage get_stage(const char * file, int line, const char * function) {
+static enum block_stage get_stage(const char * file, const int line, const char * function) {
 
     const struct e4c_context * context = get_context(file, line, function);
 
@@ -224,23 +224,23 @@ static enum block_stage get_stage(const char * file, int line, const char * func
     return context->current_block->stage;
 }
 
-bool e4c_try(const char * file, int line, const char * function) {
+bool e4c_try(const char * file, const int line, const char * function) {
     return get_stage(file, line, function) == TRYING;
 }
 
-bool e4c_finally(const char * file, int line, const char * function) {
+bool e4c_finally(const char * file, const int line, const char * function) {
     return get_stage(file, line, function) == FINALIZING;
 }
 
-bool e4c_acquire(const char * file, int line, const char * function) {
+bool e4c_acquire(const char * file, const int line, const char * function) {
     return get_stage(file, line, function) == ACQUIRING;
 }
 
-bool e4c_dispose(const char * file, int line, const char * function) {
+bool e4c_dispose(const char * file, const int line, const char * function) {
     return get_stage(file, line, function) == DISPOSING;
 }
 
-bool e4c_catch(const struct e4c_exception_type * type, const char * file, int line, const char * function) {
+bool e4c_catch(const struct e4c_exception_type * type, const char * file, const int line, const char * function) {
 
     const struct e4c_context * context = get_context(file, line, function);
 
@@ -265,7 +265,7 @@ bool e4c_catch(const struct e4c_exception_type * type, const char * file, int li
     return false;
 }
 
-bool e4c_next(const char * file, int line, const char * function) {
+bool e4c_next(const char * file, const int line, const char * function) {
 
     struct e4c_context *    context;
     struct e4c_block *      block;
@@ -383,7 +383,7 @@ noreturn void e4c_restart(const bool should_reacquire, const int max_repeat_atte
 
 bool e4c_is_uncaught(void) {
 
-    struct e4c_context * context = e4c_get_current_context();
+    const struct e4c_context * context = e4c_get_current_context();
 
     return context != NULL && context->current_block != NULL && context->current_block->uncaught;
 }
@@ -411,12 +411,12 @@ static bool exception_type_extends(const struct e4c_exception * exception, const
 
 const struct e4c_exception * e4c_get_exception(void) {
 
-    struct e4c_context * context = e4c_get_current_context();
+    const struct e4c_context * context = e4c_get_current_context();
 
     return context != NULL && context->current_block != NULL ? context->current_block->thrown_exception : NULL;
 }
 
-static struct e4c_exception * new_exception(const struct e4c_context * context, const struct e4c_exception_type * type, const char * name, int error_number, const char * file, int line, const char * function, const char * format, va_list arguments_list) {
+static struct e4c_exception * new_exception(const struct e4c_context * context, const struct e4c_exception_type * type, const char * name, int error_number, const char * file, const int line, const char * function, const char * format, va_list arguments_list) {
 
     /* allocate new exception */
     struct e4c_exception * exception = calloc(1, sizeof(*exception));
@@ -461,7 +461,7 @@ static struct e4c_exception * new_exception(const struct e4c_context * context, 
     return exception;
 }
 
-void e4c_throw(const struct e4c_exception_type * type, const char * name, const char * file, int line, const char * function, const char * format, ...) {
+void e4c_throw(const struct e4c_exception_type * type, const char * name, const char * file, const int line, const char * function, const char * format, ...) {
 
     /* store the current error number up front */
     const int error_number = errno;
@@ -495,7 +495,7 @@ static void deallocate_exception(const struct e4c_context * context, struct e4c_
     }
 }
 
-static void print_debug_info(const char * file, int line, const char * function) {
+static void print_debug_info(const char * file, const int line, const char * function) {
     if (file != NULL) {
         if (function != NULL) {
             fprintf(stderr, "    at %s (%s:%d)\n", function, file, line);
