@@ -214,12 +214,13 @@ static void deallocate_block(const struct e4c_context * context, struct e4c_bloc
 static enum block_stage get_stage(const char * file, const int line, const char * function) {
 
     const struct e4c_context * context = get_context(file, line, function);
+    const struct e4c_block * block = context->current_block;
 
-    if (context->current_block == NULL) {
+    if (block == NULL) {
         panic("Invalid exception context state.", file, line, function);
     }
 
-    return context->current_block->stage;
+    return block->stage;
 }
 
 bool e4c_try(const char * file, const int line, const char * function) {
@@ -241,20 +242,21 @@ bool e4c_dispose(const char * file, const int line, const char * function) {
 bool e4c_catch(const struct e4c_exception_type * type, const char * file, const int line, const char * function) {
 
     const struct e4c_context * context = get_context(file, line, function);
+    struct e4c_block * block = context->current_block;
 
-    if (context->current_block == NULL) {
+    if (block == NULL) {
         panic("Invalid exception context state.", file, line, function);
     }
 
-    if (context->current_block->stage != CATCHING || context->current_block->thrown_exception == NULL) {
+    if (block->stage != CATCHING || block->thrown_exception == NULL) {
         return false;
     }
 
     /* does this block catch current exception? */
-    if (type == NULL || exception_type_extends(context->current_block->thrown_exception, type)) {
+    if (type == NULL || exception_type_extends(block->thrown_exception, type)) {
 
         /* yay, catch current exception by executing the handler */
-        context->current_block->uncaught = false;
+        block->uncaught = false;
 
         return true;
     }
@@ -380,14 +382,14 @@ bool e4c_is_uncaught(void) {
 
     const struct e4c_context * context = e4c_get_context();
 
-    return context != NULL && context->current_block != NULL && context->current_block->uncaught;
+    return context != NULL && context->current_block != NULL && ((struct e4c_block *) context->current_block)->uncaught;
 }
 
 e4c_env * e4c_get_env(void) {
 
     const struct e4c_context * context = e4c_get_context();
 
-    return context != NULL && context->current_block != NULL ? &context->current_block->env : NULL;
+    return context != NULL && context->current_block != NULL ? &((struct e4c_block *) context->current_block)->env : NULL;
 }
 
 /* EXCEPTION TYPE
@@ -415,7 +417,7 @@ const struct e4c_exception * e4c_get_exception(void) {
 
     const struct e4c_context * context = e4c_get_context();
 
-    return context != NULL && context->current_block != NULL ? context->current_block->thrown_exception : NULL;
+    return context != NULL && context->current_block != NULL ? ((struct e4c_block *) context->current_block)->thrown_exception : NULL;
 }
 
 static void throw(const struct e4c_context * context, const struct e4c_exception_type * type, const char * name, int error_number, const char * file, const int line, const char * function, const char * format, va_list arguments_list) {
@@ -473,7 +475,7 @@ e4c_env * e4c_throw(const struct e4c_exception_type * type, const char * name, c
     throw(context, type, name, error_number, file, line, function, format, arguments_list);
     va_end(arguments_list);
 
-    return &context->current_block->env;
+    return &((struct e4c_block *) context->current_block)->env;
 }
 
 static void deallocate_exception(const struct e4c_context * context, struct e4c_exception * exception) {

@@ -759,7 +759,7 @@ struct e4c_context {
      *
      * It represents the innermost exception block.
      */
-    struct e4c_block * current_block;
+    void * current_block;
 
     /** The initial value assigned to the custom_data of a new exception */
     void * custom_data;
