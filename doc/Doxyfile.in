@@ -41,43 +41,11 @@ WARN_AS_ERROR          = NO
 # Configuration options related to the input files
 #---------------------------------------------------------------------------
 
-INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/src/e4c.h \
-                         @CMAKE_CURRENT_SOURCE_DIR@/src/e4c.c \
+INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/src/ \
                          @CMAKE_CURRENT_SOURCE_DIR@/doc/README.md
 FILE_PATTERNS          = *.c \
                          *.h \
                          *.md
-EXCLUDE_SYMBOLS        = e4c_frame_stage_ \
-                         e4c_exception_throw_format_ \
-                         e4c_exception_throw_verbatim_ \
-                         e4c_frame_catch_ \
-                         e4c_frame_first_stage_ \
-                         e4c_frame_next_stage_ \
-                         e4c_frame_get_stage_ \
-                         e4c_frame_catch_ \
-                         e4c_frame_repeat_ \
-                         E4C_AUTO_ \
-                         E4C_CONTINUATION_BUFFER_ \
-                         E4C_CONTINUATION_CREATE_ \
-                         E4C_FRAME_LOOP_ \
-                         E4C_INFO_ \
-                         E4C_INFO_FILE_ \
-                         E4C_INFO_FUNC_ \
-                         E4C_INFO_LINE_ \
-                         E4C_MANGLE_ \
-                         E4C_PASTE_ \
-                         E4C_REUSING_CONTEXT \
-                         E4C_UNREACHABLE_RETURN_ \
-                         E4C_USING_CONTEXT \
-                         e4c_status_ \
-                         _ \
-                         e4c_beginning_ \
-                         e4c_acquiring_ \
-                         e4c_trying_ \
-                         e4c_disposing_ \
-                         e4c_catching_ \
-                         e4c_finalizing_ \
-                         e4c_done_
 IMAGE_PATH             = @CMAKE_CURRENT_SOURCE_DIR@/doc
 USE_MDFILE_AS_MAINPAGE = @CMAKE_CURRENT_SOURCE_DIR@/doc/README.md
 
@@ -94,8 +62,6 @@ VERBATIM_HEADERS       = NO
 #---------------------------------------------------------------------------
 
 ALPHABETICAL_INDEX     = NO
-IGNORE_PREFIX          = e4c_ \
-                         E4C_
 
 
 #---------------------------------------------------------------------------
@@ -161,27 +127,14 @@ GENERATE_AUTOGEN_DEF   = NO
 
 GENERATE_PERLMOD       = NO
 
+
 #---------------------------------------------------------------------------
 # Configuration options related to the preprocessor
 #---------------------------------------------------------------------------
 
-MACRO_EXPANSION        = YES
-EXPAND_ONLY_PREDEF     = YES
-PREDEFINED             = __bool_true_false_are_defined \
-                         __DOXYGEN \
-                         __STDC_VERSION__=199901L \
-                         HAVE_C99_VARIADIC_MACROS \
-                         HAVE_VSNPRINTF \
-                         HAVE_STD_BOOL_H \
-                         e4c_exception_type_=e4c_exception_type \
-                         e4c_exception_=e4c_exception \
-                         e4c_signal_mapping_=e4c_signal_mapping \
-                         e4c_status_=e4c_status \
-                         "E4C_DECLARE_EXCEPTION(e)=extern const e4c_exception_type e"
-EXPAND_AS_DEFINED      = E4C_BOOL \
-                         E4C_TRUE \
-                         E4C_FALSE
+PREDEFINED             = __bool_true_false_are_defined
 SKIP_FUNCTION_MACROS   = NO
+
 
 #---------------------------------------------------------------------------
 # Configuration options related to diagram generator tools
