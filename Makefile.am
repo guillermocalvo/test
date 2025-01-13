@@ -47,15 +47,15 @@ CLEANFILES =                            \
     src/*.gcda                          \
     src/*.gcno                          \
     src/*.gcov                          \
-    test/*.gcda                         \
-    test/*.gcno                         \
-    test/*.gcov                         \
+    tests/*.gcda                         \
+    tests/*.gcno                         \
+    tests/*.gcov                         \
     lite/src/*.gcda                     \
     lite/src/*.gcno                     \
     lite/src/*.gcov                     \
-    lite/test/*.gcda                    \
-    lite/test/*.gcno                    \
-    lite/test/*.gcov
+    lite/tests/*.gcda                    \
+    lite/tests/*.gcno                    \
+    lite/tests/*.gcov
 
 
 # Check
@@ -201,51 +201,51 @@ lib_libe4c_lite_a_SOURCES               = lite/src/e4c_lite.c
 
 # exceptions4c tests
 
-bin_check_a10_SOURCES                   = src/e4c.c test/a10.c
-bin_check_a11_SOURCES                   = src/e4c.c test/a11.c
-bin_check_a12_SOURCES                   = src/e4c.c test/a12.c
-bin_check_b08_SOURCES                   = src/e4c.c test/b08.c
-bin_check_b10_SOURCES                   = src/e4c.c test/b10.c
-bin_check_b11_SOURCES                   = src/e4c.c test/b11.c
-bin_check_b15_SOURCES                   = src/e4c.c test/b15.c
-bin_check_b18_SOURCES                   = src/e4c.c test/b18.c
-bin_check_b19_SOURCES                   = src/e4c.c test/b19.c
-bin_check_b22_SOURCES                   = src/e4c.c test/b22.c
-bin_check_d01_SOURCES                   = src/e4c.c test/d01.c
-bin_check_d02_SOURCES                   = src/e4c.c test/d02.c
-bin_check_d03_SOURCES                   = src/e4c.c test/d03.c
-bin_check_d04_SOURCES                   = src/e4c.c test/d04.c
-bin_check_e01_SOURCES                   = src/e4c.c test/e01.c
-bin_check_e02_SOURCES                   = src/e4c.c test/e02.c
-bin_check_e03_SOURCES                   = src/e4c.c test/e03.c
-bin_check_f01_SOURCES                   = src/e4c.c test/f01.c
-bin_check_f02_SOURCES                   = src/e4c.c test/f02.c
-bin_check_f03_SOURCES                   = src/e4c.c test/f03.c
-bin_check_f04_SOURCES                   = src/e4c.c test/f04.c
-bin_check_f05_SOURCES                   = src/e4c.c test/f05.c
-bin_check_f06_SOURCES                   = src/e4c.c test/f06.c
-bin_check_f07_SOURCES                   = src/e4c.c test/f07.c
-bin_check_g04_SOURCES                   = src/e4c.c test/g04.c
-bin_check_g05_SOURCES                   = src/e4c.c test/g05.c
-bin_check_g06_SOURCES                   = src/e4c.c test/g06.c
-bin_check_g07_SOURCES                   = src/e4c.c test/g07.c
-bin_check_g08_SOURCES                   = src/e4c.c test/g08.c
-bin_check_g09_SOURCES                   = src/e4c.c test/g09.c
-bin_check_g10_SOURCES                   = src/e4c.c test/g10.c
-bin_check_g11_SOURCES                   = src/e4c.c test/g11.c
-bin_check_g12_SOURCES                   = src/e4c.c test/g12.c
-bin_check_i02_SOURCES                   = src/e4c.c test/i02.c
-bin_check_i03_SOURCES                   = src/e4c.c test/i03.c
-bin_check_i04_SOURCES                   = src/e4c.c test/i04.c
-bin_check_i05_SOURCES                   = src/e4c.c test/i05.c
-bin_check_i07_SOURCES                   = src/e4c.c test/i07.c
-bin_check_i08_SOURCES                   = src/e4c.c test/i08.c
-bin_check_i09_SOURCES                   = src/e4c.c test/i09.c
-bin_check_i10_SOURCES                   = src/e4c.c test/i10.c
-bin_check_i11_SOURCES                   = src/e4c.c test/i11.c
-bin_check_i14_SOURCES                   = src/e4c.c test/i14.c
-bin_check_i15_SOURCES                   = src/e4c.c test/i15.c
-bin_check_i17_SOURCES                   = src/e4c.c test/i17.c
+bin_check_a10_SOURCES                   = src/e4c.c tests/a10.c
+bin_check_a11_SOURCES                   = src/e4c.c tests/a11.c
+bin_check_a12_SOURCES                   = src/e4c.c tests/a12.c
+bin_check_b08_SOURCES                   = src/e4c.c tests/b08.c
+bin_check_b10_SOURCES                   = src/e4c.c tests/b10.c
+bin_check_b11_SOURCES                   = src/e4c.c tests/b11.c
+bin_check_b15_SOURCES                   = src/e4c.c tests/b15.c
+bin_check_b18_SOURCES                   = src/e4c.c tests/b18.c
+bin_check_b19_SOURCES                   = src/e4c.c tests/b19.c
+bin_check_b22_SOURCES                   = src/e4c.c tests/b22.c
+bin_check_d01_SOURCES                   = src/e4c.c tests/d01.c
+bin_check_d02_SOURCES                   = src/e4c.c tests/d02.c
+bin_check_d03_SOURCES                   = src/e4c.c tests/d03.c
+bin_check_d04_SOURCES                   = src/e4c.c tests/d04.c
+bin_check_e01_SOURCES                   = src/e4c.c tests/e01.c
+bin_check_e02_SOURCES                   = src/e4c.c tests/e02.c
+bin_check_e03_SOURCES                   = src/e4c.c tests/e03.c
+bin_check_f01_SOURCES                   = src/e4c.c tests/f01.c
+bin_check_f02_SOURCES                   = src/e4c.c tests/f02.c
+bin_check_f03_SOURCES                   = src/e4c.c tests/f03.c
+bin_check_f04_SOURCES                   = src/e4c.c tests/f04.c
+bin_check_f05_SOURCES                   = src/e4c.c tests/f05.c
+bin_check_f06_SOURCES                   = src/e4c.c tests/f06.c
+bin_check_f07_SOURCES                   = src/e4c.c tests/f07.c
+bin_check_g04_SOURCES                   = src/e4c.c tests/g04.c
+bin_check_g05_SOURCES                   = src/e4c.c tests/g05.c
+bin_check_g06_SOURCES                   = src/e4c.c tests/g06.c
+bin_check_g07_SOURCES                   = src/e4c.c tests/g07.c
+bin_check_g08_SOURCES                   = src/e4c.c tests/g08.c
+bin_check_g09_SOURCES                   = src/e4c.c tests/g09.c
+bin_check_g10_SOURCES                   = src/e4c.c tests/g10.c
+bin_check_g11_SOURCES                   = src/e4c.c tests/g11.c
+bin_check_g12_SOURCES                   = src/e4c.c tests/g12.c
+bin_check_i02_SOURCES                   = src/e4c.c tests/i02.c
+bin_check_i03_SOURCES                   = src/e4c.c tests/i03.c
+bin_check_i04_SOURCES                   = src/e4c.c tests/i04.c
+bin_check_i05_SOURCES                   = src/e4c.c tests/i05.c
+bin_check_i07_SOURCES                   = src/e4c.c tests/i07.c
+bin_check_i08_SOURCES                   = src/e4c.c tests/i08.c
+bin_check_i09_SOURCES                   = src/e4c.c tests/i09.c
+bin_check_i10_SOURCES                   = src/e4c.c tests/i10.c
+bin_check_i11_SOURCES                   = src/e4c.c tests/i11.c
+bin_check_i14_SOURCES                   = src/e4c.c tests/i14.c
+bin_check_i15_SOURCES                   = src/e4c.c tests/i15.c
+bin_check_i17_SOURCES                   = src/e4c.c tests/i17.c
 
 
 # exceptions4c tests (lightweight version)

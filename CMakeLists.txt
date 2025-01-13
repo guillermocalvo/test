@@ -81,7 +81,7 @@ set(TESTS
 )
 
 foreach(TEST IN LISTS TESTS)
-    add_executable(${TEST} "test/${TEST}.c")
+    add_executable(${TEST} "tests/${TEST}.c")
     set_target_properties(${TEST} PROPERTIES COMPILE_WARNING_AS_ERROR ON)
     target_link_libraries(${TEST} exceptions4c)
     target_include_directories(${TEST} PUBLIC src)
