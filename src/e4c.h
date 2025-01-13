@@ -762,10 +762,10 @@ struct e4c_context {
     void * current_block;
 
     /** The function to be executed whenever a new exception is thrown */
-    void * (*initialize_handler)(const struct e4c_exception * exception);
+    void (*initialize_exception)(struct e4c_exception * exception);
 
     /** The function to be executed whenever an exception is destroyed */
-    void (*finalize_handler)(void * custom_data);
+    void (*finalize_exception)(const struct e4c_exception * exception);
 
     /** The function to be executed in the event of an uncaught exception */
     void (*uncaught_handler)(const struct e4c_exception * exception);

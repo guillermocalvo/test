@@ -3,7 +3,7 @@
 
 
 volatile bool custom_initializer_was_executed = false;
-void * custom_initialize_handler(const struct e4c_exception * exception);
+void custom_initializer(struct e4c_exception * exception);
 static const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
 
 /**
@@ -15,7 +15,7 @@ static const struct e4c_exception_type RuntimeException = {NULL, "Runtime except
  */
 TEST_CASE{
 
-    e4c_get_context()->initialize_handler = custom_initialize_handler;
+    e4c_get_context()->initialize_exception = custom_initializer;
 
     TRY {
 
@@ -31,9 +31,9 @@ TEST_CASE{
 
 }
 
-void * custom_initialize_handler(const struct e4c_exception * exception){
+void custom_initializer(struct e4c_exception * exception){
 
     custom_initializer_was_executed = true;
 
-    return(NULL);
+    TEST_ASSERT_EQUALS(exception->custom_data, NULL);
 }

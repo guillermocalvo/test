@@ -3,8 +3,8 @@
 
 
 char foobar[64] = "FOOBAR";
-void * custom_initialize_handler(const struct e4c_exception * exception);
-void custom_finalize_handler(void * custom_data);
+void custom_initializer(struct e4c_exception * exception);
+void custom_finalizer(const struct e4c_exception * exception);
 volatile bool custom_handler_was_initialized = false;
 volatile bool custom_handler_was_finalized = false;
 static const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
@@ -19,8 +19,8 @@ static const struct e4c_exception_type RuntimeException = {NULL, "Runtime except
 TEST_CASE{
 
     struct e4c_context * context = e4c_get_context();
-    context->initialize_handler = custom_initialize_handler;
-    context->finalize_handler = custom_finalize_handler;
+    context->initialize_exception = custom_initializer;
+    context->finalize_exception = custom_finalizer;
 
     TRY {
 
@@ -35,11 +35,13 @@ TEST_CASE{
     TEST_ASSERT(custom_handler_was_finalized);
 }
 
-void * custom_initialize_handler(const struct e4c_exception * exception) {
-    return foobar;
+void custom_initializer(struct e4c_exception * exception) {
+    exception->custom_data = foobar;
 }
 
-void custom_finalize_handler(void * custom_data) {
+void custom_finalizer(const struct e4c_exception * exception) {
+
+    TEST_ASSERT_EQUALS(exception->custom_data, foobar);
 
     custom_handler_was_finalized = true;
 }

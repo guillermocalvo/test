@@ -3,7 +3,7 @@
 
 
 char foobar[64] = "FOOBAR";
-void * custom_initialize_handler(const struct e4c_exception * exception);
+void custom_initializer(struct e4c_exception * exception);
 volatile bool custom_handler_was_initialized = false;
 static const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
 
@@ -16,7 +16,7 @@ static const struct e4c_exception_type RuntimeException = {NULL, "Runtime except
  */
 TEST_CASE{
 
-    e4c_get_context()->initialize_handler = custom_initialize_handler;
+    e4c_get_context()->initialize_exception = custom_initializer;
 
     TRY {
 
@@ -30,7 +30,7 @@ TEST_CASE{
     TEST_ASSERT(custom_handler_was_initialized);
 }
 
-void * custom_initialize_handler(const struct e4c_exception * exception){
+void custom_initializer(struct e4c_exception * exception){
 
-    return(&foobar);
+    exception->custom_data = &foobar;
 }

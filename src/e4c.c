@@ -75,8 +75,8 @@ static struct e4c_context * (*context_supplier)(void) = NULL;
 /** default exception context of the program */
 static struct e4c_context default_context = {
     .current_block = NULL,
-    .initialize_handler = NULL,
-    .finalize_handler = NULL,
+    .initialize_exception = NULL,
+    .finalize_exception = NULL,
     .uncaught_handler = default_uncaught_handler
 };
 
@@ -457,8 +457,8 @@ static void throw(const struct e4c_context * context, const struct e4c_exception
     }
 
     /* initialize custom data */
-    if (context->initialize_handler != NULL) {
-        exception->custom_data = context->initialize_handler(exception);
+    if (context->initialize_exception != NULL) {
+        context->initialize_exception(exception);
     }
 
     propagate(context, exception);
@@ -485,11 +485,11 @@ static void deallocate_exception(const struct e4c_context * context, struct e4c_
 
         if (exception->_ref_count <= 0) {
 
-            deallocate_exception(context, exception->cause);
-
-            if (context->finalize_handler != NULL) {
-                context->finalize_handler(exception->custom_data);
+            if (context->finalize_exception != NULL) {
+                context->finalize_exception(exception);
             }
+
+            deallocate_exception(context, exception->cause);
 
             free(exception);
         }
