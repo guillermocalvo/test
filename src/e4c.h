@@ -797,7 +797,7 @@ void e4c_set_context_supplier(struct e4c_context * (*supplier)(void));
  *
  * @see #e4c_set_context_supplier
  */
-struct e4c_context * e4c_get_current_context(void);
+struct e4c_context * e4c_get_context(void);
 
 /**
  * Returns whether the current exception block has an uncaught exception

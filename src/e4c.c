@@ -90,7 +90,7 @@ static volatile bool is_initialized = false;
 
 static void cleanup(void) {
 
-    const struct e4c_context * context = e4c_get_current_context();
+    const struct e4c_context * context = e4c_get_context();
 
     /* check for dangling context */
     /* check if there are too many blocks left (breaking out of a try block) */
@@ -115,12 +115,12 @@ void e4c_set_context_supplier(struct e4c_context * (*supplier)(void)) {
     context_supplier = supplier;
 }
 
-struct e4c_context * e4c_get_current_context(void) {
+struct e4c_context * e4c_get_context(void) {
     return context_supplier != NULL ? context_supplier() : &default_context;
 }
 
 static struct e4c_context * get_context(const char * file, const int line, const char * function) {
-    struct e4c_context * context = e4c_get_current_context();
+    struct e4c_context * context = e4c_get_context();
     if (context == NULL) {
         panic("Context supplier returned NULL.", file, line, function);
     }
@@ -378,14 +378,14 @@ e4c_env * e4c_restart(const bool should_reacquire, const int max_repeat_attempts
 
 bool e4c_is_uncaught(void) {
 
-    const struct e4c_context * context = e4c_get_current_context();
+    const struct e4c_context * context = e4c_get_context();
 
     return context != NULL && context->current_block != NULL && context->current_block->uncaught;
 }
 
 e4c_env * e4c_get_env(void) {
 
-    const struct e4c_context * context = e4c_get_current_context();
+    const struct e4c_context * context = e4c_get_context();
 
     return context != NULL && context->current_block != NULL ? &context->current_block->env : NULL;
 }
@@ -413,7 +413,7 @@ static bool exception_type_extends(const struct e4c_exception * exception, const
 
 const struct e4c_exception * e4c_get_exception(void) {
 
-    const struct e4c_context * context = e4c_get_current_context();
+    const struct e4c_context * context = e4c_get_context();
 
     return context != NULL && context->current_block != NULL ? context->current_block->thrown_exception : NULL;
 }

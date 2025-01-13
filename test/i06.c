@@ -16,7 +16,7 @@ static const struct e4c_exception_type RuntimeException = {NULL, "Runtime except
  */
 TEST_CASE{
 
-    e4c_get_current_context()->custom_data = &initial_data;
+    e4c_get_context()->custom_data = &initial_data;
 
     TRY {
 
