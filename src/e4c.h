@@ -113,9 +113,6 @@
  *   - It *fails* when an exception is thrown and it's not caught.
  *
  * @pre
- *   - A program (or thread) **must** begin an exception context prior to using
- *     the keyword #TRY. Such programming error will lead to an abrupt exit of
- *     the program (or thread).
  *   - A #TRY block **must** precede, at least, another block of code,
  *     introduced by either #CATCH or #FINALLY.
  *     - A #TRY block may precede several #CATCH blocks.
@@ -243,10 +240,6 @@
  *     `using` or #CATCH block.
  *   - A #FINALLY block **must not** be exited through any of: `goto`, `break`,
  *     `continue` or `return` (but it is legal to #THROW an exception).
- * @pre
- *   - A program (or thread) **must** begin an exception context prior to using
- *     the keyword #FINALLY. Such programming error will lead to an abrupt exit
- *     of the program (or thread).
  *
  * @see #e4c_exception
  * @see #e4c_get_exception
@@ -281,10 +274,6 @@
  * gets to the main function of the program. This situation is called an
  * **uncaught exception**.
  *
- * @pre
- *   - A program (or thread) **must** begin an exception context prior to using
- *     the keyword #THROW. Such programming error will lead to an abrupt exit
- *     of the program (or thread).
  * @post
  *   - Control does not return to the #THROW point.
  *
@@ -356,9 +345,6 @@
  * ```
  *
  * @pre
- *   - A program (or thread) **must** begin an exception context prior to using
- *     the keyword #RETRY. Such programming error will lead to an abrupt exit
- *     of the program (or thread).
  *   - The #RETRY keyword **must** be used from a #CATCH or #FINALLY block.
  * @post
  *   - Control does not return to the #RETRY point.
@@ -473,9 +459,6 @@
  * `e4c_using_file` or `e4c_using_memory`.
  *
  * @pre
- *   - A program (or thread) **must** begin an exception context prior to using
- *     the keyword `with`. Such programming error will lead to an abrupt exit of
- *     the program (or thread).
  *   - A `with` block **must not** be exited through any of: `goto`, `break`,
  *     `continue` or `return` (but it is legal to `throw` an exception).
  *   - A `with` block **must** always be followed by a `use` block.
@@ -538,9 +521,6 @@
  * precede #CATCH and #FINALLY blocks.
  *
  * @pre
- *   - A program (or thread) **must** begin an exception context prior to using
- *     the keyword `using`. Such programming error will lead to an abrupt exit
- *     of the program (or thread).
  *   - A `using` block **must not** be exited through any of: `goto`, `break`,
  *     `continue` or `return`  (but it is legal to #THROW an exception).
  *
@@ -611,9 +591,6 @@
  * @pre
  *   - The #REACQUIRE keyword **must** be used from a #CATCH or #FINALLY
  *     block, preceded by `with`... `use` or `using` blocks.
- *   - A program (or thread) **must** begin an exception context prior to using
- *     the keyword `reacquire`. Such programming error will lead to an abrupt
- *     exit of the program (or thread).
  * @post
  *   - Control does not return to the `reacquire` point.
  *
@@ -832,11 +809,6 @@ bool e4c_is_uncaught(void);
  * and `message` outside these blocks, care should be taken in order not to
  * dereference the `cause` of the exception, unless it is a **deep copy**
  * (as opposed to a **shallow copy**).
- *
- * @pre
- *   - A program (or thread) **must** begin an exception context prior to
- *     calling `e4c_get_exception`. Such programming error will lead to an
- *     abrupt exit of the program (or thread).
  *
  * @see #e4c_exception
  * @see #THROW
