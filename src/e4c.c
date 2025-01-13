@@ -31,6 +31,7 @@
 # include <stdio.h>
 # include <errno.h>
 # include <stdarg.h>
+# include <stdnoreturn.h>
 # include "e4c.h"
 
 /** Represents the execution stage of the current exception block */
@@ -52,21 +53,21 @@ struct e4c_block {
     struct e4c_exception * thrown_exception;
     int retry_attempts;
     int reacquire_attempts;
-    e4c_jump_buffer continuation;
+    e4c_env env;
 };
 
+static noreturn void panic(const char * error_message, const char * file, int line, const char * function);
 static void default_uncaught_handler(const struct e4c_exception * exception);
 static struct e4c_context * get_context(const char * file, int line, const char * function);
 static void cleanup(void);
-static noreturn void panic(const char * error_message, const char * file, int line, const char * function);
-static noreturn void propagate_exception(const struct e4c_context * context, struct e4c_exception * exception);
+static void throw(const struct e4c_context * context, const struct e4c_exception_type * type, const char * name, int error_number, const char * file, int line, const char * function, const char * format, va_list arguments_list);
+static void propagate(const struct e4c_context * context, struct e4c_exception * exception);
 static void deallocate_block(const struct e4c_context * context, struct e4c_block * block);
 static enum block_stage get_stage(const char * file, int line, const char * function);
 static void deallocate_exception(const struct e4c_context * context, struct e4c_exception * exception);
 static void print_debug_info(const char * file, int line, const char * function);
 static void print_exception(const char * prefix, const struct e4c_exception * exception);
 static bool exception_type_extends(const struct e4c_exception * exception, const struct e4c_exception_type * parent);
-static struct e4c_exception * new_exception(const struct e4c_context * context, const struct e4c_exception_type * type, const char * name, int error_number, const char * file, int line, const char * function, const char * format, va_list arguments_list);
 
 /** exception context supplier */
 static struct e4c_context * (*context_supplier)(void) = NULL;
@@ -126,7 +127,7 @@ static struct e4c_context * get_context(const char * file, const int line, const
     return context;
 }
 
-static void propagate_exception(const struct e4c_context * context, struct e4c_exception * exception) {
+static void propagate(const struct e4c_context * context, struct e4c_exception * exception) {
 
     struct e4c_block * block = context->current_block;
 
@@ -155,15 +156,12 @@ static void propagate_exception(const struct e4c_context * context, struct e4c_e
         block->stage = DISPOSING;
         /* (that actually jumps over the "disposing" stage) */
     }
-
-    /* keep looping */
-    E4C_LONG_JUMP(block->continuation);
 }
 
 /* BLOCK
  ================================================================ */
 
-e4c_jump_buffer * e4c_start(const bool should_acquire, const char * file, const int line, const char * function) {
+e4c_env * e4c_start(const bool should_acquire, const char * file, const int line, const char * function) {
 
     if (!is_initialized) {
         /* registers the function cleanup to be called when the program exits */
@@ -194,7 +192,7 @@ e4c_jump_buffer * e4c_start(const bool should_acquire, const char * file, const 
     /* make it the new current block */
     context->current_block = new_block;
 
-    return &new_block->continuation;
+    return &new_block->env;
 }
 
 static void deallocate_block(const struct e4c_context * context, struct e4c_block * block) {
@@ -318,15 +316,14 @@ bool e4c_next(const char * file, const int line, const char * function) {
 
     /* if the current block has an uncaught exception, then we will propagate it */
     if (thrown_exception != NULL) {
-        propagate_exception(context, thrown_exception);
+        propagate(context, thrown_exception);
     }
-    /* otherwise, we're free to go */
 
     /* get out of the exception loop */
     return false;
 }
 
-noreturn void e4c_restart(const bool should_reacquire, const int max_repeat_attempts, const struct e4c_exception_type * type, const char * name, const char * file, const int line, const char * function, const char * format, ...) {
+e4c_env * e4c_restart(const bool should_reacquire, const int max_repeat_attempts, const struct e4c_exception_type * type, const char * name, const char * file, const int line, const char * function, const char * format, ...) {
 
     /* store the current error number up front */
     const int error_number = errno;
@@ -364,21 +361,19 @@ noreturn void e4c_restart(const bool should_reacquire, const int max_repeat_atte
     if (max_reached) {
         va_list arguments_list;
         va_start(arguments_list, format);
-        struct e4c_exception * exception = new_exception(context, type, name, error_number, file, line, function, format, arguments_list);
+        throw(context, type, name, error_number, file, line, function, format, arguments_list);
         va_end(arguments_list);
-        propagate_exception(context, exception);
+    } else {
+        /* deallocate previously thrown exception */
+        deallocate_exception(context, block->thrown_exception);
+        /* reset exception information */
+        block->thrown_exception = NULL;
+        block->uncaught         = false;
+        block->stage            = should_reacquire ? BEGINNING : ACQUIRING;
     }
 
-    /* deallocate previously thrown exception */
-    deallocate_exception(context, block->thrown_exception);
-
-    /* reset exception information */
-    block->thrown_exception = NULL;
-    block->uncaught         = false;
-    block->stage            = should_reacquire ? BEGINNING : ACQUIRING;
-
-    /* keep looping */
-    E4C_LONG_JUMP(block->continuation);
+    /* jump back to the TRY or WITH block */
+    return &block->env;
 }
 
 bool e4c_is_uncaught(void) {
@@ -386,6 +381,13 @@ bool e4c_is_uncaught(void) {
     const struct e4c_context * context = e4c_get_current_context();
 
     return context != NULL && context->current_block != NULL && context->current_block->uncaught;
+}
+
+e4c_env * e4c_get_env(void) {
+
+    const struct e4c_context * context = e4c_get_current_context();
+
+    return context != NULL && context->current_block != NULL ? &context->current_block->env : NULL;
 }
 
 /* EXCEPTION TYPE
@@ -416,7 +418,7 @@ const struct e4c_exception * e4c_get_exception(void) {
     return context != NULL && context->current_block != NULL ? context->current_block->thrown_exception : NULL;
 }
 
-static struct e4c_exception * new_exception(const struct e4c_context * context, const struct e4c_exception_type * type, const char * name, int error_number, const char * file, const int line, const char * function, const char * format, va_list arguments_list) {
+static void throw(const struct e4c_context * context, const struct e4c_exception_type * type, const char * name, int error_number, const char * file, const int line, const char * function, const char * format, va_list arguments_list) {
 
     /* allocate new exception */
     struct e4c_exception * exception = calloc(1, sizeof(*exception));
@@ -458,22 +460,20 @@ static struct e4c_exception * new_exception(const struct e4c_context * context, 
         exception->custom_data = context->initialize_handler(exception);
     }
 
-    return exception;
+    propagate(context, exception);
 }
 
-void e4c_throw(const struct e4c_exception_type * type, const char * name, const char * file, const int line, const char * function, const char * format, ...) {
+e4c_env * e4c_throw(const struct e4c_exception_type * type, const char * name, const char * file, const int line, const char * function, const char * format, ...) {
 
-    /* store the current error number up front */
     const int error_number = errno;
-
     const struct e4c_context * context = get_context(file, line, function);
 
     va_list arguments_list;
     va_start(arguments_list, format);
-    struct e4c_exception * exception = new_exception(context, type, name, error_number, file, line, function, format, arguments_list);
+    throw(context, type, name, error_number, file, line, function, format, arguments_list);
     va_end(arguments_list);
 
-    propagate_exception(context, exception);
+    return &context->current_block->env;
 }
 
 static void deallocate_exception(const struct e4c_context * context, struct e4c_exception * exception) {

@@ -47,38 +47,10 @@
 
 #include <stdlib.h>
 #include <setjmp.h>
-#include <stdnoreturn.h>
 
 #ifndef __bool_true_false_are_defined
 #include <stdbool.h>
 #endif
-
-#ifdef HAVE_SIGSETJMP
-typedef sigjmp_buf e4c_jump_buffer;
-#define E4C_SET_JUMP(buffer) sigsetjmp(buffer, 1)
-#define E4C_LONG_JUMP(buffer) siglongjmp(buffer, 1)
-#else
-typedef jmp_buf e4c_jump_buffer;
-#define E4C_SET_JUMP(buffer) setjmp(buffer)
-#define E4C_LONG_JUMP(buffer) longjmp(buffer, 1)
-#endif
-
-
-# ifndef NDEBUG
-#   define E4C_DEBUG_INFO               __FILE__, __LINE__, __func__
-# else
-#   define E4C_DEBUG_INFO               NULL, 0, NULL
-# endif
-
-/*
- * This undocumented macro hide implementation details from documentation.
- */
-
-# define E4C_START_BLOCK(should_acquire)                                    \
-  for (                                                                     \
-      E4C_SET_JUMP(*e4c_start(should_acquire, E4C_DEBUG_INFO));             \
-      e4c_next(E4C_DEBUG_INFO);                                             \
-  )
 
 /**
  * @name Exception handling keywords
@@ -163,8 +135,8 @@ typedef jmp_buf e4c_jump_buffer;
  * @see #e4c_is_uncaught
  */
 #define TRY                                                                 \
-  E4C_START_BLOCK(false)                                                    \
-  if (e4c_try(E4C_DEBUG_INFO))
+  EXCEPTIONS4C_START_BLOCK(false)                                           \
+  if (e4c_try(EXCEPTIONS4C_DEBUG))
 
 /**
  * Introduces a block of code capable of handling a specific type of exceptions
@@ -221,7 +193,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see #e4c_exception
  */
 #define CATCH(exception_type)                                               \
-  else if (e4c_catch(&exception_type, E4C_DEBUG_INFO))
+  else if (e4c_catch(&exception_type, EXCEPTIONS4C_DEBUG))
 
 /**
  * Introduces a block of code capable of handling any exception
@@ -233,7 +205,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see #CATCH
  */
 #define CATCH_ALL                                                           \
-  else if (e4c_catch(NULL, E4C_DEBUG_INFO))
+  else if (e4c_catch(NULL, EXCEPTIONS4C_DEBUG))
 
 /**
  * Introduces a block of code responsible for cleaning up the previous
@@ -282,7 +254,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see #e4c_status
  */
 #define FINALLY                                                             \
-  else if (e4c_finally(E4C_DEBUG_INFO))
+  else if (e4c_finally(EXCEPTIONS4C_DEBUG))
 
 /**
  * Signals an exceptional situation represented by an exception object
@@ -322,12 +294,14 @@ typedef jmp_buf e4c_jump_buffer;
  * @see #e4c_get_exception
  */
 #define THROW(exception_type, format, ...)                                  \
-  e4c_throw(                                                                \
-    &exception_type,                                                        \
-    #exception_type,                                                        \
-    E4C_DEBUG_INFO,                                                         \
-    (format)                                                                \
-    __VA_OPT__(,) __VA_ARGS__                                               \
+  EXCEPTIONS4C_LONG_JUMP(                                                   \
+    e4c_throw(                                                              \
+      &exception_type,                                                      \
+      #exception_type,                                                      \
+      EXCEPTIONS4C_DEBUG,                                                   \
+      (format)                                                              \
+      __VA_OPT__(,) __VA_ARGS__                                             \
+    )                                                                       \
   )
 
 /**
@@ -395,14 +369,16 @@ typedef jmp_buf e4c_jump_buffer;
  * @see #e4c_is_uncaught
  */
 #define RETRY(max_retry_attempts, exception_type, format, ...)              \
-  e4c_restart(                                                              \
-    false,                                                                  \
-    max_retry_attempts,                                                     \
-    &exception_type,                                                        \
-    #exception_type,                                                        \
-    E4C_DEBUG_INFO,                                                         \
-    (format)                                                                \
-    __VA_OPT__(,) __VA_ARGS__                                               \
+  EXCEPTIONS4C_LONG_JUMP(                                                   \
+    e4c_restart(                                                            \
+      false,                                                                \
+      max_retry_attempts,                                                   \
+      &exception_type,                                                      \
+      #exception_type,                                                      \
+      EXCEPTIONS4C_DEBUG,                                                   \
+      (format)                                                              \
+      __VA_OPT__(,) __VA_ARGS__                                             \
+    )                                                                       \
   )
 
 /** @} */
@@ -508,10 +484,10 @@ typedef jmp_buf e4c_jump_buffer;
  * @see #USING
  */
 #define WITH(resource, dispose)                                             \
-  E4C_START_BLOCK(true)                                                     \
-  if (e4c_dispose(E4C_DEBUG_INFO)) {                                        \
+  EXCEPTIONS4C_START_BLOCK(true)                                            \
+  if (e4c_dispose(EXCEPTIONS4C_DEBUG)) {                                    \
     dispose((resource), e4c_is_uncaught());                                 \
-  } else if (e4c_acquire(E4C_DEBUG_INFO)) {
+  } else if (e4c_acquire(EXCEPTIONS4C_DEBUG)) {
 
 /**
  * Closes a block of code with automatic disposal of a resource
@@ -534,7 +510,7 @@ typedef jmp_buf e4c_jump_buffer;
  * @see #WITH
  */
 #define USE                                                                 \
-  } else if (e4c_try(E4C_DEBUG_INFO))
+  } else if (e4c_try(EXCEPTIONS4C_DEBUG))
 
 /**
  * Introduces a block of code with automatic acquisition and disposal of a
@@ -647,28 +623,47 @@ typedef jmp_buf e4c_jump_buffer;
  * @see #e4c_is_uncaught
  */
 #define REACQUIRE(max_reacquire_attempts, exception_type, format, ...)      \
-  e4c_restart(                                                              \
-    true,                                                                   \
-    max_reacquire_attempts,                                                 \
-    &exception_type,                                                        \
-    #exception_type,                                                        \
-    E4C_DEBUG_INFO,                                                         \
-    (format)                                                                \
-    __VA_OPT__(,) __VA_ARGS__                                               \
+  EXCEPTIONS4C_LONG_JUMP(                                                   \
+    e4c_restart(                                                            \
+      true,                                                                 \
+      max_reacquire_attempts,                                               \
+      &exception_type,                                                      \
+      #exception_type,                                                      \
+      EXCEPTIONS4C_DEBUG,                                                   \
+      (format)                                                              \
+      __VA_OPT__(,) __VA_ARGS__                                             \
+    )                                                                       \
   )
 
 /** @} */
 
-/**
- * @name Integration macros
- *
- * These macros are designed to ease the integration of external libraries which
- * make use of the exception handling system.
- *
- * @{
+/*
+ * These undocumented macros hide implementation details.
  */
 
-/** @} */
+# define EXCEPTIONS4C_START_BLOCK(should_acquire)                           \
+  for (                                                                     \
+    EXCEPTIONS4C_SET_JUMP(e4c_start(should_acquire, EXCEPTIONS4C_DEBUG));   \
+    e4c_next(EXCEPTIONS4C_DEBUG) || (                                       \
+      e4c_is_uncaught() && (EXCEPTIONS4C_LONG_JUMP(e4c_get_env()), true)    \
+    );                                                                      \
+  )
+
+#ifndef HAVE_SIGSETJMP
+#define EXCEPTIONS4C_SET_JUMP(env) setjmp(*(env))
+#define EXCEPTIONS4C_LONG_JUMP(env) longjmp(*(env), 1)
+typedef jmp_buf e4c_env;
+#else
+#define EXCEPTIONS4C_SET_JUMP(env) sigsetjmp(*(env), 1)
+#define EXCEPTIONS4C_LONG_JUMP(env) siglongjmp(*(env), 1)
+typedef sigjmp_buf e4c_jump_buffer;
+#endif
+
+#ifndef NDEBUG
+#define EXCEPTIONS4C_DEBUG __FILE__, __LINE__, __func__
+#else
+#define EXCEPTIONS4C_DEBUG NULL, 0, NULL
+#endif
 
 /**
  * Represents an exception type in the exception handling system
@@ -856,19 +851,18 @@ const struct e4c_exception * e4c_get_exception(void);
 /** @} */
 
 /*
- * Next functions are undocumented on purpose, because they shouldn't be used
- * directly (but through the "keywords").
+ * These functions SHOULD be called only via provided macros.
  */
 
-e4c_jump_buffer * e4c_start(bool should_acquire, const char * file, int line, const char * function);
-bool e4c_next(const char * file, int line, const char * function);
+e4c_env * e4c_start(bool should_acquire, const char * file, int line, const char * function);
+bool e4c_acquire(const char * file, int line, const char * function);
 bool e4c_try(const char * file, int line, const char * function);
+bool e4c_dispose(const char * file, int line, const char * function);
 bool e4c_catch(const struct e4c_exception_type * type, const char * file, int line, const char * function);
 bool e4c_finally(const char * file, int line, const char * function);
-bool e4c_acquire(const char * file, int line, const char * function);
-bool e4c_dispose(const char * file, int line, const char * function);
-noreturn void e4c_restart(bool should_reacquire, int max_repeat_attempts, const struct e4c_exception_type * type, const char * name, const char * file, int line, const char * function, const char * format, ...);
-noreturn void e4c_throw(const struct e4c_exception_type * type, const char * name, const char * file, int line, const char * function, const char * format, ...);
-
+bool e4c_next(const char * file, int line, const char * function);
+e4c_env * e4c_get_env(void);
+e4c_env * e4c_restart(bool should_reacquire, int max_repeat_attempts, const struct e4c_exception_type * type, const char * name, const char * file, int line, const char * function, const char * format, ...);
+e4c_env * e4c_throw(const struct e4c_exception_type * type, const char * name, const char * file, int line, const char * function, const char * format, ...);
 
 # endif

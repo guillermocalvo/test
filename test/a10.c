@@ -14,5 +14,5 @@
 TEST_CASE{
 
     /* This function must not be called like this! */
-    (void) e4c_try(E4C_DEBUG_INFO);
+    (void) e4c_try(__FILE__, __LINE__, __func__);
 }
