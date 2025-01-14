@@ -458,7 +458,7 @@
 #define WITH(resource, dispose)                                             \
   EXCEPTIONS4C_START_BLOCK(true)                                            \
   if (e4c_dispose(EXCEPTIONS4C_DEBUG)) {                                    \
-    dispose((resource), e4c_is_uncaught());                                 \
+    (void) dispose((resource), e4c_is_uncaught());                          \
   } else if (e4c_acquire(EXCEPTIONS4C_DEBUG)) {
 
 /**
@@ -488,22 +488,23 @@
  * Introduces a block of code with automatic acquisition and disposal of a
  * resource
  *
- * @param   type
- *          The type of the resource
  * @param   resource
  *          The resource to be acquired, used and then disposed
+ * @param   dispose
+ *          The function (or macro) to dispose of the resource
+ * @param   acquire
+ *          The function (or macro) to acquire the resource
  * @param   args
  *          A list of arguments to be passed to the acquisition function
+ * @param   ...
+ *          An optional list of arguments to be passed to `acquire`
  *
  * The specified resource will be *acquired*, *used* and then *disposed*. The
- * automatic acquisition and disposal is achieved by calling the *implicit*
- * functions **e4c_acquire_<em>type</em>** and **e4c_dispose_<em>type</em>**:
+ * automatic acquisition and disposal is achieved by calling the supplied
+ * functions (or macros) #acquire and #dispose:
  *
- *   - `TYPE e4c_acquire_TYPE(ARGS)`
- *   - `void e4c_dispose_TYPE(TYPE RESOURCE, bool failed)`
- *
- * These two symbols **must** exist, in the form of either *functions* or
- * *macros*.
+ *   - `typeof(resource) acquire(...)`
+ *   - `void dispose(typeof(resource) resource, bool is_uncaught)`
  *
  * The semantics of the automatic acquisition and disposal are the same as for
  * blocks introduced by #WITH... #USE. For example, a #USING block can also
@@ -515,9 +516,9 @@
  *
  * @see #WITH
  */
-#define USING(type, resource, args)                                         \
-  WITH((resource), e4c_dispose_##type) {                                    \
-    (resource) = e4c_acquire_##type args;                                   \
+#define USING(resource, dispose, acquire, ...)                              \
+  WITH((resource), dispose) {                                               \
+    (resource) = (void) &(resource), acquire(__VA_ARGS__);                  \
   } USE
 
 /**
