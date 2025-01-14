@@ -104,14 +104,6 @@
  * instance, once the exception has been caught and the error condition has been
  * solved.
  *
- * A #TRY block has an associated [status](#e4c_status) according to the
- * way it has been executed:
- *
- *   - It *succeeds* when the execution reaches the end of the block without
- *     any exceptions.
- *   - It *recovers* when an exception is thrown but a #CATCH block handles it.
- *   - It *fails* when an exception is thrown and it's not caught.
- *
  * @pre
  *   - A #TRY block **must** precede, at least, another block of code,
  *     introduced by either #CATCH or #FINALLY.
@@ -128,7 +120,6 @@
  * @see #CATCH
  * @see #FINALLY
  * @see #RETRY
- * @see #e4c_status
  * @see #e4c_is_uncaught
  */
 #define TRY                                                                 \
@@ -138,7 +129,7 @@
 /**
  * Introduces a block of code capable of handling a specific type of exceptions
  *
- * @param   exception_type
+ * @param   type
  *          The type of exceptions to be handled
  *
  * #CATCH blocks are optional code blocks that **must** be preceded by #TRY,
@@ -147,8 +138,7 @@
  *
  * When an exception is thrown, the system looks for a #CATCH block to handle
  * it. The first capable block (in order of appearance) will be executed. The
- * exception is said to be *caught* and the #TRY block is in *recovered*
- * (status)[@ ref e4c_status].
+ * exception is said to be *caught*.
  *
  * The caught exception can be accessed through the function #e4c_get_exception.
  *
@@ -189,8 +179,8 @@
  * @see #e4c_get_exception
  * @see #e4c_exception
  */
-#define CATCH(exception_type)                                               \
-  else if (e4c_catch(&exception_type, EXCEPTIONS4C_DEBUG))
+#define CATCH(type)                                                         \
+  else if (e4c_catch(&type, EXCEPTIONS4C_DEBUG))
 
 /**
  * Introduces a block of code capable of handling any exception
@@ -244,7 +234,6 @@
  * @see #e4c_exception
  * @see #e4c_get_exception
  * @see #e4c_is_uncaught
- * @see #e4c_status
  */
 #define FINALLY                                                             \
   else if (e4c_finally(EXCEPTIONS4C_DEBUG))
@@ -252,7 +241,7 @@
 /**
  * Signals an exceptional situation represented by an exception object
  *
- * @param   exception_type
+ * @param   type
  *          The type of exception to be thrown
  * @param   format
  *          The detail message.
@@ -282,11 +271,11 @@
  * @see #e4c_uncaught_handler
  * @see #e4c_get_exception
  */
-#define THROW(exception_type, format, ...)                                  \
+#define THROW(type, format, ...)                                            \
   EXCEPTIONS4C_LONG_JUMP(                                                   \
     e4c_throw(                                                              \
-      &exception_type,                                                      \
-      #exception_type,                                                      \
+      &type,                                                                \
+      #type,                                                                \
       EXCEPTIONS4C_DEBUG,                                                   \
       (format)                                                              \
       __VA_OPT__(,) __VA_ARGS__                                             \
@@ -296,9 +285,9 @@
 /**
  * Repeats the previous #TRY (or #USE) block entirely
  *
- * @param   max_retry_attempts
+ * @param   max_attempts
  *          The maximum number of attempts to retry
- * @param   exception_type
+ * @param   type
  *          The type of exception to be thrown
  * @param   format
  *          The detail message.
@@ -354,13 +343,13 @@
  * @see #USE
  * @see #e4c_is_uncaught
  */
-#define RETRY(max_retry_attempts, exception_type, format, ...)              \
+#define RETRY(max_attempts, type, format, ...)                              \
   EXCEPTIONS4C_LONG_JUMP(                                                   \
     e4c_restart(                                                            \
       false,                                                                \
-      max_retry_attempts,                                                   \
-      &exception_type,                                                      \
-      #exception_type,                                                      \
+      max_attempts,                                                         \
+      &type,                                                                \
+      #type,                                                                \
       EXCEPTIONS4C_DEBUG,                                                   \
       (format)                                                              \
       __VA_OPT__(,) __VA_ARGS__                                             \
@@ -534,9 +523,9 @@
 /**
  * Repeats the previous #WITH block entirely
  *
- * @param   max_reacquire_attempts
+ * @param   max_attempts
  *          The maximum number of attempts to reacquire
- * @param   exception_type
+ * @param   type
  *          The type of exception to be thrown
  * @param   format
  *          The detail message.
@@ -599,13 +588,13 @@
  * @see #USE
  * @see #e4c_is_uncaught
  */
-#define REACQUIRE(max_reacquire_attempts, exception_type, format, ...)      \
+#define REACQUIRE(max_attempts, type, format, ...)                          \
   EXCEPTIONS4C_LONG_JUMP(                                                   \
     e4c_restart(                                                            \
       true,                                                                 \
-      max_reacquire_attempts,                                               \
-      &exception_type,                                                      \
-      #exception_type,                                                      \
+      max_attempts,                                                         \
+      &type,                                                                \
+      #type,                                                                \
       EXCEPTIONS4C_DEBUG,                                                   \
       (format)                                                              \
       __VA_OPT__(,) __VA_ARGS__                                             \
@@ -831,7 +820,7 @@ bool e4c_catch(const struct e4c_exception_type * type, const char * file, int li
 bool e4c_finally(const char * file, int line, const char * function);
 bool e4c_next(const char * file, int line, const char * function);
 e4c_env * e4c_get_env(void);
-e4c_env * e4c_restart(bool should_reacquire, int max_repeat_attempts, const struct e4c_exception_type * type, const char * name, const char * file, int line, const char * function, const char * format, ...);
+e4c_env * e4c_restart(bool should_reacquire, int max_attempts, const struct e4c_exception_type * type, const char * name, const char * file, int line, const char * function, const char * format, ...);
 e4c_env * e4c_throw(const struct e4c_exception_type * type, const char * name, const char * file, int line, const char * function, const char * format, ...);
 
 # endif

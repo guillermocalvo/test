@@ -324,7 +324,7 @@ bool e4c_next(const char * file, const int line, const char * function) {
     return false;
 }
 
-e4c_env * e4c_restart(const bool should_reacquire, const int max_repeat_attempts, const struct e4c_exception_type * type, const char * name, const char * file, const int line, const char * function, const char * format, ...) {
+e4c_env * e4c_restart(const bool should_reacquire, const int max_attempts, const struct e4c_exception_type * type, const char * name, const char * file, const int line, const char * function, const char * format, ...) {
 
     /* store the current error number up front */
     const int error_number = errno;
@@ -347,13 +347,13 @@ e4c_env * e4c_restart(const bool should_reacquire, const int max_repeat_attempts
 
     if (should_reacquire) {
         /* reacquire */
-        max_reached = block->reacquire_attempts >= max_repeat_attempts;
+        max_reached = block->reacquire_attempts >= max_attempts;
         if (!max_reached) {
             block->reacquire_attempts++;
         }
     } else {
         /* retry */
-        max_reached = block->retry_attempts >= max_repeat_attempts;
+        max_reached = block->retry_attempts >= max_attempts;
         if (!max_reached) {
             block->retry_attempts++;
         }
