@@ -9,8 +9,8 @@
 #include <stdio.h>
 #include "exceptions4c-lite.h"
 
-const struct e4c_exception_type RuntimeException = { "RuntimeException", &RuntimeException, "Runtime exception."};
-const struct e4c_exception_type NullPointerException = { "NullPointerException", &RuntimeException, "Null pointer."};
+const struct e4c_exception_type RuntimeException = {&RuntimeException, "Runtime exception."};
+const struct e4c_exception_type NullPointerException = {&RuntimeException, "Null pointer."};
 
 struct e4c_context e4c = {0};
 static const char * err_msg[] = {"\n\nError: %s (%s)\n\n", "\n\nUncaught %s: %s\n\n    thrown at %s:%d\n\n"};
@@ -23,7 +23,7 @@ static void e4c_propagate(void) {
         longjmp(e4c.jump[e4c.frames - 1], 1);
     }
 
-    if (fprintf(stderr, e4c.err.file ? err_msg[1] : err_msg[0], e4c.err.type->name, e4c.err.message, e4c.err.file, e4c.err.line) > 0) {
+    if (fprintf(stderr, e4c.err.file ? err_msg[1] : err_msg[0], e4c.err.name, e4c.err.message, e4c.err.file, e4c.err.line) > 0) {
         (void) fflush(stderr);
     }
 
@@ -33,7 +33,7 @@ static void e4c_propagate(void) {
 int e4c_try(const char * file, int line) {
 
     if (e4c.frames >= E4C_MAX_FRAMES) {
-        e4c_throw(&RuntimeException, file, line, "Too many `try` blocks nested.");
+        e4c_throw(&RuntimeException, "RuntimeException", file, line, "Too many `try` blocks nested.");
     }
 
     e4c.frames++;
@@ -84,9 +84,10 @@ int e4c_extends(const struct e4c_exception_type * child, const struct e4c_except
     return 0;
 }
 
-void e4c_throw(const struct e4c_exception_type * exception_type, const char * file, int line, const char * message) {
+void e4c_throw(const struct e4c_exception_type * exception_type, const char * name, const char * file, int line, const char * message) {
 
     e4c.err.type = (exception_type ? exception_type : &NullPointerException);
+    e4c.err.name = name;
     e4c.err.file = file;
     e4c.err.line = line;
 

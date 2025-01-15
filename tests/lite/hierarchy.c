@@ -2,8 +2,8 @@
 #include "testing.h"
 
 
-const struct e4c_exception_type ColorException = {"ColorException", &RuntimeException, "Color exception."};
-const struct e4c_exception_type RedException = {"RedException", &ColorException, "Red exception."};
+const struct e4c_exception_type ColorException = {&RuntimeException, "Color exception."};
+const struct e4c_exception_type RedException = {&ColorException, "Red exception."};
 
 
 /**
@@ -19,7 +19,7 @@ TEST_CASE{
 
     }E4C_CATCH(ColorException){
 
-        printf("The color exception was caught: %s\n", E4C_EXCEPTION.type->name);
+        printf("The color exception was caught: %s\n", E4C_EXCEPTION.name);
 
         TEST_ASSERT( E4C_IS_INSTANCE_OF(RedException) );
         TEST_ASSERT( E4C_IS_INSTANCE_OF(RuntimeException) );

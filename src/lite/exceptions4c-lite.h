@@ -25,7 +25,6 @@
 
 /* Represents an exception type */
 struct e4c_exception_type {
-    const char * name;
     const struct e4c_exception_type * supertype;
     const char * default_message;
 };
@@ -40,6 +39,7 @@ struct e4c_exception {
     const char * file;
     int line;
     const struct e4c_exception_type * type;
+    const char * name;
 };
 
 /* Retrieve current thrown exception */
@@ -64,7 +64,7 @@ struct e4c_exception {
   else if (e4c.frame[e4c.frames].stage == e4c_finalizing)
 
 #define E4C_THROW(type, message)                                            \
-  e4c_throw(&type, EXCEPTIONS4C_DEBUG, message)
+  e4c_throw(&type, #type, EXCEPTIONS4C_DEBUG, message)
 
 /* This functions must be called only via E4C_TRY, E4C_CATCH, E4C_FINALLY and E4C_THROW */
 enum e4c_stage { e4c_beginning, e4c_trying, e4c_catching, e4c_finalizing, e4c_done };
@@ -87,7 +87,7 @@ extern int e4c_hook(int is_catch);
 
 extern int e4c_extends(const struct e4c_exception_type * child, const struct e4c_exception_type * parent);
 
-extern void e4c_throw(const struct e4c_exception_type * exception_type, const char * file, int line, const char * message);
+extern void e4c_throw(const struct e4c_exception_type * exception_type, const char * name, const char * file, int line, const char * message);
 
 /* OpenMP support */
 #ifdef _OPENMP

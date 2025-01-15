@@ -2,7 +2,7 @@
 #include "testing.h"
 
 
-const struct e4c_exception_type CustomException = { "CustomException", &RuntimeException, "Custom exception."};
+const struct e4c_exception_type CustomException = {&RuntimeException, "Custom exception."};
 
 
 /**
@@ -16,6 +16,6 @@ const struct e4c_exception_type CustomException = { "CustomException", &RuntimeE
 
     }E4C_CATCH(CustomException){
 
-        printf("The custom exception was caught: %s\n", E4C_EXCEPTION.type->name);
+        printf("The custom exception was caught: %s\n", E4C_EXCEPTION.name);
     }
 }
