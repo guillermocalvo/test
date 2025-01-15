@@ -15,7 +15,7 @@ AM_CFLAGS = -Wall -Werror --pedantic -Wno-missing-braces -Wno-dangling-else -cov
 EXCEPTIONS4C_PATH           = src
 EXCEPTIONS4C_LIBRARY        = lib/libexceptions4c.a
 
-EXCEPTIONS4C_LITE_PATH      = lite/src
+EXCEPTIONS4C_LITE_PATH      = src/lite
 EXCEPTIONS4C_LITE_LIBRARY   = lib/libexceptions4c_lite.a
 
 
@@ -27,7 +27,7 @@ lib_LIBRARIES =                         \
 
 include_HEADERS =                       \
     src/exceptions4c.h                  \
-    lite/src/exceptions4c-lite.h
+    src/lite/exceptions4c-lite.h
 
 
 # Documentation
@@ -47,15 +47,15 @@ CLEANFILES =                            \
     src/*.gcda                          \
     src/*.gcno                          \
     src/*.gcov                          \
-    tests/*.gcda                         \
-    tests/*.gcno                         \
-    tests/*.gcov                         \
-    lite/src/*.gcda                     \
-    lite/src/*.gcno                     \
-    lite/src/*.gcov                     \
-    lite/tests/*.gcda                    \
-    lite/tests/*.gcno                    \
-    lite/tests/*.gcov
+    tests/*.gcda                        \
+    tests/*.gcno                        \
+    tests/*.gcov                        \
+    src/lite/*.gcda                     \
+    src/lite/*.gcno                     \
+    src/lite/*.gcov                     \
+    tests/lite/*.gcda                   \
+    tests/lite/*.gcno                   \
+    tests/lite/*.gcov
 
 
 # Check
@@ -196,7 +196,7 @@ lib_libexceptions4c_a_SOURCES           = src/exceptions4c.c
 # exceptions4c library (lightweight version)
 
 lib_libexceptions4c_lite_a_CFLAGS       = -Wall -Werror --pedantic -Wno-missing-braces
-lib_libexceptions4c_lite_a_SOURCES      = lite/src/exceptions4c-lite.c
+lib_libexceptions4c_lite_a_SOURCES      = src/lite/exceptions4c-lite.c
 
 
 # exceptions4c tests
@@ -250,12 +250,12 @@ bin_check_i17_SOURCES                   = src/exceptions4c.c tests/i17.c
 
 # exceptions4c tests (lightweight version)
 
-bin_check_lite_uncaught_SOURCES         = lite/src/exceptions4c-lite.c lite/test/uncaught.c
-bin_check_lite_caught_SOURCES           = lite/src/exceptions4c-lite.c lite/test/caught.c
-bin_check_lite_cleanup_SOURCES          = lite/src/exceptions4c-lite.c lite/test/cleanup.c
-bin_check_lite_hierarchy_SOURCES        = lite/src/exceptions4c-lite.c lite/test/hierarchy.c
-bin_check_lite_limits_SOURCES           = lite/src/exceptions4c-lite.c lite/test/limits.c
-bin_check_lite_overflow_SOURCES         = lite/src/exceptions4c-lite.c lite/test/overflow.c
+bin_check_lite_uncaught_SOURCES         = src/lite/exceptions4c-lite.c tests/lite/uncaught.c
+bin_check_lite_caught_SOURCES           = src/lite/exceptions4c-lite.c tests/lite/caught.c
+bin_check_lite_cleanup_SOURCES          = src/lite/exceptions4c-lite.c tests/lite/cleanup.c
+bin_check_lite_hierarchy_SOURCES        = src/lite/exceptions4c-lite.c tests/lite/hierarchy.c
+bin_check_lite_limits_SOURCES           = src/lite/exceptions4c-lite.c tests/lite/limits.c
+bin_check_lite_overflow_SOURCES         = src/lite/exceptions4c-lite.c tests/lite/overflow.c
 
 # coverage
 
@@ -265,7 +265,7 @@ exceptions4c.c.gcov:
 	gcov src/exceptions4c.c --object-directory src/*
 
 exceptions4c_lite.c.gcov:
-	gcov lite/src/exceptions4c-lite.c --object-directory lite/src/*
+	gcov src/lite/exceptions4c-lite.c --object-directory src/lite/*
 
 # generate documentation
 

@@ -9,7 +9,7 @@ add_library(exceptions4c
         src/exceptions4c.c)
 
 add_library(exceptions4c_lite
-        lite/src/exceptions4c-lite.c)
+        src/lite/exceptions4c-lite.c)
 
 include(FetchContent)
 FetchContent_Declare(
@@ -108,10 +108,10 @@ set(TESTS
 )
 
 foreach(TEST IN LISTS TESTS)
-    add_executable(${TEST} "lite/test/${TEST}.c")
+    add_executable(${TEST} "tests/lite/${TEST}.c")
     set_target_properties(${TEST} PROPERTIES COMPILE_WARNING_AS_ERROR ON)
     target_link_libraries(${TEST} exceptions4c_lite)
-    target_include_directories(${TEST} PUBLIC lite/src)
+    target_include_directories(${TEST} PUBLIC src/lite)
     add_test(NAME ${TEST} COMMAND $<TARGET_FILE:${TEST}>)
     set_property(TEST ${TEST} PROPERTY SKIP_RETURN_CODE 77)
 endforeach()
