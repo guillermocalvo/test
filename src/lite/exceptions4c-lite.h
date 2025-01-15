@@ -30,13 +30,9 @@ struct e4c_exception_type {
     const char * default_message;
 };
 
-/* Declarations and definitions of exception types */
-#define E4C_DECLARE_EXCEPTION(name)                                         \
-  extern const struct e4c_exception_type name
-
 /* Predefined exception types */
-E4C_DECLARE_EXCEPTION(RuntimeException);
-E4C_DECLARE_EXCEPTION(NullPointerException);
+extern const struct e4c_exception_type RuntimeException;
+extern const struct e4c_exception_type NullPointerException;
 
 /* Represents an instance of an exception type */
 struct e4c_exception {
