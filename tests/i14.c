@@ -35,5 +35,5 @@ void custom_initializer(struct e4c_exception * exception){
 
     custom_initializer_was_executed = true;
 
-    TEST_ASSERT_EQUALS(exception->custom_data, NULL);
+    TEST_ASSERT_EQUALS(exception->data, NULL);
 }

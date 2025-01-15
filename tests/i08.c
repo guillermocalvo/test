@@ -28,7 +28,7 @@ TEST_CASE{
 
     } CATCH(RuntimeException) {
 
-        custom_handler_was_initialized = ( strcmp(e4c_get_exception()->custom_data, foobar) == 0 );
+        custom_handler_was_initialized = ( strcmp(e4c_get_exception()->data, foobar) == 0 );
     }
 
     TEST_ASSERT(custom_handler_was_initialized);
@@ -36,12 +36,12 @@ TEST_CASE{
 }
 
 void custom_initializer(struct e4c_exception * exception) {
-    exception->custom_data = foobar;
+    exception->data = foobar;
 }
 
 void custom_finalizer(const struct e4c_exception * exception) {
 
-    TEST_ASSERT_EQUALS(exception->custom_data, foobar);
+    TEST_ASSERT_EQUALS(exception->data, foobar);
 
     custom_handler_was_finalized = true;
 }
