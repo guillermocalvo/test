@@ -23,9 +23,9 @@
 
 /* Controls whether file/line info is attached to exceptions */
 #ifndef NDEBUG
-# define E4C_DEBUG_INFO __FILE__, __LINE__
+#define EXCEPTIONS4C_DEBUG __FILE__, __LINE__
 #else
-# define E4C_DEBUG_INFO NULL, 0
+#define EXCEPTIONS4C_DEBUG NULL, 0
 #endif
 
 /* Represents an exception type */
@@ -64,7 +64,7 @@ struct e4c_exception {
 
 /* Implementation details */
 #define E4C_TRY                                                             \
-  if (e4c_try(E4C_DEBUG_INFO) && setjmp(e4c.jump[e4c.frames - 1]) >= 0)     \
+  if (e4c_try(EXCEPTIONS4C_DEBUG) && setjmp(e4c.jump[e4c.frames - 1]) >= 0) \
     while (e4c_hook(0))                                                     \
       if (e4c.frame[e4c.frames].stage == e4c_trying)
 
@@ -76,7 +76,7 @@ struct e4c_exception {
   else if (e4c.frame[e4c.frames].stage == e4c_finalizing)
 
 #define E4C_THROW(type, message)                                            \
-  e4c_throw(&type, E4C_DEBUG_INFO, message)
+  e4c_throw(&type, EXCEPTIONS4C_DEBUG, message)
 
 /* This functions must be called only via E4C_TRY, E4C_CATCH, E4C_FINALLY and E4C_THROW */
 enum e4c_stage { e4c_beginning, e4c_trying, e4c_catching, e4c_finalizing, e4c_done };
