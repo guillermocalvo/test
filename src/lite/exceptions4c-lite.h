@@ -11,11 +11,6 @@
 #include <stddef.h>
 #include <setjmp.h>
 
-/* Maximum number of nested `try` blocks */
-#ifndef E4C_MAX_FRAMES
-# define E4C_MAX_FRAMES 16
-#endif
-
 /* Controls whether file/line info is attached to exceptions */
 #ifndef NDEBUG
 #define EXCEPTIONS4C_DEBUG __FILE__, __LINE__
@@ -52,16 +47,16 @@ struct e4c_exception {
 
 /* Implementation details */
 #define E4C_TRY                                                             \
-  if (e4c_try(EXCEPTIONS4C_DEBUG) && setjmp(e4c.jump[e4c.frames - 1]) >= 0) \
+  if (e4c_try(EXCEPTIONS4C_DEBUG) && setjmp(e4c.block[e4c.blocks - 1].jump) >= 0) \
     while (e4c_hook(0))                                                     \
-      if (e4c.frame[e4c.frames].stage == e4c_trying)
+      if (e4c.block[e4c.blocks].stage == e4c_trying)
 
 #define E4C_CATCH(type)                                                     \
-  else if (e4c.frame[e4c.frames].stage == e4c_catching                      \
+  else if (e4c.block[e4c.blocks].stage == e4c_catching                      \
            && E4C_IS_INSTANCE_OF(type) && e4c_hook(1))
 
 #define E4C_FINALLY                                                         \
-  else if (e4c.frame[e4c.frames].stage == e4c_finalizing)
+  else if (e4c.block[e4c.blocks].stage == e4c_finalizing)
 
 #define E4C_THROW(type, message)                                            \
   e4c_throw(&type, #type, EXCEPTIONS4C_DEBUG, message)
@@ -70,15 +65,13 @@ struct e4c_exception {
 enum e4c_stage { e4c_beginning, e4c_trying, e4c_catching, e4c_finalizing, e4c_done };
 
 extern struct e4c_context {
-    jmp_buf jump[E4C_MAX_FRAMES];
     struct e4c_exception err;
-
+    short blocks;
     struct {
         unsigned char stage;
         unsigned char uncaught;
-    } frame[E4C_MAX_FRAMES + 1];
-
-    int frames;
+        jmp_buf jump;
+    } block[32];
 } e4c;
 
 extern int e4c_try(const char * file, int line);

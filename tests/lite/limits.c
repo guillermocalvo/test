@@ -6,11 +6,12 @@ void nest_try_block(int keep_nesting);
 
 
 /**
- * Reach maximum number of exception frames
+ * Reach maximum number of exception blocks
  */
 TEST_CASE{
 
-    nest_try_block(E4C_MAX_FRAMES /* will not overflow */);
+    /* will not overflow */
+    nest_try_block(sizeof(e4c.block) / sizeof(e4c.block[0]));
 }
 
 void nest_try_block(int keep_nesting){
