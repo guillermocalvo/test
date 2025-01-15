@@ -905,7 +905,7 @@ bool e4c_catch(const struct e4c_exception_type * type, const char * file, int li
 bool e4c_finally(const char * file, int line, const char * function);
 
 /**
- * Throws a new exception.
+ * @internal Throws a new exception.
  *
  * @param type the type of exception to be thrown.
  * @param name the name of the exception type.
@@ -921,7 +921,7 @@ bool e4c_finally(const char * file, int line, const char * function);
 e4c_env * e4c_throw(const struct e4c_exception_type * type, const char * name, const char * file, int line, const char * function, const char * format, ...);
 
 /**
- * Restarts an exception block.
+ * @internal Restarts an exception block.
  *
  * @param should_reacquire if <tt>true</tt>, the exception block will restart in the #ACQUIRING stage; otherwise it will start in the #TRYING stage.
  * @param max_attempts
