@@ -295,7 +295,7 @@
  * ```
  *
  * @note
- * #TRY MAY be used at a #FINALLY block.
+ * #RETRY MAY be used at a #FINALLY block.
  *
  * ```c
  * int dividend = 100;
