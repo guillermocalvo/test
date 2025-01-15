@@ -2,8 +2,8 @@
 #include "testing.h"
 
 
-E4C_DEFINE_EXCEPTION(ColorException, "Color exception.", RuntimeException);
-E4C_DEFINE_EXCEPTION(RedException, "Red exception.", ColorException);
+const struct e4c_exception_type ColorException = {"ColorException", &RuntimeException, "Color exception."};
+const struct e4c_exception_type RedException = {"RedException", &ColorException, "Red exception."};
 
 
 /**

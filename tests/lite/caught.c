@@ -2,7 +2,7 @@
 #include "testing.h"
 
 
-E4C_DEFINE_EXCEPTION(CustomException, "Custom exception.", RuntimeException);
+const struct e4c_exception_type CustomException = { "CustomException", &RuntimeException, "Custom exception."};
 
 
 /**

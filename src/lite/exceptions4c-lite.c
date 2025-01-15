@@ -9,8 +9,8 @@
 #include <stdio.h>
 #include "exceptions4c-lite.h"
 
-E4C_DEFINE_EXCEPTION(RuntimeException, "Runtime exception.", RuntimeException);
-E4C_DEFINE_EXCEPTION(NullPointerException, "Null pointer.", RuntimeException);
+const struct e4c_exception_type RuntimeException = { "RuntimeException", &RuntimeException, "Runtime exception."};
+const struct e4c_exception_type NullPointerException = { "NullPointerException", &RuntimeException, "Null pointer."};
 
 struct e4c_context e4c = {0};
 static const char * err_msg[] = {"\n\nError: %s (%s)\n\n", "\n\nUncaught %s: %s\n\n    thrown at %s:%d\n\n"};

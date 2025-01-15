@@ -26,16 +26,13 @@
 /* Represents an exception type */
 struct e4c_exception_type {
     const char * name;
-    const char * default_message;
     const struct e4c_exception_type * supertype;
+    const char * default_message;
 };
 
 /* Declarations and definitions of exception types */
 #define E4C_DECLARE_EXCEPTION(name)                                         \
   extern const struct e4c_exception_type name
-
-#define E4C_DEFINE_EXCEPTION(name, default_message, supertype)              \
-  const struct e4c_exception_type name = { #name, default_message, &supertype }
 
 /* Predefined exception types */
 E4C_DECLARE_EXCEPTION(RuntimeException);
