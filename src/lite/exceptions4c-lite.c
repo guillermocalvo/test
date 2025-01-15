@@ -90,7 +90,7 @@ void e4c_throw(const struct e4c_exception_type * exception_type, const char * fi
     e4c.err.file = file;
     e4c.err.line = line;
 
-    (void) sprintf(e4c.err.message, "%.*s", (int) E4C_MESSAGE_SIZE - 1, (message ? message : e4c.err.type->default_message));
+    (void) sprintf(e4c.err.message, "%.*s", (int) sizeof(e4c.err.message) - 1, (message ? message : e4c.err.type->default_message));
 
     e4c_propagate();
 }

@@ -16,11 +16,6 @@
 # define E4C_MAX_FRAMES 16
 #endif
 
-/* Maximum length (in bytes) of an exception message */
-#ifndef E4C_MESSAGE_SIZE
-# define E4C_MESSAGE_SIZE 128
-#endif
-
 /* Controls whether file/line info is attached to exceptions */
 #ifndef NDEBUG
 #define EXCEPTIONS4C_DEBUG __FILE__, __LINE__
@@ -48,7 +43,7 @@ E4C_DECLARE_EXCEPTION(NullPointerException);
 
 /* Represents an instance of an exception type */
 struct e4c_exception {
-    char message[E4C_MESSAGE_SIZE];
+    char message[256];
     const char * file;
     int line;
     const struct e4c_exception_type * type;
