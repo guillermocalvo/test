@@ -21,7 +21,7 @@ OPTIMIZE_OUTPUT_FOR_C  = YES
 # Build related configuration options
 #---------------------------------------------------------------------------
 
-EXTRACT_ALL            = YES
+EXTRACT_ALL            = NO
 HIDE_UNDOC_MEMBERS     = YES
 HIDE_SCOPE_NAMES       = YES
 HIDE_UNDOC_CLASSES     = YES
