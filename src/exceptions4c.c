@@ -36,25 +36,25 @@
 /** @internal Represents the execution stage of the current exception block. */
 enum block_stage {
 
-    /** The exception block has started. */
+    /** @internal The exception block has started. */
     BEGINNING,
 
-    /** The exception block is [acquiring a resource](#WITH). */
+    /** @internal The exception block is [acquiring a resource](#WITH). */
     ACQUIRING,
 
-    /** The exception block is [trying something](#TRY) or [using a resource](#USE). */
+    /** @internal The exception block is [trying something](#TRY) or [using a resource](#USE). */
     TRYING,
 
-    /** The exception block is [disposing of a resource](#WITH). */
+    /** @internal The exception block is [disposing of a resource](#WITH). */
     DISPOSING,
 
-    /** The exception block is [catching an exception](#CATCH). */
+    /** @internal The exception block is [catching an exception](#CATCH). */
     CATCHING,
 
-    /** The exception block is [finalizing](#FINALLY). */
+    /** @internal The exception block is [finalizing](#FINALLY). */
     FINALIZING,
 
-    /** The exception block has finished. */
+    /** @internal The exception block has finished. */
     DONE
 };
 
