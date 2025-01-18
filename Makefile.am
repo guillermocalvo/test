@@ -108,6 +108,7 @@ check_PROGRAMS =                        \
 	bin/check/i17                       \
     bin/check/lite/uncaught             \
     bin/check/lite/caught               \
+    bin/check/lite/catch-all            \
     bin/check/lite/cleanup              \
     bin/check/lite/hierarchy            \
     bin/check/lite/limits               \
@@ -161,6 +162,7 @@ TESTS =                                 \
 	bin/check/i17                       \
     bin/check/lite/uncaught             \
     bin/check/lite/caught               \
+    bin/check/lite/catch-all            \
     bin/check/lite/cleanup              \
     bin/check/lite/hierarchy            \
     bin/check/lite/limits               \
@@ -252,6 +254,7 @@ bin_check_i17_SOURCES                   = src/exceptions4c.c tests/i17.c
 
 bin_check_lite_uncaught_SOURCES         = src/lite/exceptions4c-lite.c tests/lite/uncaught.c
 bin_check_lite_caught_SOURCES           = src/lite/exceptions4c-lite.c tests/lite/caught.c
+bin_check_lite_catch_all_SOURCES        = src/lite/exceptions4c-lite.c tests/lite/catch-all.c
 bin_check_lite_cleanup_SOURCES          = src/lite/exceptions4c-lite.c tests/lite/cleanup.c
 bin_check_lite_hierarchy_SOURCES        = src/lite/exceptions4c-lite.c tests/lite/hierarchy.c
 bin_check_lite_limits_SOURCES           = src/lite/exceptions4c-lite.c tests/lite/limits.c

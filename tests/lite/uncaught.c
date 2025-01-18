@@ -1,11 +1,12 @@
 
 #include "testing.h"
 
+const struct e4c_exception_type FATAL_ERROR = {NULL, "Fatal error."};
 
 /**
  * Uncaught exception
  */
 TEST_CASE{
 
-    E4C_THROW(NullPointerException, "This is an uncaught exception");
+    THROW(FATAL_ERROR, "This is an uncaught exception");
 }

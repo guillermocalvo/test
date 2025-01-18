@@ -101,6 +101,7 @@ set_property(TEST i05 PROPERTY WILL_FAIL TRUE)
 set(TESTS
         uncaught
         caught
+        catch-all
         cleanup
         hierarchy
         limits

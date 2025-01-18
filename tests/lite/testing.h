@@ -35,7 +35,7 @@
     void test_case(void); \
     \
     int main(void){ \
-        (void)printf("    - Running test %s...\n", __FILE__); \
+        (void)printf("    - Running test %s:%d\n", __FILE__, __LINE__); \
         test_case(); \
         return(EXIT_SUCCESS); \
     } \

@@ -2,8 +2,8 @@
 #include "testing.h"
 
 
-const struct e4c_exception_type ColorException = {&RuntimeException, "Color exception."};
-const struct e4c_exception_type RedException = {&ColorException, "Red exception."};
+const struct e4c_exception_type COLOR_EXCEPTION = {NULL, "Color exception."};
+const struct e4c_exception_type RED_EXCEPTION = {&COLOR_EXCEPTION, "Red exception."};
 
 
 /**
@@ -11,17 +11,20 @@ const struct e4c_exception_type RedException = {&ColorException, "Red exception.
  */
 TEST_CASE{
 
-    E4C_TRY{
+    int caught = 0;
 
-        E4C_THROW(RedException, "This is a red exception");
+    TRY {
+
+        THROW(RED_EXCEPTION, "This is a red exception");
 
         TEST_FAIL; /* this should not happen */
 
-    }E4C_CATCH(ColorException){
+    } CATCH(COLOR_EXCEPTION) {
 
-        printf("The color exception was caught: %s\n", E4C_EXCEPTION.name);
+        printf("The color exception was caught: %s\n", THROWN_EXCEPTION.name);
 
-        TEST_ASSERT( E4C_IS_INSTANCE_OF(RedException) );
-        TEST_ASSERT( E4C_IS_INSTANCE_OF(RuntimeException) );
+        caught = 1;
     }
+
+    TEST_ASSERT(caught);
 }

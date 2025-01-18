@@ -11,14 +11,14 @@ void nest_try_block(int keep_nesting);
 TEST_CASE{
 
     /* will not overflow */
-    nest_try_block(sizeof(e4c.block) / sizeof(e4c.block[0]));
+    nest_try_block(EXCEPTIONS4C_MAX_BLOCKS);
 }
 
 void nest_try_block(int keep_nesting){
 
     if(keep_nesting){
 
-        E4C_TRY{
+        TRY {
 
             nest_try_block(--keep_nesting);
         }

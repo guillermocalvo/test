@@ -1,90 +1,427 @@
 /*
- * exceptions4c lightweight version 2.1
+ * Copyright 2025 Guillermo Calvo
  *
- * Copyright (c) 2016 Guillermo Calvo
- * Licensed under the GNU Lesser General Public License
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Really lightweight exception handling for C.
+ *
+ * <img src="exceptions4c-logo.svg">
+ *
+ * This is the lightweight version of the library.
+ *
+ * @file        exceptions4c-lite.h
+ * @version     4.0.0
+ * @author      [Guillermo Calvo](https://guillermo.dev)
+ * @copyright   Licensed under Apache 2.0
+ * @see         For more information, visit the
+ *              [project on GitHub](https://github.com/guillermocalvo/exceptions4c)
  */
 
 #ifndef EXCEPTIONS4C_LITE
-#define EXCEPTIONS4C_LITE
+
+/**
+ * Returns the major version number of this library.
+ */
+#define EXCEPTIONS4C_LITE 4
 
 #include <stddef.h>
 #include <setjmp.h>
 
-/* Controls whether file/line info is attached to exceptions */
-#ifndef NDEBUG
-#define EXCEPTIONS4C_DEBUG __FILE__, __LINE__
-#else
-#define EXCEPTIONS4C_DEBUG NULL, 0
-#endif
+/**
+ * @internal
+ * @brief Maximum number of #TRY blocks that can be nested.
+ */
+#define EXCEPTIONS4C_MAX_BLOCKS 32
 
-/* Represents an exception type */
+/**
+ * Represents a category of problematic situations in a program.
+ *
+ * #e4c_exception_type is used to define a kind of error or exceptional
+ * condition that a program might want to #THROW and #CATCH. It serves as
+ * a way to group related issues that share common characteristics.
+ *
+ * The <strong>supertype</strong> allows for creating a hierarchy of
+ * exception types, where a more specific type can be built upon a more
+ * generic one. The <strong>default message</strong> provides a general
+ * description of the type, offering a starting point for understanding
+ * the nature of the problem.
+ *
+ * Exception types SHOULD be defined as <tt>const</tt>.
+ *
+ * ```c
+ * const struct e4c_exception_type GENERIC = {NULL, "Generic problem"};
+ * const struct e4c_exception_type SPECIFIC = {&GENERIC, "Specific problem"};
+ * ```
+ *
+ * @see #THROW
+ * @see #CATCH
+ */
 struct e4c_exception_type {
+
+    /** The parent type that this exception type belongs to, or <tt>NULL</tt> if no parent exists. */
     const struct e4c_exception_type * supertype;
+
+    /** A default message that summarizes the kind of error or issue this type represents */
     const char * default_message;
 };
 
-/* Predefined exception types */
-extern const struct e4c_exception_type RuntimeException;
-extern const struct e4c_exception_type NullPointerException;
-
-/* Represents an instance of an exception type */
+/**
+ * Represents a specific occurrence of an exceptional situation in a
+ * program.
+ *
+ * #e4c_exception ties a specific instance of an exception to its type.
+ * It combines an #e4c_exception_type (which defines the general category
+ * of the exception) with a detailed error message that provides specific
+ * information about what went wrong in this particular instance.
+ *
+ * After an exception is [thrown](#THROW), it may propagate through the
+ * program and be caught by an appropriate #CATCH or #CATCH_ALL block.
+ * When an exception is caught, #THROWN_EXCEPTION can be used to retrieve
+ * the exception currently being handled. This allows for inspection and
+ * further handling of the error based on both its type and the detailed
+ * context of the situation.
+ *
+ * @see #e4c_exception_type
+ */
 struct e4c_exception {
-    char message[256];
-    const char * file;
-    int line;
+
+    /** The general nature of the error. */
     const struct e4c_exception_type * type;
+
+    /** The name of the exception type. */
     const char * name;
+
+    /** A text message describing the specific problem. */
+    char message[256];
+
+    /** The name of the source code file that threw this exception, or <tt>NULL</tt> if <tt>NDEBUG</tt> is defined. */
+    const char * file;
+
+    /** The number of line that threw this exception, or zero if <tt>NDEBUG</tt> is defined. */
+    int line;
 };
 
-/* Retrieve current thrown exception */
-#define E4C_EXCEPTION                                                       \
-  e4c.err
+/**
+ * @internal
+ * @brief Contains the current status of exceptions.
+ */
+extern struct e4c_context {
+  struct e4c_exception exception;
+  char blocks;
+  struct {
+    unsigned char stage;
+    unsigned char uncaught;
+    jmp_buf jump;
+  } block[EXCEPTIONS4C_MAX_BLOCKS];
+} exceptions4c;
 
-/* Returns whether current exception is of a given type */
-#define E4C_IS_INSTANCE_OF(t)                                               \
-  ( E4C_EXCEPTION.type == &t || e4c_extends(E4C_EXCEPTION.type, &t) )
+/**
+ * @internal
+ * @brief Represents the execution stage of the current exception block.
+ */
+enum e4c_stage {
 
-/* Implementation details */
-#define E4C_TRY                                                             \
-  if (e4c_try(EXCEPTIONS4C_DEBUG) && setjmp(e4c.block[e4c.blocks - 1].jump) >= 0) \
-    while (e4c_hook(0))                                                     \
-      if (e4c.block[e4c.blocks].stage == e4c_trying)
+  /** @internal The exception block has started. */
+  EXCEPTIONS4C_START,
 
-#define E4C_CATCH(type)                                                     \
-  else if (e4c.block[e4c.blocks].stage == e4c_catching                      \
-           && E4C_IS_INSTANCE_OF(type) && e4c_hook(1))
+  /** @internal The exception block is [trying something](#TRY). */
+  EXCEPTIONS4C_TRY,
 
-#define E4C_FINALLY                                                         \
-  else if (e4c.block[e4c.blocks].stage == e4c_finalizing)
+  /** @internal The exception block is [catching an exception](#CATCH). */
+  EXCEPTIONS4C_CATCH,
 
-#define E4C_THROW(type, message)                                            \
+  /** @internal The exception block is [finalizing](#FINALLY). */
+  EXCEPTIONS4C_FINALLY,
+
+  /** @internal The exception block has finished. */
+  EXCEPTIONS4C_DONE
+};
+
+/**
+ * Introduces a block of code that may throw exceptions during execution.
+ *
+ * The #TRY block is used to define a section of code where exceptions
+ * might occur. It allows you to handle exceptions gracefully using other
+ * blocks that follow it. If an exception occurs, control is transferred
+ * to the appropriate block.
+ *
+ * A single #TRY block can be followed by:
+ *
+ * - One or more #CATCH blocks to handle specific types of exceptions.
+ * - Optionally, one #CATCH_ALL block to handle all exception types (if
+ *   present, it must appear after all #CATCH blocks).
+ * - Optionally, one #FINALLY block to execute cleanup code, regardless
+ *   of whether an exception was thrown or caught.
+ *
+ * @note
+ * The blocks must appear in this order: #CATCH blocks (if any),
+ * #CATCH_ALL block (if any), and #FINALLY block (if any). A single #TRY
+ * block MUST be followed by, at least, one #CATCH, #CATCH_ALL, or
+ * #FINALLY block.
+ *
+ * @see CATCH
+ * @see CATCH_ALL
+ * @see FINALLY
+ */
+#define TRY                                                                 \
+                                                                            \
+  for (                                                                     \
+    e4c_start(EXCEPTIONS4C_DEBUG),                                          \
+      (void) setjmp(exceptions4c.block[exceptions4c.blocks - 1].jump);      \
+    e4c_next();                                                             \
+  )                                                                         \
+    if (                                                                    \
+      exceptions4c.block[exceptions4c.blocks - 1].stage == EXCEPTIONS4C_TRY \
+    )
+
+/**
+ * Introduces a block of code that handles exceptions thrown by a
+ * preceding #TRY block.
+ *
+ * @param type the type of exception to catch.
+ *
+ * One or more #CATCH blocks can follow a #TRY block. Each #CATCH block
+ * MUST specify the type of exception it handles. Only exceptions of that
+ * type (or its subtypes) will be caught.
+ *
+ * @remark
+ * The #CATCH blocks are evaluated in the order they are written, so more
+ * specific exceptions should appear before more general ones.
+ *
+ * @see #TRY
+ * @see #CATCH_ALL
+ *
+ */
+#define CATCH(type)                                                         \
+                                                                            \
+    else if (                                                               \
+      exceptions4c.blocks > 0                                               \
+      &&                                                                    \
+      exceptions4c.blocks <= EXCEPTIONS4C_MAX_BLOCKS                        \
+      &&                                                                    \
+      exceptions4c.block[exceptions4c.blocks - 1].stage ==                  \
+        EXCEPTIONS4C_CATCH                                                  \
+      &&                                                                    \
+      e4c_catch(&type)                                                      \
+    )
+
+/**
+ * Introduces a block of code that handles any exception thrown by a
+ * preceding #TRY block, regardless of its type.
+ *
+ * The #CATCH_ALL block works like a general #CATCH block that does not
+ * require specifying the type of exception to handle. It acts as a
+ * fallback for catching all exceptions, including those not explicitly
+ * declared in other #CATCH blocks.
+ *
+ * Only one #CATCH_ALL block is allowed per #TRY block, and it must
+ * appear after all type-specific #CATCH blocks if any are present.
+ *
+ * @remark
+ * Using a #CATCH_ALL block is useful for logging, debugging, or handling
+ * unexpected exceptions that don't fit into specific categories.
+ * However, specific #CATCH blocks SHOULD be used whenever possible to
+ * maintain clarity and precise control over exception handling.
+ *
+ * @see TRY
+ * @see CATCH
+ */
+#define CATCH_ALL                                                           \
+                                                                            \
+    else if (                                                               \
+      exceptions4c.blocks > 0                                               \
+      &&                                                                    \
+      exceptions4c.blocks <= EXCEPTIONS4C_MAX_BLOCKS                        \
+      &&                                                                    \
+      exceptions4c.block[exceptions4c.blocks - 1].stage ==                  \
+        EXCEPTIONS4C_CATCH                                                  \
+      &&                                                                    \
+      e4c_catch(NULL)                                                       \
+    )
+
+/**
+ * Introduces a block of code that is executed after a #TRY block,
+ * regardless of whether an exception was thrown or not.
+ *
+ * A #FINALLY block can follow a #TRY block, with or without accompanying
+ * #CATCH blocks. Only one #FINALLY block is allowed per #TRY block.
+ *
+ * @remark
+ * It is typically used to release resources, close files, or perform
+ * cleanup tasks.
+ */
+#define FINALLY                                                             \
+                                                                            \
+    else if (                                                               \
+      exceptions4c.blocks > 0                                               \
+      &&                                                                    \
+      exceptions4c.blocks <= EXCEPTIONS4C_MAX_BLOCKS                        \
+      &&                                                                    \
+      exceptions4c.block[exceptions4c.blocks - 1].stage ==                  \
+        EXCEPTIONS4C_FINALLY                                                \
+    )
+
+/**
+ * Throws an exception, interrupting the normal flow of execution.
+ *
+ * @param type the type of the exception to throw.
+ * @param message a descriptive message explaining the exception.
+ *
+ * #THROW is used within a #TRY block, a #CATCH block, or any other
+ * function to signal that an error has occurred. The thrown exception
+ * will be of the specified <strong>type</strong>, and it MAY be handled
+ * by a preceding #CATCH block.
+ *
+ * If a thrown exception is not handled by any of the #CATCH blocks in
+ * the current function, it propagates up the call stack to the function
+ * that called the current function. This continues until the exception
+ * is either handled by a #CATCH block higher in the stack, or it reaches
+ * the top level of the program. If no #CATCH block handles the
+ * exception, the program terminates and an error message is printed to
+ * the console.
+ */
+#define THROW(type, message)                                                \
+                                                                            \
   e4c_throw(&type, #type, EXCEPTIONS4C_DEBUG, message)
 
-/* This functions must be called only via E4C_TRY, E4C_CATCH, E4C_FINALLY and E4C_THROW */
-enum e4c_stage { e4c_beginning, e4c_trying, e4c_catching, e4c_finalizing, e4c_done };
+/**
+ * Retrieves the last exception that was thrown.
+ *
+ * @return the last exception that was thrown.
+ *
+ * This macro SHOULD be used in the body of a #CATCH or #CATCH_ALL
+ * block to inspect the exception being handled.
+ *
+ * It MAY also be used in the body of a #FINALLY block to determine if an
+ * exception was thrown in the corresponding #TRY block, or during the
+ * execution of a #CATCH or #CATCH_ALL block.
+ *
+ * @see #e4c_exception
+ * @see #THROW
+ * @see #CATCH
+ * @see #FINALLY
+ * @see #IS_UNCAUGHT
+ */
+#define THROWN_EXCEPTION                                                    \
+                                                                            \
+  exceptions4c.exception
 
-extern struct e4c_context {
-    struct e4c_exception err;
-    short blocks;
-    struct {
-        unsigned char stage;
-        unsigned char uncaught;
-        jmp_buf jump;
-    } block[32];
-} e4c;
+/**
+ * Determines whether the current exception (if any) hasn't been handled
+ * yet by any #CATCH or #CATCH_ALL block.
+ *
+ * @return <tt>1</tt> if the exception from the #TRY block was not caught
+ *   by any #CATCH or #CATCH_ALL block; <tt>0</tt> otherwise.
+ *
+ * An exception is considered "uncaught" if no matching #CATCH or
+ * #CATCH_ALL block has been executed for it. In other words, this macro
+ * evaluates to a truthy value if the exception has bypassed all specific
+ * exception-handling logic and is propagating further. And it evaluates
+ * to a falsy value if no exception was thrown in the #TRY block, or if
+ * an exception was successfully caught.
+ *
+ * @remark
+ * This macro SHOULD be used exclusively in the body of a #FINALLY block
+ * to check whether an exception thrown during the #TRY block has
+ * propagated past all #CATCH and #CATCH_ALL blocks without being
+ * handled.
+ *
+ * @see FINALLY
+ * @see THROWN_EXCEPTION
+ */
+#define IS_UNCAUGHT                                                         \
+                                                                            \
+  (                                                                         \
+    exceptions4c.blocks > 0                                                 \
+    &&                                                                      \
+    exceptions4c.blocks <= EXCEPTIONS4C_MAX_BLOCKS                          \
+    &&                                                                      \
+    exceptions4c.block[exceptions4c.blocks - 1].uncaught                    \
+  )
 
-extern int e4c_try(const char * file, int line);
+#ifndef NDEBUG
 
-extern int e4c_hook(int is_catch);
+/**
+ * @internal
+ * @brief Captures debug information about the running program.
+ */
+#define EXCEPTIONS4C_DEBUG                                                  \
+                                                                            \
+  __FILE__, __LINE__
 
-extern int e4c_extends(const struct e4c_exception_type * child, const struct e4c_exception_type * parent);
+#else
 
-extern void e4c_throw(const struct e4c_exception_type * exception_type, const char * name, const char * file, int line, const char * message);
+/**
+ * @internal
+ * @brief Discards debug information about the running program.
+ */
+#define EXCEPTIONS4C_DEBUG                                                  \
+                                                                            \
+  NULL, 0
+
+#endif
+
+/**
+ * @internal
+ * @brief Starts a new exception block.
+ *
+ * @param file the name of the source code file that is calling this function.
+ * @param line the number of line that is calling this function.
+ *
+ * @warning This function SHOULD be called only via #TRY.
+ */
+void e4c_start(const char * file, int line);
+
+/**
+ * @internal
+ * @brief Iterates through the different [stages](#block_stage) of the current exception block.
+ *
+ * @return <tt>1</tt> if the current exception block has not completed yet; <tt>0</tt> otherwise.
+ *
+ * @warning This function SHOULD be called only via #TRY.
+ */
+int e4c_next(void);
+
+/**
+ * @internal
+ * @brief Checks if the current exception can be handled.
+ *
+ * @param type the type of exceptions to handle.
+ * @return <tt>1</tt> if the supplied <tt>type</tt> is either <tt>NULL</tt> or a supertype of the thrown exception; <tt>false</tt> otherwise.
+ *
+ * @warning This function SHOULD be called only via #CATCH.
+ */
+int e4c_catch(const struct e4c_exception_type * type);
+
+/**
+ * @internal
+ * @brief Throws a new exception.
+ *
+ * @param type the type of exception to throw.
+ * @param name the name of the exception type.
+ * @param file the name of the source code file that is calling this function.
+ * @param line the number of line that is calling this function.
+ * @param message the error message.
+ *
+ * @warning This function SHOULD be called only via #THROW.
+ */
+void e4c_throw(const struct e4c_exception_type * type, const char * name, const char * file, int line, const char * message);
 
 /* OpenMP support */
 #ifdef _OPENMP
-# pragma omp threadprivate(e4c)
+# pragma omp threadprivate(exceptions4c)
 #endif
 
 #endif

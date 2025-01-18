@@ -14,7 +14,7 @@ const struct e4c_exception_type my_exception = {NULL, "My exception."};
 
         THROW(my_exception, "This is my exception");
 
-    } CATCH(my_exception) {
+    } CATCH_ALL {
 
         printf("The exception was caught: %s\n", THROWN_EXCEPTION.name);
     }

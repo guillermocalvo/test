@@ -2,6 +2,9 @@
 #include "testing.h"
 
 
+const struct e4c_exception_type PROBLEM = {NULL, "A problem happened."};
+
+
 /**
  * Cleanup
  */
@@ -12,24 +15,24 @@ TEST_CASE{
     volatile int started     = 0;
     volatile int finished    = 0;
 
-    E4C_TRY{
+    TRY {
 
         created = 1;
 
-        E4C_TRY{
+        TRY {
 
             started = 1;
 
-            E4C_THROW(NullPointerException, "Get me out of here");
+            THROW(PROBLEM, "Get me out of here");
 
             finished = 1; /* this should not happen */
 
-        }E4C_FINALLY{
+        } FINALLY {
 
             destroyed = 1;
         }
 
-    }E4C_CATCH(NullPointerException){
+    } CATCH(PROBLEM) {
 
         printf("No problem :-)");
     }
