@@ -118,7 +118,7 @@
 /**
  * Introduces a block of code capable of handling a specific type of exceptions
  *
- * @param type the type of exceptions to be handled.
+ * @param type the type of exceptions to handle.
  *
  * #CATCH blocks are optional code blocks that **must** be preceded by #TRY,
  * #WITH... #USE or #USING blocks. Several #CATCH blocks can be placed
@@ -230,7 +230,7 @@
 /**
  * Signals an exceptional situation represented by an exception object
  *
- * @param type the type of exception to be thrown.
+ * @param type the type of exception to throw.
  * @param format the error message.
  * @param ... an optional list of arguments that will be formatted according to <tt>format</tt>.
  *
@@ -271,7 +271,7 @@
  * Repeats the previous #TRY (or #USE) block entirely
  *
  * @param max_attempts the maximum number of attempts to retry.
- * @param type the type of exception to be thrown.
+ * @param type the type of exception to throw.
  * @param format the error message.
  * @param ... an optional list of arguments that will be formatted according to <tt>format</tt>.
  *
@@ -340,8 +340,8 @@
 /**
  * Opens a block of code with automatic disposal of a resource
  *
- * @param resource the resource to be disposed
- * @param dispose the function (or macro) to dispose of the resource
+ * @param resource the thing to dispose of.
+ * @param dispose the function (or macro) to dispose of the <strong>resource</strong>.
  *
  * The combination of #WITH... #USE encapsulates the *Dispose Pattern*.
  * This pattern consists of two separate blocks and an implicit call
@@ -448,7 +448,7 @@
  * Introduces a block of code with automatic acquisition and disposal of a
  * resource
  *
- * @param resource the resource to be acquired, used and then disposed.
+ * @param resource the thing to acquire, use and then dispose of.
  * @param dispose the function (or macro) to dispose of the resource.
  * @param acquire the function (or macro) to acquire the resource.
  * @param ... an optional list of arguments to be passed to <tt>acquire</tt>.
@@ -480,7 +480,7 @@
  * Repeats the previous #WITH block entirely
  *
  * @param max_attempts the maximum number of attempts to reacquire
- * @param type the type of exception to be thrown when <tt>max_attempts</tt> is exceeded.
+ * @param type the type of exception throw when <tt>max_attempts</tt> is exceeded.
  * @param format The error message.
  * @param ... an optional list of arguments that will be formatted according to <tt>format</tt>.
  *
@@ -656,8 +656,6 @@ struct e4c_exception_type {
  * any code block that directly or indirectly invoked the code block where the
  * error occurred.
  *
- * Exceptions provide information regarding the exceptional situation, such as:
- *
  * @remark
  * You MAY associate user-defined <strong>data</strong> to exceptions by configuring [initialize_exception](#e4c_context.initialize_exception) in the [exception context](e4c_context).
  *
@@ -719,13 +717,13 @@ struct e4c_context {
      */
     void * _innermost_block;
 
-    /** The function to be executed in the event of an uncaught exception */
+    /** The function to execute in the event of an uncaught exception */
     void (*uncaught_handler)(const struct e4c_exception * exception);
 
-    /** The function to be executed whenever a new exception is thrown */
+    /** The function to execute whenever a new exception is thrown */
     void (*initialize_exception)(struct e4c_exception * exception);
 
-    /** The function to be executed whenever an exception is destroyed */
+    /** The function to execute whenever an exception is destroyed */
     void (*finalize_exception)(const struct e4c_exception * exception);
 };
 
@@ -808,7 +806,8 @@ const struct e4c_exception * e4c_get_exception(void);
 bool e4c_is_uncaught(void);
 
 /**
- * @internal Starts a new exception block.
+ * @internal
+ * @brief Starts a new exception block.
  *
  * @param should_acquire if <tt>true</tt>, the exception block will start in the #ACQUIRING stage; otherwise it will start in the #TRYING stage.
  * @param file the name of the source code file that is calling this function.
@@ -821,7 +820,8 @@ bool e4c_is_uncaught(void);
 e4c_env * e4c_start(bool should_acquire, const char * file, int line, const char * function);
 
 /**
- * @internal Iterates through the [different stages](#block_stage) of the current exception block.
+ * @internal
+ * @brief Iterates through the different [stages](#block_stage) of the current exception block.
  *
  * @param file the name of the source code file that is calling this function.
  * @param line the number of line that is calling this function.
@@ -833,7 +833,8 @@ e4c_env * e4c_start(bool should_acquire, const char * file, int line, const char
 bool e4c_next(const char * file, int line, const char * function);
 
 /**
- * @internal Retrieves the execution context of the current exception block.
+ * @internal
+ * @brief Retrieves the execution context of the current exception block.
  *
  * @return the execution context of the current exception block.
  *
@@ -842,7 +843,8 @@ bool e4c_next(const char * file, int line, const char * function);
 e4c_env * e4c_get_env(void);
 
 /**
- * @internal Checks if the current exception block is in the #ACQUIRING stage.
+ * @internal
+ * @brief Checks if the current exception block is in the #ACQUIRING stage.
  *
  * @param file the name of the source code file that is calling this function.
  * @param line the number of line that is calling this function.
@@ -854,7 +856,8 @@ e4c_env * e4c_get_env(void);
 bool e4c_acquire(const char * file, int line, const char * function);
 
 /**
- * @internal Checks if the current exception block is in the #TRYING stage.
+ * @internal
+ * @brief Checks if the current exception block is in the #TRYING stage.
  *
  * @param file the name of the source code file that is calling this function.
  * @param line the number of line that is calling this function.
@@ -866,7 +869,8 @@ bool e4c_acquire(const char * file, int line, const char * function);
 bool e4c_try(const char * file, int line, const char * function);
 
 /**
- * @internal Checks if the current exception block is in the #DISPOSING stage.
+ * @internal
+ * @brief Checks if the current exception block is in the #DISPOSING stage.
  *
  * @param file the name of the source code file that is calling this function.
  * @param line the number of line that is calling this function.
@@ -878,22 +882,25 @@ bool e4c_try(const char * file, int line, const char * function);
 bool e4c_dispose(const char * file, int line, const char * function);
 
 /**
- * @internal Checks if the current exception can be handled.
+ * @internal
+ * @brief Checks if the current exception can be handled.
  *
- * @param type the type of exceptions to be handled.
+ * @param type the type of exceptions to handle.
  * @param file the name of the source code file that is calling this function.
  * @param line the number of line that is calling this function.
  * @param function the name of the function that is calling this function.
  * @return <tt>true</tt> if:
  *   - the current exception block is in the #CATCHING stage, AND
  *   - the supplied <tt>type</tt> is either <tt>NULL</tt> or a supertype of the thrown exception.
+ *   <tt>false</tt> otherwise.
  *
  * @warning This function SHOULD be called only via #CATCH.
  */
 bool e4c_catch(const struct e4c_exception_type * type, const char * file, int line, const char * function);
 
 /**
- * @internal Checks if the current exception block is in the #FINALIZING stage.
+ * @internal
+ * @brief Checks if the current exception block is in the #FINALIZING stage.
  *
  * @param file the name of the source code file that is calling this function.
  * @param line the number of line that is calling this function.
@@ -905,9 +912,10 @@ bool e4c_catch(const struct e4c_exception_type * type, const char * file, int li
 bool e4c_finally(const char * file, int line, const char * function);
 
 /**
- * @internal Throws a new exception.
+ * @internal
+ * @brief Throws a new exception.
  *
- * @param type the type of exception to be thrown.
+ * @param type the type of exception to throw.
  * @param name the name of the exception type.
  * @param file the name of the source code file that is calling this function.
  * @param line the number of line that is calling this function.
@@ -921,11 +929,12 @@ bool e4c_finally(const char * file, int line, const char * function);
 e4c_env * e4c_throw(const struct e4c_exception_type * type, const char * name, const char * file, int line, const char * function, const char * format, ...);
 
 /**
- * @internal Restarts an exception block.
+ * @internal
+ * @brief Restarts an exception block.
  *
  * @param should_reacquire if <tt>true</tt>, the exception block will restart in the #ACQUIRING stage; otherwise it will start in the #TRYING stage.
  * @param max_attempts
- * @param type the type of exception to be thrown.
+ * @param type the type of exception to throw.
  * @param name the name of the exception type.
  * @param file the name of the source code file that is calling this function.
  * @param line the number of line that is calling this function.

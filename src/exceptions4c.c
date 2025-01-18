@@ -1,5 +1,5 @@
 /*
-* Copyright 2025 Guillermo Calvo
+ * Copyright 2025 Guillermo Calvo
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -33,7 +33,10 @@
 #include <stdnoreturn.h>
 #include "exceptions4c.h"
 
-/** @internal Represents the execution stage of the current exception block. */
+/**
+ * @internal
+ * @brief Represents the execution stage of the current exception block.
+ */
 enum block_stage {
 
     /** @internal The exception block has started. */
@@ -58,7 +61,10 @@ enum block_stage {
     DONE
 };
 
-/** @internal Represents an exception block. */
+/**
+ * @internal
+ * @brief Represents an exception block.
+ */
 struct e4c_block {
 
     /** A possibly-null pointer to the outer exception block. */
@@ -332,7 +338,7 @@ static struct e4c_context * get_context(const char * file, const int line, const
  * @param exception the exception to propagate.
  *
  * @note
- * If the supplied context does not have an exception block, then the program will be abruptly terminated (after calling the uncaught handler).
+ * If the exception reached the top level of the program, then the program will be abruptly terminated (after calling the uncaught handler).
  */
 static void propagate(const struct e4c_context * context, struct e4c_exception * exception) {
     struct e4c_block * block = context->_innermost_block;
@@ -521,7 +527,7 @@ static void print_debug_info(const char * file, const int line, const char * fun
  * @param is_cause <tt>true</tt> if the supplied exception is the cause of another one.
  */
 static void print_exception(const struct e4c_exception * exception, bool is_cause) {
-    fprintf(stderr, "%s%s: %s\n", is_cause ? "\n" : "Caused by: ", exception->name, exception->message);
+    fprintf(stderr, "%s%s: %s\n", is_cause ? "Caused by: " : "\n", exception->name, exception->message);
     print_debug_info(exception->file, exception->line, exception->function);
     if (exception->cause != NULL && exception->cause != exception) {
         print_exception(exception->cause, true);
