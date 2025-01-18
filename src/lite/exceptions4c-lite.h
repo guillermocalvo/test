@@ -119,7 +119,7 @@ struct e4c_exception {
  */
 extern struct e4c_context {
   struct e4c_exception exception;
-  char blocks;
+  unsigned char blocks;
   struct {
     unsigned char stage;
     unsigned char uncaught;
