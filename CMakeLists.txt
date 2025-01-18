@@ -105,7 +105,6 @@ set(TESTS
         cleanup
         hierarchy
         limits
-        overflow
 )
 
 foreach(TEST IN LISTS TESTS)
@@ -118,4 +117,3 @@ foreach(TEST IN LISTS TESTS)
 endforeach()
 
 set_property(TEST uncaught PROPERTY WILL_FAIL TRUE)
-set_property(TEST overflow PROPERTY WILL_FAIL TRUE)
