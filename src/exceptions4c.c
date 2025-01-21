@@ -513,9 +513,9 @@ static void delete_exception(const struct e4c_context * context, struct e4c_exce
 static void print_debug_info(const char * file, const int line, const char * function) {
     if (file != NULL) {
         if (function != NULL) {
-            fprintf(stderr, "    at %s (%s:%d)\n", function, file, line);
+            (void) fprintf(stderr, "    at %s (%s:%d)\n", function, file, line);
         } else {
-            fprintf(stderr, "    at %s:%d\n", file, line);
+            (void) fprintf(stderr, "    at %s:%d\n", file, line);
         }
     }
 }
@@ -527,7 +527,7 @@ static void print_debug_info(const char * file, const int line, const char * fun
  * @param is_cause <tt>true</tt> if the supplied exception is the cause of another one.
  */
 static void print_exception(const struct e4c_exception * exception, bool is_cause) {
-    fprintf(stderr, "%s%s: %s\n", is_cause ? "Caused by: " : "\n", exception->name, exception->message);
+    (void) fprintf(stderr, "%s%s: %s\n", is_cause ? "Caused by: " : "\n", exception->name, exception->message);
     print_debug_info(exception->file, exception->line, exception->function);
     if (exception->cause != NULL && exception->cause != exception) {
         print_exception(exception->cause, true);
