@@ -2,7 +2,7 @@
 #include "testing.h"
 
 
-const struct e4c_exception_type my_exception = {NULL, "My exception."};
+const struct e4c_exception_type MY_EXCEPTION = {NULL, "My exception."};
 
 
 /**
@@ -12,7 +12,7 @@ const struct e4c_exception_type my_exception = {NULL, "My exception."};
 
     TRY {
 
-        THROW(my_exception, "This is my exception");
+        THROW(MY_EXCEPTION, "This is my exception");
 
     } CATCH_ALL {
 
