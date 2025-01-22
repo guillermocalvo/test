@@ -10,6 +10,11 @@ add_library(exceptions4c
 
 target_include_directories(exceptions4c PUBLIC src)
 
+add_library(exceptions4c_pthreads
+        src/pthreads/exceptions4c-pthreads.c)
+
+target_include_directories(exceptions4c_pthreads PUBLIC src src/pthreads)
+
 include(FetchContent)
 FetchContent_Declare(
         doxygen-awesome-css
@@ -17,6 +22,10 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(doxygen-awesome-css)
 FetchContent_GetProperties(doxygen-awesome-css SOURCE_DIR AWESOME_CSS_DIR)
+
+# POSIX Threads
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
 
 # Doxygen
 find_package(Doxygen)
@@ -109,6 +118,25 @@ foreach(TEST IN LISTS TESTS)
     add_executable(${TEST} "tests/lite/${TEST}.c")
     set_target_properties(${TEST} PROPERTIES COMPILE_WARNING_AS_ERROR ON)
     target_include_directories(${TEST} PUBLIC src/lite)
+    add_test(NAME ${TEST} COMMAND $<TARGET_FILE:${TEST}>)
+    set_property(TEST ${TEST} PROPERTY SKIP_RETURN_CODE 77)
+endforeach()
+
+set_property(TEST uncaught PROPERTY WILL_FAIL TRUE)
+
+set(TESTS
+        multithread
+)
+
+foreach(TEST IN LISTS TESTS)
+    add_executable(${TEST} "tests/pthreads/${TEST}.c")
+    set_target_properties(${TEST} PROPERTIES COMPILE_WARNING_AS_ERROR ON)
+    target_link_libraries(${TEST}
+            exceptions4c
+            exceptions4c_pthreads
+            Threads::Threads
+    )
+    target_include_directories(${TEST} PUBLIC src src/pthreads)
     add_test(NAME ${TEST} COMMAND $<TARGET_FILE:${TEST}>)
     set_property(TEST ${TEST} PROPERTY SKIP_RETURN_CODE 77)
 endforeach()

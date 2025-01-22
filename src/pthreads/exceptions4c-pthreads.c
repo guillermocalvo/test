@@ -1,0 +1,151 @@
+/*
+ * Copyright 2025 Guillermo Calvo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+/**
+ * Implementation of the thread-safe extension for exceptions4c.
+ *
+ * <img src="exceptions4c-logo.svg">
+ *
+ * @file        exceptions4c-pthreads.h
+ * @version     1.0.0
+ * @author      [Guillermo Calvo](https://guillermo.dev)
+ * @copyright   Licensed under Apache 2.0
+ * @see         For more information, visit the
+ *              [project on GitHub](https://github.com/guillermocalvo/exceptions4c)
+ */
+
+#include <stdio.h> /* fflush, fprintf, stderr */
+#include <errno.h> /* errno */
+#include <pthread.h> /* PTHREAD_CANCELED, PTHREAD_ONCE_INIT, pthread_exit, pthread_getspecific, pthread_key_create, pthread_key_delete, pthread_key_t, pthread_once, pthread_once_t, pthread_setspecific */
+#include <exceptions4c-pthreads.h>
+
+/* Key for the thread-specific exception context */
+static pthread_key_t context_key;
+
+/* Once-only initialization of the key */
+static pthread_once_t context_key_once = PTHREAD_ONCE_INIT;
+
+/* Register the cleanup function once only */
+static pthread_once_t cleanup_once = PTHREAD_ONCE_INIT;
+
+static struct e4c_context * create_context(void);
+static void create_context_key(void);
+static void delete_context_key(void);
+static void cleanup(void);
+static void delete_context(void * context);
+static void termination_handler(void);
+static void panic(const char * cause, int error_code, const char * error_message);
+
+/**
+ * Causes abnormal thread termination due to a fatal error.
+ *
+ * @param cause The name of the function that failed.
+ * @param error_code The error code returned by the function that failed.
+ * @param error_message The message to print to standard error output.
+ */
+static void panic(const char * cause, int error_code, const char * error_message) {
+    fprintf(stderr, "\n[exceptions4c-pthreads] Thread #%llu: %s\n",
+        (long long unsigned) pthread_self(),
+        error_message);
+    if (error_code) {
+        errno = error_code;
+        perror(cause);
+    }
+    fflush(stderr);
+    pthread_exit(PTHREAD_CANCELED);
+}
+
+/**
+ * Allocates the context key.
+ */
+static void create_context_key() {
+    const int error = pthread_key_create(&context_key, delete_context);
+    if (error) {
+        panic("pthread_key_create", error, "Could not create context key.");
+    }
+}
+
+/**
+ * Deallocates the context key.
+ */
+static void delete_context_key() {
+    const int error = pthread_key_delete(context_key);
+    if (error) {
+        panic("pthread_key_delete", error, "Could not delete context key.");
+    }
+}
+
+static void cleanup(void) {
+    const int error = atexit(delete_context_key);
+    if (error) {
+        panic("atexit", error, "Could not register cleanup function.");
+    }
+}
+
+/**
+ * Terminates the current thread.
+ *
+ * This termination handler cancels the current thread, rather than
+ * terminating the entire program.
+ */
+static void termination_handler(void) {
+    panic(NULL, 0, "Terminating thread.");
+}
+
+/**
+ * Allocates and initializes the thread-specific context.
+ *
+ * @param context the context to deallocate.
+ */
+static struct e4c_context * create_context(void) {
+    int error = pthread_once(&context_key_once, create_context_key);
+    if (error) {
+        panic("pthread_once", error, "Could not initialize context key.");
+    }
+    error = pthread_once(&cleanup_once, cleanup);
+    if (error) {
+        panic("pthread_once", error, "Could not initialize cleanup function.");
+    }
+    struct e4c_context * context = calloc(1, sizeof(*context));
+    if (!context) {
+        panic("calloc", errno, "Could not allocate exception context.");
+    }
+    context->termination_handler = termination_handler;
+    error = pthread_setspecific(context_key, context);
+    if (error) {
+        free(context);
+        panic("pthread_setspecific", error, "Could not save thread-specific context.");
+    }
+    return context;
+}
+
+/**
+ * Deallocates the thread-specific context.
+ *
+ * @param context the context to deallocate.
+ */
+static void delete_context(void * context) {
+    const void * block = ((struct e4c_context *) context)->_innermost_block;
+    free(context);
+    if (block) {
+        panic(NULL, 0, "Dangling exception block leaked. Some `TRY` block may have been exited improperly (via `goto`, `break`, `continue`, or `return`).");
+    }
+}
+
+struct e4c_context * e4c_pthreads_context_supplier() {
+    struct e4c_context * context = pthread_getspecific(context_key);
+    return context ? context : create_context();
+}

@@ -73,6 +73,16 @@ AC_CHECK_FUNCS([sprintf])
 AC_CHECK_FUNCS([vsnprintf])
 
 
+AC_CHECK_HEADERS([pthread.h], [
+    AC_CHECK_LIB(pthread, pthread_create, [
+    LIBS="$LIBS -pthread"
+    AC_DEFINE(HAVE_LIBPTHREAD, 1, 
+         [Define to 1 if you have the 'pthread' library (-pthread).])
+    ], 
+    AC_MSG_ERROR(Missing required pthread library))
+], AC_MSG_ERROR(Missing required pthread header))
+
+
 # The config file is generated but not used by the source code
 #AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_FILES([

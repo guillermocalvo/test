@@ -7,23 +7,27 @@
 
 AUTOMAKE_OPTIONS = foreign subdir-objects
 
-AM_CFLAGS = -Wall -Werror --pedantic -Wno-missing-braces -Wno-dangling-else -coverage -O0 -I$(EXCEPTIONS4C_PATH) -Isrc/lite
+AM_CFLAGS = -Wall -Werror --pedantic -Wno-missing-braces -Wno-dangling-else -coverage -O0 -I$(EXCEPTIONS4C_PATH) -Isrc/lite -I$(EXCEPTIONS4C_PTHREADS_PATH)
 
 
 # Library
 
 EXCEPTIONS4C_PATH           = src
 EXCEPTIONS4C_LIBRARY        = lib/libexceptions4c.a
+EXCEPTIONS4C_PTHREADS_PATH  = src/pthreads
+EXCEPTIONS4C_PTHREADS_LIBRARY = lib/libexceptions4c-pthreads.a
 
 
 # Install
 
 lib_LIBRARIES =                         \
-    $(EXCEPTIONS4C_LIBRARY)
+    $(EXCEPTIONS4C_LIBRARY)             \
+    $(EXCEPTIONS4C_PTHREADS_LIBRARY)
 
 include_HEADERS =                       \
     src/exceptions4c.h                  \
-    src/lite/exceptions4c-lite.h
+    src/lite/exceptions4c-lite.h        \
+    src/pthreads/exceptions4c-pthreads.h
 
 
 # Documentation
@@ -43,12 +47,18 @@ CLEANFILES =                            \
     src/*.gcda                          \
     src/*.gcno                          \
     src/*.gcov                          \
+    src/pthreads/*.gcda                 \
+    src/pthreads/*.gcno                 \
+    src/pthreads/*.gcov                 \
     tests/*.gcda                        \
     tests/*.gcno                        \
     tests/*.gcov                        \
     tests/lite/*.gcda                   \
     tests/lite/*.gcno                   \
-    tests/lite/*.gcov
+    tests/lite/*.gcov                   \
+    tests/pthreads/*.gcda               \
+    tests/pthreads/*.gcno               \
+    tests/pthreads/*.gcov
 
 
 # Check
@@ -104,7 +114,8 @@ check_PROGRAMS =                        \
     bin/check/lite/catch-all            \
     bin/check/lite/cleanup              \
     bin/check/lite/limits               \
-    bin/check/lite/overflow
+    bin/check/lite/overflow             \
+    bin/check/pthreads/multithread
 
 TESTS =                                 \
     bin/check/a10                       \
@@ -157,7 +168,8 @@ TESTS =                                 \
     bin/check/lite/catch-all            \
     bin/check/lite/cleanup              \
     bin/check/lite/limits               \
-    bin/check/lite/overflow
+    bin/check/lite/overflow             \
+    bin/check/pthreads/multithread
 
 XFAIL_TESTS =                           \
     bin/check/a10                       \
@@ -182,8 +194,14 @@ tests: check
 
 # exceptions4c library
 
-lib_libexceptions4c_a_CFLAGS            = -Wall -Werror --pedantic -Wno-missing-braces
+lib_libexceptions4c_a_CFLAGS            = -Wall -Werror --pedantic -Wno-missing-braces -I$(EXCEPTIONS4C_PATH)
 lib_libexceptions4c_a_SOURCES           = src/exceptions4c.c
+
+
+# exceptions4c-pthreads library
+
+lib_libexceptions4c_pthreads_a_CFLAGS   = -Wall -Werror --pedantic -Wno-missing-braces -I$(EXCEPTIONS4C_PATH) -I$(EXCEPTIONS4C_PTHREADS_PATH)
+lib_libexceptions4c_pthreads_a_SOURCES  = src/pthreads/exceptions4c-pthreads.c
 
 
 # exceptions4c tests
@@ -244,12 +262,21 @@ bin_check_lite_cleanup_SOURCES          = tests/lite/cleanup.c
 bin_check_lite_limits_SOURCES           = tests/lite/limits.c
 bin_check_lite_overflow_SOURCES         = tests/lite/overflow.c
 
+
+# exceptions4c-pthreads tests
+
+bin_check_pthreads_multithread_SOURCES  = src/exceptions4c.c src/pthreads/exceptions4c-pthreads.c tests/pthreads/multithread.c
+
+
 # coverage
 
-coverage: check exceptions4c.c.gcov
+coverage: check exceptions4c.c.gcov exceptions4c-pthreads.c.gcov
 
 exceptions4c.c.gcov:
 	gcov src/exceptions4c.c --object-directory src/*
+
+exceptions4c-pthreads.c.gcov:
+	gcov src/exceptions4c-pthreads.c --object-directory src/pthreads/*
 
 # generate documentation
 
