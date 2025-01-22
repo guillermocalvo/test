@@ -8,9 +8,6 @@ set(EXCEPTIONS4C_VERSION "4.0")
 add_library(exceptions4c
         src/exceptions4c.c)
 
-add_library(exceptions4c_lite
-        src/lite/exceptions4c-lite.c)
-
 include(FetchContent)
 FetchContent_Declare(
         doxygen-awesome-css
@@ -103,14 +100,12 @@ set(TESTS
         caught
         catch-all
         cleanup
-        hierarchy
         limits
 )
 
 foreach(TEST IN LISTS TESTS)
     add_executable(${TEST} "tests/lite/${TEST}.c")
     set_target_properties(${TEST} PROPERTIES COMPILE_WARNING_AS_ERROR ON)
-    target_link_libraries(${TEST} exceptions4c_lite)
     target_include_directories(${TEST} PUBLIC src/lite)
     add_test(NAME ${TEST} COMMAND $<TARGET_FILE:${TEST}>)
     set_property(TEST ${TEST} PROPERTY SKIP_RETURN_CODE 77)

@@ -1,12 +1,15 @@
 
-#include "testing.h"
+#include <exceptions4c-lite.h>
 
-const struct e4c_exception_type FATAL_ERROR = {NULL, "Fatal error."};
+struct e4c_context exceptions4c = {0};
+const struct e4c_exception_type FATAL_ERROR = {"Fatal error."};
 
 /**
  * Uncaught exception
  */
-TEST_CASE{
+int main(void) {
 
     THROW(FATAL_ERROR, "This is an uncaught exception");
+
+    return 0;
 }

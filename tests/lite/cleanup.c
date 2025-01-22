@@ -1,14 +1,15 @@
 
-#include "testing.h"
+#include <exceptions4c-lite.h>
 
 
-const struct e4c_exception_type PROBLEM = {NULL, "A problem happened."};
+struct e4c_context exceptions4c = {0};
+const struct e4c_exception_type PROBLEM = {"A problem happened."};
 
 
 /**
  * Cleanup
  */
-TEST_CASE{
+int main(void) {
 
     volatile int created     = 0;
     volatile int destroyed   = 0;
@@ -37,8 +38,5 @@ TEST_CASE{
         printf("No problem :-)");
     }
 
-    TEST_ASSERT(created);
-    TEST_ASSERT(started);
-    TEST_ASSERT(!finished);
-    TEST_ASSERT(destroyed);
+    return !created || !started || finished || !destroyed;
 }

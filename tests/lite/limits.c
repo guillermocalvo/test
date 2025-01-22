@@ -1,14 +1,15 @@
 
-#include "testing.h"
+#include <exceptions4c-lite.h>
 
 
+struct e4c_context exceptions4c = {0};
 void nest_try_block(int keep_nesting);
 
 
 /**
  * Reach maximum number of exception blocks
  */
-TEST_CASE{
+int main(void) {
 
     /* will not overflow */
     nest_try_block(EXCEPTIONS4C_MAX_BLOCKS);

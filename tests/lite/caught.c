@@ -1,14 +1,18 @@
 
-#include "testing.h"
+#include <string.h>
+#include <exceptions4c-lite.h>
 
-
-const struct e4c_exception_type MY_EXCEPTION = {NULL, "My exception."};
+struct e4c_context exceptions4c = {0};
+const struct e4c_exception_type MY_EXCEPTION = {"My exception."};
 
 
 /**
  * Caught exception
  */
- TEST_CASE{
+int main(void) {
+
+    int caught = 0;
+    int message_ok = 0;
 
     TRY {
 
@@ -16,6 +20,12 @@ const struct e4c_exception_type MY_EXCEPTION = {NULL, "My exception."};
 
     } CATCH(MY_EXCEPTION) {
 
-        printf("The exception was caught: %s\n", THROWN_EXCEPTION.name);
+        caught = 1;
+
+        printf("The exception was caught: %s: %s\n", THROWN_EXCEPTION.name, THROWN_EXCEPTION.message);
+
+        message_ok = strcmp(THROWN_EXCEPTION.message, "This is my exception") == 0;
     }
+
+    return !caught || !message_ok;
 }

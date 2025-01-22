@@ -36,8 +36,9 @@
  */
 #define EXCEPTIONS4C_LITE 4
 
-#include <stddef.h>
-#include <setjmp.h>
+#include <setjmp.h> /* longjmp, setjmp */
+#include <stdio.h> /* stderr, fprintf, fflush, sprintf */
+#include <stdlib.h> /* abort,  EXIT_FAILURE, exit */
 
 /**
  * @internal
@@ -52,17 +53,10 @@
  * condition that a program might want to #THROW and #CATCH. It serves as
  * a way to group related issues that share common characteristics.
  *
- * The <strong>supertype</strong> allows for creating a hierarchy of
- * exception types, where a more specific type can be built upon a more
- * generic one. The <strong>default message</strong> provides a general
- * description of the type, offering a starting point for understanding
- * the nature of the problem.
- *
  * Exception types SHOULD be defined as <tt>const</tt>.
  *
  * ```c
- * const struct e4c_exception_type GENERIC = {NULL, "Generic problem"};
- * const struct e4c_exception_type SPECIFIC = {&GENERIC, "Specific problem"};
+ * const struct e4c_exception_type IO_ERROR = {"I/O Error"};
  * ```
  *
  * @see #THROW
@@ -70,10 +64,7 @@
  */
 struct e4c_exception_type {
 
-    /** The parent type that this exception type belongs to, or <tt>NULL</tt> if no parent exists. */
-    const struct e4c_exception_type * supertype;
-
-    /** A default message that summarizes the kind of error or issue this type represents */
+    /** A default message that summarizes the kind of error or issue. */
     const char * default_message;
 };
 
@@ -92,8 +83,6 @@ struct e4c_exception_type {
  * the exception currently being handled. This allows for inspection and
  * further handling of the error based on both its type and the detailed
  * context of the situation.
- *
- * @see #e4c_exception_type
  */
 struct e4c_exception {
 
@@ -106,18 +95,18 @@ struct e4c_exception {
     /** A text message describing the specific problem. */
     char message[256];
 
-    /** The name of the source code file that threw this exception, or <tt>NULL</tt> if <tt>NDEBUG</tt> is defined. */
+    /** The name of the source code file that threw this exception. */
     const char * file;
 
-    /** The number of line that threw this exception, or zero if <tt>NDEBUG</tt> is defined. */
+    /** The number of line that threw this exception. */
     int line;
 };
 
 /**
  * @internal
- * @brief Contains the current status of exceptions.
+ * @brief Represents the current status of exceptions.
  */
-extern struct e4c_context {
+struct e4c_context {
   struct e4c_exception exception;
   unsigned char blocks;
   struct {
@@ -125,7 +114,18 @@ extern struct e4c_context {
     unsigned char uncaught;
     jmp_buf jump;
   } block[EXCEPTIONS4C_MAX_BLOCKS];
-} exceptions4c;
+};
+
+/**
+ * Contains the current status of exceptions.
+ *
+ * You MUST define this global variable for your program.
+ *
+ * ```c
+ * struct e4c_context exceptions4c = {0};
+ * ```
+ */
+extern struct e4c_context exceptions4c;
 
 /**
  * @internal
@@ -178,9 +178,41 @@ enum e4c_stage {
 #define TRY                                                                 \
                                                                             \
   for (                                                                     \
-    e4c_start(EXCEPTIONS4C_DEBUG),                                          \
-      (void) setjmp(exceptions4c.block[exceptions4c.blocks - 1].jump);      \
-    e4c_next();                                                             \
+    (void) (                                                                \
+      exceptions4c.blocks >= EXCEPTIONS4C_MAX_BLOCKS && (                   \
+        (void) fprintf(stderr,                                              \
+          "\n[exceptions4c]: Too many `try` blocks nested.\n    at %s:%d\n",\
+          __FILE__, __LINE__                                                \
+        ),                                                                  \
+        (void) fflush(stderr),                                              \
+        abort(), 0                                                          \
+      )                                                                     \
+    ),                                                                      \
+    exceptions4c.block[exceptions4c.blocks].stage = EXCEPTIONS4C_START,     \
+    exceptions4c.block[exceptions4c.blocks].uncaught = 0,                   \
+    exceptions4c.blocks++,                                                  \
+    (void) setjmp(exceptions4c.block[exceptions4c.blocks - 1].jump);        \
+                                                                            \
+    ++exceptions4c.block[exceptions4c.blocks - 1].stage < EXCEPTIONS4C_DONE \
+    || (                                                                    \
+      exceptions4c.block[--exceptions4c.blocks].uncaught && (               \
+        (void) (                                                            \
+          exceptions4c.blocks > 0 && (                                      \
+            exceptions4c.block[exceptions4c.blocks - 1].uncaught = 1,       \
+            (void) longjmp(                                                 \
+              exceptions4c.block[exceptions4c.blocks - 1].jump, 1           \
+            ), 0                                                            \
+          )                                                                 \
+        ),                                                                  \
+        (void) fprintf(stderr,                                              \
+          "\n%s: %s\n    at %s:%d\n",                                       \
+          exceptions4c.exception.name, exceptions4c.exception.message,      \
+          exceptions4c.exception.file, exceptions4c.exception.line          \
+        ),                                                                  \
+        (void) fflush(stderr),                                              \
+        exit(EXIT_FAILURE), 0                                               \
+      )                                                                     \
+    );                                                                      \
   )                                                                         \
     if (                                                                    \
       exceptions4c.block[exceptions4c.blocks - 1].stage == EXCEPTIONS4C_TRY \
@@ -190,21 +222,16 @@ enum e4c_stage {
  * Introduces a block of code that handles exceptions thrown by a
  * preceding #TRY block.
  *
- * @param type the type of exception to catch.
+ * @param exception_type the type of exception to catch.
  *
  * One or more #CATCH blocks can follow a #TRY block. Each #CATCH block
- * MUST specify the type of exception it handles. Only exceptions of that
- * type (or its subtypes) will be caught.
- *
- * @remark
- * The #CATCH blocks are evaluated in the order they are written, so more
- * specific exceptions should appear before more general ones.
+ * MUST specify the type of exception it handles.
  *
  * @see #TRY
  * @see #CATCH_ALL
  *
  */
-#define CATCH(type)                                                         \
+#define CATCH(exception_type)                                               \
                                                                             \
     else if (                                                               \
       exceptions4c.blocks > 0                                               \
@@ -214,7 +241,11 @@ enum e4c_stage {
       exceptions4c.block[exceptions4c.blocks - 1].stage ==                  \
         EXCEPTIONS4C_CATCH                                                  \
       &&                                                                    \
-      e4c_catch(&type)                                                      \
+      exceptions4c.block[exceptions4c.blocks - 1].uncaught == 1             \
+      &&                                                                    \
+      &(exception_type) == exceptions4c.exception.type                      \
+      &&                                                                    \
+      (exceptions4c.block[exceptions4c.blocks - 1].uncaught = 0, 1)         \
     )
 
 /**
@@ -248,7 +279,9 @@ enum e4c_stage {
       exceptions4c.block[exceptions4c.blocks - 1].stage ==                  \
         EXCEPTIONS4C_CATCH                                                  \
       &&                                                                    \
-      e4c_catch(NULL)                                                       \
+      exceptions4c.block[exceptions4c.blocks - 1].uncaught == 1             \
+      &&                                                                    \
+      (exceptions4c.block[exceptions4c.blocks - 1].uncaught = 0, 1)         \
     )
 
 /**
@@ -276,13 +309,13 @@ enum e4c_stage {
 /**
  * Throws an exception, interrupting the normal flow of execution.
  *
- * @param type the type of the exception to throw.
- * @param message a descriptive message explaining the exception.
+ * @param exception_type the type of the exception to throw.
+ * @param error_message a descriptive message explaining the exception.
  *
  * #THROW is used within a #TRY block, a #CATCH block, or any other
  * function to signal that an error has occurred. The thrown exception
- * will be of the specified <strong>type</strong>, and it MAY be handled
- * by a preceding #CATCH block.
+ * will be of the specified type, and it MAY be handled by a preceding
+ * #CATCH block.
  *
  * If a thrown exception is not handled by any of the #CATCH blocks in
  * the current function, it propagates up the call stack to the function
@@ -292,9 +325,39 @@ enum e4c_stage {
  * exception, the program terminates and an error message is printed to
  * the console.
  */
-#define THROW(type, message)                                                \
+#define THROW(exception_type, error_message)                                \
                                                                             \
-  e4c_throw(&type, #type, EXCEPTIONS4C_DEBUG, message)
+  (                                                                         \
+    exceptions4c.exception.file = (error_message),                          \
+    (                                                                       \
+      exceptions4c.blocks <= 0                                              \
+      &&                                                                    \
+      (                                                                     \
+        (void) fprintf(stderr,                                              \
+          "\n%s: %s\n    at %s:%d\n",                                       \
+          #exception_type,                                                  \
+          exceptions4c.exception.file ? exceptions4c.exception.file         \
+            : exceptions4c.exception.type->default_message,                 \
+          __FILE__, __LINE__                                                \
+        ),                                                                  \
+        (void) fflush(stderr),                                              \
+        exit(EXIT_FAILURE),                                                 \
+        0                                                                   \
+      )                                                                     \
+    ),                                                                      \
+    exceptions4c.exception.type = &(exception_type),                        \
+    exceptions4c.exception.name = #exception_type,                          \
+    (void) sprintf(                                                         \
+      exceptions4c.exception.message, "%.*s",                               \
+      (int) sizeof(exceptions4c.exception.message) - 1,                     \
+      exceptions4c.exception.file ? exceptions4c.exception.file             \
+        : exceptions4c.exception.type->default_message                      \
+    ),                                                                      \
+    exceptions4c.exception.file = __FILE__,                                 \
+    exceptions4c.exception.line = __LINE__,                                 \
+    exceptions4c.block[exceptions4c.blocks - 1].uncaught = 1,               \
+    longjmp(exceptions4c.block[exceptions4c.blocks - 1].jump, 1)            \
+  )
 
 /**
  * Retrieves the last exception that was thrown.
@@ -350,74 +413,6 @@ enum e4c_stage {
     &&                                                                      \
     exceptions4c.block[exceptions4c.blocks - 1].uncaught                    \
   )
-
-#ifndef NDEBUG
-
-/**
- * @internal
- * @brief Captures debug information about the running program.
- */
-#define EXCEPTIONS4C_DEBUG                                                  \
-                                                                            \
-  __FILE__, __LINE__
-
-#else
-
-/**
- * @internal
- * @brief Discards debug information about the running program.
- */
-#define EXCEPTIONS4C_DEBUG                                                  \
-                                                                            \
-  NULL, 0
-
-#endif
-
-/**
- * @internal
- * @brief Starts a new exception block.
- *
- * @param file the name of the source code file that is calling this function.
- * @param line the number of line that is calling this function.
- *
- * @warning This function SHOULD be called only via #TRY.
- */
-void e4c_start(const char * file, int line);
-
-/**
- * @internal
- * @brief Iterates through the different [stages](#block_stage) of the current exception block.
- *
- * @return <tt>1</tt> if the current exception block has not completed yet; <tt>0</tt> otherwise.
- *
- * @warning This function SHOULD be called only via #TRY.
- */
-int e4c_next(void);
-
-/**
- * @internal
- * @brief Checks if the current exception can be handled.
- *
- * @param type the type of exceptions to handle.
- * @return <tt>1</tt> if the supplied <tt>type</tt> is either <tt>NULL</tt> or a supertype of the thrown exception; <tt>false</tt> otherwise.
- *
- * @warning This function SHOULD be called only via #CATCH.
- */
-int e4c_catch(const struct e4c_exception_type * type);
-
-/**
- * @internal
- * @brief Throws a new exception.
- *
- * @param type the type of exception to throw.
- * @param name the name of the exception type.
- * @param file the name of the source code file that is calling this function.
- * @param line the number of line that is calling this function.
- * @param message the error message.
- *
- * @warning This function SHOULD be called only via #THROW.
- */
-void e4c_throw(const struct e4c_exception_type * type, const char * name, const char * file, int line, const char * message);
 
 /* OpenMP support */
 #ifdef _OPENMP
