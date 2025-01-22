@@ -7,7 +7,7 @@
 
 AUTOMAKE_OPTIONS = foreign subdir-objects
 
-AM_CFLAGS = -Wall -Werror --pedantic -Wno-missing-braces -Wno-dangling-else -coverage -I$(EXCEPTIONS4C_PATH) -I$(EXCEPTIONS4C_LITE_PATH) -I$(EXCEPTIONS4C_STACKTRACE_PATH)
+AM_CFLAGS = -Wall -Werror --pedantic -Wno-missing-braces -Wno-dangling-else -coverage -O0 -I$(EXCEPTIONS4C_PATH) -I$(EXCEPTIONS4C_LITE_PATH)
 
 
 # Library
@@ -18,21 +18,16 @@ EXCEPTIONS4C_LIBRARY        = lib/libexceptions4c.a
 EXCEPTIONS4C_LITE_PATH      = src/lite
 EXCEPTIONS4C_LITE_LIBRARY   = lib/libexceptions4c-lite.a
 
-EXCEPTIONS4C_STACKTRACE_PATH    = src/stacktrace
-EXCEPTIONS4C_STACKTRACE_LIBRARY = lib/libexceptions4c-stacktrace.a
-
 
 # Install
 
 lib_LIBRARIES =                         \
     $(EXCEPTIONS4C_LIBRARY)             \
-    $(EXCEPTIONS4C_LITE_LIBRARY)        \
-    $(EXCEPTIONS4C_STACKTRACE_LIBRARY)
+    $(EXCEPTIONS4C_LITE_LIBRARY)
 
 include_HEADERS =                       \
     src/exceptions4c.h                  \
-    src/lite/exceptions4c-lite.h        \
-    src/stacktrace/exceptions4c-stacktrace.h
+    src/lite/exceptions4c-lite.h
 
 
 # Documentation
@@ -60,13 +55,7 @@ CLEANFILES =                            \
     src/lite/*.gcov                     \
     tests/lite/*.gcda                   \
     tests/lite/*.gcno                   \
-    tests/lite/*.gcov                   \
-    src/stacktrace/*.gcda               \
-    src/stacktrace/*.gcno               \
-    src/stacktrace/*.gcov               \
-    tests/stacktrace/*.gcda             \
-    tests/stacktrace/*.gcno             \
-    tests/stacktrace/*.gcov
+    tests/lite/*.gcov
 
 
 # Check
@@ -123,8 +112,7 @@ check_PROGRAMS =                        \
     bin/check/lite/cleanup              \
     bin/check/lite/hierarchy            \
     bin/check/lite/limits               \
-    bin/check/lite/overflow             \
-    bin/check/stacktrace/stacktrace
+    bin/check/lite/overflow
 
 TESTS =                                 \
     bin/check/a10                       \
@@ -178,8 +166,7 @@ TESTS =                                 \
     bin/check/lite/cleanup              \
     bin/check/lite/hierarchy            \
     bin/check/lite/limits               \
-    bin/check/lite/overflow             \
-    bin/check/stacktrace/stacktrace
+    bin/check/lite/overflow
 
 XFAIL_TESTS =                           \
     bin/check/a10                       \
@@ -197,8 +184,7 @@ XFAIL_TESTS =                           \
     bin/check/g06                       \
     bin/check/i05                       \
     bin/check/lite/uncaught             \
-    bin/check/lite/overflow             \
-    bin/check/stacktrace/stacktrace
+    bin/check/lite/overflow
 
 tests: check
 
@@ -214,10 +200,6 @@ lib_libexceptions4c_a_SOURCES           = src/exceptions4c.c
 lib_libexceptions4c_lite_a_CFLAGS       = -Wall -Werror --pedantic -Wno-missing-braces
 lib_libexceptions4c_lite_a_SOURCES      = src/lite/exceptions4c-lite.c
 
-# exceptions4c-stacktrace library (extension)
-
-lib_libexceptions4c_stacktrace_a_CFLAGS  = -Wall -Werror --pedantic -Wno-missing-braces
-lib_libexceptions4c_stacktrace_a_SOURCES = src/stacktrace/exceptions4c-stacktrace.c
 
 # exceptions4c tests
 
@@ -278,23 +260,15 @@ bin_check_lite_hierarchy_SOURCES        = src/lite/exceptions4c-lite.c tests/lit
 bin_check_lite_limits_SOURCES           = src/lite/exceptions4c-lite.c tests/lite/limits.c
 bin_check_lite_overflow_SOURCES         = src/lite/exceptions4c-lite.c tests/lite/overflow.c
 
-# exceptions4c-stacktrace tests (extension)
-
-bin_check_stacktrace_stacktrace_SOURCES = src/exceptions4c.c src/stacktrace/exceptions4c-stacktrace.c tests/stacktrace/stacktrace.c
-bin_check_stacktrace_stacktrace_CFLAGS  = $(AM_CFLAGS) -Og -g3 -finstrument-functions
-
 # coverage
 
-coverage: check exceptions4c.c.gcov exceptions4c-lite.c.gcov exceptions4c-stacktrace.c.gcov
+coverage: check exceptions4c.c.gcov exceptions4c-lite.c.gcov
 
 exceptions4c.c.gcov:
 	gcov src/exceptions4c.c --object-directory src/*
 
 exceptions4c_lite.c.gcov:
 	gcov src/lite/exceptions4c-lite.c --object-directory src/lite/*
-
-exceptions4c_stacktrace.c.gcov:
-	gcov src/stacktrace/exceptions4c-stacktrace.c --object-directory src/stacktrace/*
 
 # generate documentation
 

@@ -11,9 +11,6 @@ add_library(exceptions4c
 add_library(exceptions4c_lite
         src/lite/exceptions4c-lite.c)
 
-add_library(exceptions4c_stacktrace
-        src/stacktrace/exceptions4c-stacktrace.c)
-
 include(FetchContent)
 FetchContent_Declare(
         doxygen-awesome-css
@@ -120,23 +117,3 @@ foreach(TEST IN LISTS TESTS)
 endforeach()
 
 set_property(TEST uncaught PROPERTY WILL_FAIL TRUE)
-
-set(TESTS
-        stacktrace
-)
-
-add_executable(stacktrace "tests/stacktrace/stacktrace.c")
-set_target_properties(stacktrace PROPERTIES COMPILE_WARNING_AS_ERROR ON)
-target_link_libraries(stacktrace
-        exceptions4c
-        exceptions4c_stacktrace)
-target_include_directories(stacktrace PUBLIC
-        src/
-        src/stacktrace)
-target_compile_options(stacktrace PUBLIC
-        "-finstrument-functions"
-        "-Og"
-        "-g3")
-add_test(NAME stacktrace COMMAND $<TARGET_FILE:stacktrace>)
-#set_property(TEST stacktrace PROPERTY PASS_REGULAR_EXPRESSION "from foobar")
-set_property(TEST stacktrace PROPERTY WILL_FAIL TRUE)
