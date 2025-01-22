@@ -39,7 +39,7 @@
 static int nested_functions = 0;
 
 /** @internal Stores the addresses of the nested function callers. */
-static const void * nested_caller[MAX_NESTED_FUNCTION_CALLS];
+static unsigned long long nested_caller[MAX_NESTED_FUNCTION_CALLS];
 
 static void print_exception(const struct e4c_exception * exception, bool is_cause) __attribute__ ((no_instrument_function));
 
@@ -53,12 +53,12 @@ void stacktrace_uncaught_handler(const struct e4c_exception * exception) {
 
 void stacktrace_initialize_exception(struct e4c_exception * exception) {
     int nested = nested_functions > MAX_NESTED_FUNCTION_CALLS ? MAX_NESTED_FUNCTION_CALLS : nested_functions;
-    exception->data = calloc(nested + 1, sizeof(void *));
+    exception->data = calloc(nested + 1, sizeof(unsigned long long));
     if (exception->data) {
         // Copy current stack trace in reverse order
         int index;
         for (index = 0; index < nested; index++) {
-            ((const void * *) exception->data)[index] = nested_caller[nested - index - 1];
+            ((unsigned long long *) exception->data)[index] = nested_caller[nested - index - 1];
         }
     }
 }
@@ -69,7 +69,7 @@ void stacktrace_finalize_exception(const struct e4c_exception * exception) {
 
 void __cyg_profile_func_enter(void * callee __attribute__ ((unused)), void * caller) {
     if (nested_functions < MAX_NESTED_FUNCTION_CALLS) {
-        nested_caller[nested_functions] = caller;
+        nested_caller[nested_functions] = (unsigned long long) caller;
     }
     nested_functions++;
 }
@@ -97,7 +97,7 @@ static void print_exception(const struct e4c_exception * exception, bool is_caus
         }
     }
     // Print stack trace if available
-    const void * * addresses = exception->data;
+    unsigned long long * addresses = exception->data;
     if (!addresses || !*addresses) {
         return;
     }
@@ -108,9 +108,14 @@ static void print_exception(const struct e4c_exception * exception, bool is_caus
         stacktraces.addr2line_path ? stacktraces.addr2line_path : "addr2line",
         stacktraces.addr2line_options ? stacktraces.addr2line_options : "",
         stacktraces.binary_path);
-    const void * * address;
+    unsigned long long * address;
     for (address = addresses; *address; address++) {
-        written += snprintf(&command[written], sizeof(command) - written, " %p", *address);
+        unsigned long long addr2line_address = *address;
+        if (stacktraces.address_and) {
+            addr2line_address &= stacktraces.address_and;
+            addr2line_address |= stacktraces.address_or;
+        }
+        written += snprintf(&command[written], sizeof(command) - written, " %llx", addr2line_address);
     }
     (void) snprintf(&command[written], sizeof(command) - written, " 2>&1");
     // Execute addr2line command
@@ -128,10 +133,15 @@ static void print_exception(const struct e4c_exception * exception, bool is_caus
                 if (*function && *function != '?') {
                     (void) fprintf(stderr, "    from %s (%s)\n", function, fileline);
                 } else {
-                    (void) fprintf(stderr, "   from %s\n", fileline);
+                    (void) fprintf(stderr, "    from %s\n", fileline);
                 }
             } else {
-                (void) fprintf(stderr, "    from %s @ %p\n", stacktraces.binary_path, *address);
+                unsigned long long addr2line_address = *address;
+                if (stacktraces.address_and) {
+                    addr2line_address &= stacktraces.address_and;
+                    addr2line_address |= stacktraces.address_or;
+                }
+                (void) fprintf(stderr, "    from %s @ %llx\n", stacktraces.binary_path, addr2line_address);
             }
         }
         (void) pclose(pipe);

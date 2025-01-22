@@ -111,6 +111,16 @@ struct stacktrace_options {
      * Additional options that will be passed to addr2line.
      */
     const char * addr2line_options;
+
+    /**
+     * AND mask to transform addresses to addr2line.
+     */
+    unsigned long long address_and;
+
+    /**
+     * OR mask to transform addresses to addr2line.
+     */
+    unsigned long long address_or;
 };
 
 /**

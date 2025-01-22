@@ -24,6 +24,8 @@ int main(int argc, char *argv[]){
     stacktraces.binary_path = argv[0];
     stacktraces.addr2line_path = NULL;
     stacktraces.addr2line_options = "--basenames";
+    stacktraces.address_and = 0xffff;
+    stacktraces.address_or = 0x140000000;
 
     struct e4c_context * context = e4c_get_context();
 
