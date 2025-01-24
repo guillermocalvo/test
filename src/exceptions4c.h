@@ -703,7 +703,8 @@ struct e4c_exception {
  *
  * This structure allows you to configure the way the exception system behaves:
  *
- * - Set <strong>uncaught_handler</strong> to a function that will be executed when the program abruptly terminates due to an uncaught exception.
+ * - Set <strong>uncaught_handler</strong> to a function that will be executed when an exception reaches the top level of the program.
+ * - Set <strong>termination_handler</strong> to a function that will be executed when the program abruptly terminates due to an uncaught exception.
  * - Set <strong>initialize_exception</strong> to a function that will be executed whenever an exception is thrown. This function MAY create and assign custom data to the exception.
  * - Set <strong>finalize_exception</strong> to a function that will be executed whenever an exception is deleted. This function MAY delete custom data previously created.
  *
@@ -719,6 +720,9 @@ struct e4c_context {
 
     /** The function to execute in the event of an uncaught exception */
     void (*uncaught_handler)(const struct e4c_exception * exception);
+
+    /** The function to execute in the event of program termination. */
+    void (*termination_handler)();
 
     /** The function to execute whenever a new exception is thrown */
     void (*initialize_exception)(struct e4c_exception * exception);

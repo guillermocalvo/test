@@ -31,7 +31,7 @@
 #include <errno.h>
 #include <stdarg.h>
 #include <stdnoreturn.h>
-#include "exceptions4c.h"
+#include <exceptions4c.h>
 
 /**
  * @internal
@@ -343,6 +343,7 @@ static struct e4c_context * get_context(const char * file, const int line, const
 static void propagate(const struct e4c_context * context, struct e4c_exception * exception) {
     struct e4c_block * block = context->_innermost_block;
     if (block == NULL) {
+        /* uncaught exception handler */
         if (context->uncaught_handler != NULL) {
             context->uncaught_handler(exception);
         } else {
@@ -351,6 +352,11 @@ static void propagate(const struct e4c_context * context, struct e4c_exception *
         }
         /* delete the exception to avoid memory leaks */
         delete_exception(context, exception);
+        /* abrupt termination handler */
+        if (context->termination_handler != NULL) {
+            context->termination_handler();
+            return;
+        }
         exit(EXIT_FAILURE);
     }
 

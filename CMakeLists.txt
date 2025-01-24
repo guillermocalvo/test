@@ -8,6 +8,8 @@ set(EXCEPTIONS4C_VERSION "4.0")
 add_library(exceptions4c
         src/exceptions4c.c)
 
+target_include_directories(exceptions4c PUBLIC src)
+
 include(FetchContent)
 FetchContent_Declare(
         doxygen-awesome-css
