@@ -60,17 +60,13 @@
  * Exception types SHOULD be defined as <tt>const</tt>.
  *
  * ```c
- * const struct e4c_exception_type IO_ERROR = {"I/O Error"};
+ * const e4c_exception_type IO_ERROR = "I/O Error";
  * ```
  *
  * @see #THROW
  * @see #CATCH
  */
-struct e4c_exception_type {
-
-    /** A default message that summarizes the kind of error or issue. */
-    const char * default_message;
-};
+typedef const char * e4c_exception_type;
 
 /**
  * Represents a specific occurrence of an exceptional situation in a
@@ -91,7 +87,7 @@ struct e4c_exception_type {
 struct e4c_exception {
 
     /** The general nature of the error. */
-    const struct e4c_exception_type * type;
+    e4c_exception_type type;
 
     /** The name of the exception type. */
     const char * name;
@@ -247,7 +243,7 @@ enum e4c_stage {
       &&                                                                    \
       exceptions4c.block[exceptions4c.blocks - 1].uncaught == 1             \
       &&                                                                    \
-      &(exception_type) == exceptions4c.exception.type                      \
+      (exception_type) == exceptions4c.exception.type                      \
       &&                                                                    \
       (exceptions4c.block[exceptions4c.blocks - 1].uncaught = 0, 1)         \
     )
@@ -333,14 +329,14 @@ enum e4c_stage {
 #define THROW(exception_type, format, ...)                                  \
                                                                             \
   (                                                                         \
-    exceptions4c.exception.type = &(exception_type),                        \
+    exceptions4c.exception.type = (exception_type),                         \
     exceptions4c.exception.name = #exception_type,                          \
     exceptions4c.exception.file = (format),                                 \
     (void) snprintf(                                                        \
       exceptions4c.exception.message,                                       \
       sizeof(exceptions4c.exception.message) - 1,                           \
       exceptions4c.exception.file ? exceptions4c.exception.file             \
-        : exceptions4c.exception.type->default_message                      \
+        : exceptions4c.exception.type                                       \
       __VA_OPT__(,) __VA_ARGS__                                             \
     ),                                                                      \
     exceptions4c.exception.file = __FILE__,                                 \

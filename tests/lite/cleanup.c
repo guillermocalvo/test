@@ -3,7 +3,7 @@
 
 
 struct e4c_context exceptions4c = {0};
-const struct e4c_exception_type PROBLEM = {"A problem happened."};
+const e4c_exception_type PROBLEM = "A problem happened.";
 
 
 /**

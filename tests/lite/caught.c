@@ -3,7 +3,7 @@
 #include <exceptions4c-lite.h>
 
 struct e4c_context exceptions4c = {0};
-const struct e4c_exception_type MY_EXCEPTION = {"My exception."};
+const e4c_exception_type MY_EXCEPTION = "My exception.";
 
 
 /**
