@@ -310,7 +310,8 @@ enum e4c_stage {
  * Throws an exception, interrupting the normal flow of execution.
  *
  * @param exception_type the type of the exception to throw.
- * @param error_message a descriptive message explaining the exception.
+ * @param format the error message.
+ * @param ... an optional list of arguments that will be formatted according to <tt>format</tt>.
  *
  * #THROW is used within a #TRY block, a #CATCH block, or any other
  * function to signal that an error has occurred. The thrown exception
@@ -325,36 +326,37 @@ enum e4c_stage {
  * exception, the program terminates and an error message is printed to
  * the console.
  */
-#define THROW(exception_type, error_message)                                \
+#define THROW(exception_type, format, ...)                                  \
                                                                             \
   (                                                                         \
-    exceptions4c.exception.file = (error_message),                          \
+    exceptions4c.exception.type = &(exception_type),                        \
+    exceptions4c.exception.name = #exception_type,                          \
+    exceptions4c.exception.file = (format),                                 \
+    (void) snprintf(                                                        \
+      exceptions4c.exception.message,                                       \
+      sizeof(exceptions4c.exception.message) - 1,                           \
+      exceptions4c.exception.file ? exceptions4c.exception.file             \
+        : exceptions4c.exception.type->default_message                      \
+      __VA_OPT__(,) __VA_ARGS__                                             \
+    ),                                                                      \
+    exceptions4c.exception.file = __FILE__,                                 \
+    exceptions4c.exception.line = __LINE__,                                 \
     (                                                                       \
       exceptions4c.blocks <= 0                                              \
       &&                                                                    \
       (                                                                     \
         (void) fprintf(stderr,                                              \
           "\n%s: %s\n    at %s:%d\n",                                       \
-          #exception_type,                                                  \
-          exceptions4c.exception.file ? exceptions4c.exception.file         \
-            : exceptions4c.exception.type->default_message,                 \
-          __FILE__, __LINE__                                                \
+          exceptions4c.exception.name,                                      \
+          exceptions4c.exception.message,                                   \
+          exceptions4c.exception.file,                                      \
+          exceptions4c.exception.line                                       \
         ),                                                                  \
         (void) fflush(stderr),                                              \
         exit(EXIT_FAILURE),                                                 \
         0                                                                   \
       )                                                                     \
     ),                                                                      \
-    exceptions4c.exception.type = &(exception_type),                        \
-    exceptions4c.exception.name = #exception_type,                          \
-    (void) sprintf(                                                         \
-      exceptions4c.exception.message, "%.*s",                               \
-      (int) sizeof(exceptions4c.exception.message) - 1,                     \
-      exceptions4c.exception.file ? exceptions4c.exception.file             \
-        : exceptions4c.exception.type->default_message                      \
-    ),                                                                      \
-    exceptions4c.exception.file = __FILE__,                                 \
-    exceptions4c.exception.line = __LINE__,                                 \
     exceptions4c.block[exceptions4c.blocks - 1].uncaught = 1,               \
     longjmp(exceptions4c.block[exceptions4c.blocks - 1].jump, 1)            \
   )
