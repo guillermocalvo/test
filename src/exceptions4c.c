@@ -509,7 +509,7 @@ static void print_debug_info(const char * file, const int line, const char * fun
  * @param exception the exception to print.
  * @param is_cause <tt>true</tt> if the supplied exception is the cause of another one.
  */
-static void print_exception(const struct e4c_exception * exception, bool is_cause) {
+static void print_exception(const struct e4c_exception * exception, const bool is_cause) {
     (void) fprintf(stderr, "%s%s: %s\n", is_cause ? "Caused by: " : "\n", exception->name, exception->message);
     print_debug_info(exception->file, exception->line, exception->function);
     if (exception->cause != NULL && exception->cause != exception) {
