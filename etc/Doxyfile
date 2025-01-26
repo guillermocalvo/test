@@ -756,6 +756,7 @@ WARN_LOGFILE           = ./doxygen_warnings
 INPUT                  = ./src/ \
                          ./src/lite/ \
                          ./src/pthreads/ \
+                         ./src/backtrace/ \
                          ./docs/README.md
 
 # This tag can be used to specify the character encoding of the source files

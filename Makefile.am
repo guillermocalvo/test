@@ -7,7 +7,7 @@
 
 AUTOMAKE_OPTIONS = foreign subdir-objects
 
-AM_CFLAGS = -Wall -Werror --pedantic -Wno-missing-braces -Wno-dangling-else -coverage -O0 -I$(EXCEPTIONS4C_PATH) -Isrc/lite -I$(EXCEPTIONS4C_PTHREADS_PATH)
+AM_CFLAGS = -Wall -Werror --pedantic -Wno-missing-braces -Wno-dangling-else -coverage -O0 -I$(EXCEPTIONS4C_PATH) -Isrc/lite -I$(EXCEPTIONS4C_PTHREADS_PATH) -I$(EXCEPTIONS4C_BACKTRACE_PATH)
 
 
 # Library
@@ -16,18 +16,22 @@ EXCEPTIONS4C_PATH           = src
 EXCEPTIONS4C_LIBRARY        = lib/libexceptions4c.a
 EXCEPTIONS4C_PTHREADS_PATH  = src/pthreads
 EXCEPTIONS4C_PTHREADS_LIBRARY = lib/libexceptions4c-pthreads.a
+EXCEPTIONS4C_BACKTRACE_PATH = src/backtrace
+EXCEPTIONS4C_BACKTRACE_LIBRARY = lib/libexceptions4c-backtrace.a
 
 
 # Install
 
 lib_LIBRARIES =                         \
     $(EXCEPTIONS4C_LIBRARY)             \
-    $(EXCEPTIONS4C_PTHREADS_LIBRARY)
+    $(EXCEPTIONS4C_PTHREADS_LIBRARY)    \
+    $(EXCEPTIONS4C_BACKTRACE_LIBRARY)
 
 include_HEADERS =                       \
     src/exceptions4c.h                  \
     src/lite/exceptions4c-lite.h        \
-    src/pthreads/exceptions4c-pthreads.h
+    src/pthreads/exceptions4c-pthreads.h \
+    src/backtrace/exceptions4c-backtrace.h
 
 
 # Documentation
@@ -50,6 +54,9 @@ CLEANFILES =                            \
     src/pthreads/*.gcda                 \
     src/pthreads/*.gcno                 \
     src/pthreads/*.gcov                 \
+    src/backtrace/*.gcda                \
+    src/backtrace/*.gcno                \
+    src/backtrace/*.gcov                \
     tests/*.gcda                        \
     tests/*.gcno                        \
     tests/*.gcov                        \
@@ -58,7 +65,10 @@ CLEANFILES =                            \
     tests/lite/*.gcov                   \
     tests/pthreads/*.gcda               \
     tests/pthreads/*.gcno               \
-    tests/pthreads/*.gcov
+    tests/pthreads/*.gcov               \
+    tests/backtrace/*.gcda              \
+    tests/backtrace/*.gcno              \
+    tests/backtrace/*.gcov
 
 
 # Check
@@ -115,7 +125,8 @@ check_PROGRAMS =                        \
     bin/check/lite/cleanup              \
     bin/check/lite/limits               \
     bin/check/lite/overflow             \
-    bin/check/pthreads/multithread
+    bin/check/pthreads/multithread      \
+    bin/check/backtrace/backtraced
 
 TESTS =                                 \
     bin/check/a10                       \
@@ -169,7 +180,8 @@ TESTS =                                 \
     bin/check/lite/cleanup              \
     bin/check/lite/limits               \
     bin/check/lite/overflow             \
-    bin/check/pthreads/multithread
+    bin/check/pthreads/multithread      \
+    bin/check/backtrace/backtraced
 
 XFAIL_TESTS =                           \
     bin/check/a10                       \
@@ -187,7 +199,8 @@ XFAIL_TESTS =                           \
     bin/check/g06                       \
     bin/check/i05                       \
     bin/check/lite/uncaught             \
-    bin/check/lite/overflow
+    bin/check/lite/overflow             \
+    bin/check/backtrace/backtraced
 
 tests: check
 
@@ -202,6 +215,12 @@ lib_libexceptions4c_a_SOURCES           = src/exceptions4c.c
 
 lib_libexceptions4c_pthreads_a_CFLAGS   = -Wall -Werror --pedantic -Wno-missing-braces -I$(EXCEPTIONS4C_PATH) -I$(EXCEPTIONS4C_PTHREADS_PATH)
 lib_libexceptions4c_pthreads_a_SOURCES  = src/pthreads/exceptions4c-pthreads.c
+
+
+# exceptions4c-backtrace library
+
+lib_libexceptions4c_backtrace_a_CFLAGS  = -Wall -Werror --pedantic -Wno-missing-braces -I$(EXCEPTIONS4C_PATH) -I$(EXCEPTIONS4C_BACKTRACE_PATH)
+lib_libexceptions4c_backtrace_a_SOURCES = src/backtrace/exceptions4c-backtrace.c
 
 
 # exceptions4c tests
@@ -268,15 +287,23 @@ bin_check_lite_overflow_SOURCES         = tests/lite/overflow.c
 bin_check_pthreads_multithread_SOURCES  = src/exceptions4c.c src/pthreads/exceptions4c-pthreads.c tests/pthreads/multithread.c
 
 
+# exceptions4c-backtrace tests
+
+bin_check_backtrace_backtraced_SOURCES  = src/exceptions4c.c src/backtrace/exceptions4c-backtrace.c tests/backtrace/backtraced.c
+
+
 # coverage
 
-coverage: check exceptions4c.c.gcov exceptions4c-pthreads.c.gcov
+coverage: check exceptions4c.c.gcov exceptions4c-pthreads.c.gcov exceptions4c-backtrace.c.gcov
 
 exceptions4c.c.gcov:
 	gcov src/exceptions4c.c --object-directory src/*
 
 exceptions4c-pthreads.c.gcov:
 	gcov src/exceptions4c-pthreads.c --object-directory src/pthreads/*
+
+exceptions4c-backtrace.c.gcov:
+	gcov src/exceptions4c-backtrace.c --object-directory src/backtrace/*
 
 # generate documentation
 
