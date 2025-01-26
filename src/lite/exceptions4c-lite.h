@@ -40,11 +40,15 @@
 #include <stdio.h> /* stderr, fprintf, fflush, sprintf */
 #include <stdlib.h> /* abort,  EXIT_FAILURE, exit */
 
+#ifndef EXCEPTIONS4C_MAX_BLOCKS
+
 /**
  * @internal
  * @brief Maximum number of #TRY blocks that can be nested.
  */
 #define EXCEPTIONS4C_MAX_BLOCKS 32
+
+#endif
 
 /**
  * Represents a category of problematic situations in a program.
