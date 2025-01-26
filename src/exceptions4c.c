@@ -91,10 +91,9 @@ struct e4c_block {
 
 static noreturn void panic(const char * error_message, const char * file, int line, const char * function);
 static struct e4c_context * get_context(const char * file, int line, const char * function);
-static void cleanup(void);
+static void cleanup_default_context(void);
 static void throw(const struct e4c_context * context, const struct e4c_exception_type * type, const char * name, int error_number, const char * file, int line, const char * function, const char * format, va_list arguments_list);
 static void propagate(const struct e4c_context * context, struct e4c_exception * exception);
-static struct e4c_block * delete_block(struct e4c_block * block, const struct e4c_context * context);
 static enum block_stage get_stage(const char * file, int line, const char * function);
 static void delete_exception(const struct e4c_context * context, struct e4c_exception * exception);
 static void print_debug_info(const char * file, int line, const char * function);
@@ -113,7 +112,7 @@ static struct e4c_context default_context = {
 };
 
 /** Flag that determines if the exception system has been already initialized. */
-static volatile bool is_initialized = false;
+static volatile bool is_cleanup_registered = false;
 
 void e4c_set_context_supplier(struct e4c_context * (*supplier)(void)) {
     context_supplier = supplier;
@@ -135,19 +134,18 @@ bool e4c_is_uncaught(void) {
 
 e4c_env * e4c_start(const bool should_acquire, const char * file, const int line, const char * function) {
 
-    if (!is_initialized) {
-        is_initialized = atexit(cleanup) == 0;
-        if (!is_initialized) {
-            panic("Cleanup function could not be registered.", file, line, function);
-        }
-    }
-
     struct e4c_block * new_block = calloc(1, sizeof(*new_block));
     if (new_block == NULL) {
         panic("Not enough memory to create a new exception block", file, line, function);
     }
 
     struct e4c_context * context = get_context(file, line, function);
+    if (context == &default_context && !is_cleanup_registered) {
+        is_cleanup_registered = atexit(cleanup_default_context) == 0;
+        if (!is_cleanup_registered) {
+            panic("Cleanup function could not be registered.", file, line, function);
+        }
+    }
 
     new_block->outer_block          = context->_innermost_block;
     new_block->stage                = should_acquire ? BEGINNING : ACQUIRING;
@@ -186,9 +184,12 @@ bool e4c_next(const char * file, const int line, const char * function) {
     }
 
     /* deallocate this block and promote its outer block to be the current one */
-    /* deallocate also its exception only if it has been caught */
-    /* otherwise, we will promote it to the outer block */
-    context->_innermost_block = delete_block(block, uncaught ? NULL : context);
+    context->_innermost_block = block->outer_block;
+    if (!uncaught) {
+        /* deallocate also its exception only if it has been caught */
+        delete_exception(context, exception);
+    }
+    free(block);
 
     /* check for uncaught exceptions */
     if (exception != NULL && uncaught) {
@@ -303,15 +304,10 @@ static noreturn void panic(const char * error_message, const char * file, const 
 /**
  * Checks for dangling exception blocks at program exit.
  */
-static void cleanup(void) {
-    const struct e4c_context * context = e4c_get_context();
-    struct e4c_block * block = context != NULL ? context->_innermost_block : NULL;
+static void cleanup_default_context(void) {
+    struct e4c_block * block = default_context._innermost_block;
     if (block != NULL) {
-        do {
-            /* deallocate each block and its exception to avoid memory leaks */
-            block = delete_block(block, context);
-        } while (block != NULL);
-        panic("Dangling exception block found. Some `TRY` block may have been exited improperly (via `goto`, `break`, `continue`, or `return`).", NULL, 0, NULL);
+        panic("Dangling exception block leaked. Some `TRY` block may have been exited improperly (via `goto`, `break`, `continue`, or `return`).", NULL, 0, NULL);
     }
 }
 
@@ -372,25 +368,6 @@ static void propagate(const struct e4c_context * context, struct e4c_exception *
     if (block->stage == ACQUIRING) {
         block->stage = DISPOSING;
     }
-}
-
-/**
- * Deallocates the supplied exception block, along with its thrown exception.
- *
- * @param block the exception block to delete.
- * @param context if not <tt>NULL</tt>, then the thrown exception will also be deleted.
- * @return the outer block of the supplied block.
- */
-static struct e4c_block * delete_block(struct e4c_block * block, const struct e4c_context * context) {
-    if (block == NULL) {
-        return NULL;
-    }
-    if (context != NULL) {
-        delete_exception(context, block->exception);
-    }
-    struct e4c_block * outer_block = block->outer_block;
-    free(block);
-    return outer_block;
 }
 
 /**
