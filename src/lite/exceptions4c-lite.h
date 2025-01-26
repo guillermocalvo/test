@@ -111,8 +111,8 @@ struct e4c_exception {
  * @brief Represents the current status of exceptions.
  */
 struct e4c_context {
-  struct e4c_exception exception;
   unsigned char blocks;
+  struct e4c_exception exception;
   struct {
     unsigned char stage;
     unsigned char uncaught;
