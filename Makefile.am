@@ -290,6 +290,7 @@ bin_check_pthreads_multithread_SOURCES  = src/exceptions4c.c src/pthreads/except
 # exceptions4c-backtrace tests
 
 bin_check_backtrace_backtraced_SOURCES  = src/exceptions4c.c src/backtrace/exceptions4c-backtrace.c tests/backtrace/backtraced.c
+bin_check_backtrace_backtraced_CFLAGS   = $(AM_CFLAGS) -Og -g3
 
 
 # coverage
