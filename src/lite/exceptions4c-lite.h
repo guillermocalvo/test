@@ -284,7 +284,7 @@ extern struct e4c_context exceptions4c;
   (EXCEPTION.type = (exception_type), EXCEPTION.name = #exception_type,     \
     EXCEPTION.file = (error_message),                                       \
     (void) snprintf(EXCEPTION.message, EXCEPTIONS4C_MESSAGE_LENGTH,         \
-      EXCEPTION.file ? EXCEPTION.file : EXCEPTION.type), RETHROW)
+      "%s", EXCEPTION.file ? EXCEPTION.file : EXCEPTION.type), RETHROW)
 
 /**
  * Throws an exception with a formatted error message.
