@@ -19,14 +19,29 @@
  *
  * <img src="exceptions4c-logo.svg">
  *
- * This is the lightweight version of the library.
+ * This library consists of one header file only. All you need to do is copy
+ * `exceptions4c-lite.h` into your project, include it, and define a global
+ * variable `exceptions4c`.
+ *
+ * ```c
+ * #include <exceptions4c-lite.h>
+ *
+ * struct e4c_context exceptions4c = {0};
+ * ```
+ *
+ * Since it's a header-only library, there is no library code to link against.
+ *
+ * @note
+ * This is the lightweight version of <strong>exceptions4c</strong>. You
+ * may also want to try the full version of the library on
+ * [GitHub](https://github.com/guillermocalvo/exceptions4c).
  *
  * @file        exceptions4c-lite.h
  * @version     4.0.0
  * @author      [Guillermo Calvo](https://guillermo.dev)
  * @copyright   Licensed under Apache 2.0
  * @see         For more information, visit the
- *              [project on GitHub](https://github.com/guillermocalvo/exceptions4c)
+ *              [project on GitHub](https://github.com/guillermocalvo/exceptions4c-lite)
  */
 
 #ifndef EXCEPTIONS4C_LITE
@@ -37,8 +52,8 @@
 #define EXCEPTIONS4C_LITE 4
 
 #include <setjmp.h> /* longjmp, setjmp */
-#include <stdio.h> /* stderr, fprintf, fflush, sprintf */
-#include <stdlib.h> /* abort,  EXIT_FAILURE, exit */
+#include <stdio.h> /* fflush, fprintf, snprintf, stderr */
+#include <stdlib.h> /* EXIT_FAILURE, abort, exit */
 
 #ifndef EXCEPTIONS4C_MAX_BLOCKS
 
@@ -47,6 +62,16 @@
  * @brief Maximum number of #TRY blocks that can be nested.
  */
 #define EXCEPTIONS4C_MAX_BLOCKS 32
+
+#endif
+
+#ifndef EXCEPTIONS4C_MESSAGE_LENGTH
+
+/**
+ * @internal
+ * @brief Length of an exception message, in characters.
+ */
+#define EXCEPTIONS4C_MESSAGE_LENGTH 256
 
 #endif
 
@@ -79,8 +104,8 @@ typedef const char * e4c_exception_type;
  *
  * After an exception is [thrown](#THROW), it may propagate through the
  * program and be caught by an appropriate #CATCH or #CATCH_ALL block.
- * When an exception is caught, #THROWN_EXCEPTION can be used to retrieve
- * the exception currently being handled. This allows for inspection and
+ * When an exception is caught, #EXCEPTION can be used to retrieve the
+ * exception currently being handled. This allows for inspection and
  * further handling of the error based on both its type and the detailed
  * context of the situation.
  */
@@ -93,12 +118,12 @@ struct e4c_exception {
     const char * name;
 
     /** A text message describing the specific problem. */
-    char message[256];
+    char message[EXCEPTIONS4C_MESSAGE_LENGTH];
 
-    /** The name of the source code file that threw this exception. */
+    /** The name of the source file that threw this exception. */
     const char * file;
 
-    /** The number of line that threw this exception. */
+    /** The line number in the source file that threw this exception. */
     int line;
 };
 
@@ -107,13 +132,10 @@ struct e4c_exception {
  * @brief Represents the current status of exceptions.
  */
 struct e4c_context {
-  unsigned char blocks;
-  struct e4c_exception exception;
-  struct {
-    unsigned char stage;
-    unsigned char uncaught;
-    jmp_buf jump;
-  } block[EXCEPTIONS4C_MAX_BLOCKS];
+    unsigned char blocks;
+    struct e4c_exception thrown;
+    struct { unsigned char stage; unsigned char uncaught; jmp_buf jump; }
+        block[EXCEPTIONS4C_MAX_BLOCKS];
 };
 
 /**
@@ -156,43 +178,21 @@ extern struct e4c_context exceptions4c;
 #define TRY                                                                 \
                                                                             \
   for (                                                                     \
-    (void) (                                                                \
-      exceptions4c.blocks >= EXCEPTIONS4C_MAX_BLOCKS && (                   \
-        (void) fprintf(stderr,                                              \
-          "\n[exceptions4c]: Too many `try` blocks nested.\n    at %s:%d\n",\
-          __FILE__, __LINE__                                                \
-        ),                                                                  \
-        (void) fflush(stderr),                                              \
-        abort(), 0                                                          \
-      )                                                                     \
-    ),                                                                      \
-    exceptions4c.block[exceptions4c.blocks].stage = 0,                      \
-    exceptions4c.block[exceptions4c.blocks].uncaught = 0,                   \
+    (void) (exceptions4c.blocks >= EXCEPTIONS4C_MAX_BLOCKS && (             \
+      (void) fprintf(stderr,                                                \
+        "\n[exceptions4c]: Too many `try` blocks nested.\n    at %s:%d\n",  \
+        __FILE__, __LINE__), (void) fflush(stderr), abort(), 0)),           \
     exceptions4c.blocks++,                                                  \
-    (void) setjmp(exceptions4c.block[exceptions4c.blocks - 1].jump);        \
+    EXCEPTION_BLOCK.stage = 0, EXCEPTION_BLOCK.uncaught = 0,                \
+    (void) setjmp(EXCEPTION_BLOCK.jump);                                    \
                                                                             \
-    ++exceptions4c.block[exceptions4c.blocks - 1].stage < 4                 \
-    || (                                                                    \
+    ++EXCEPTION_BLOCK.stage < 4 || (                                        \
       exceptions4c.block[--exceptions4c.blocks].uncaught && (               \
-        (void) (                                                            \
-          exceptions4c.blocks > 0 && (                                      \
-            exceptions4c.block[exceptions4c.blocks - 1].uncaught = 1,       \
-            (void) longjmp(                                                 \
-              exceptions4c.block[exceptions4c.blocks - 1].jump, 1           \
-            ), 0                                                            \
-          )                                                                 \
-        ),                                                                  \
-        (void) fprintf(stderr,                                              \
-          "\n%s: %s\n    at %s:%d\n",                                       \
-          exceptions4c.exception.name, exceptions4c.exception.message,      \
-          exceptions4c.exception.file, exceptions4c.exception.line          \
-        ),                                                                  \
-        (void) fflush(stderr),                                              \
-        exit(EXIT_FAILURE), 0                                               \
-      )                                                                     \
-    );                                                                      \
+        (void) (exceptions4c.blocks > 0 && (EXCEPTION_BLOCK.uncaught = 1,   \
+          (void) longjmp(EXCEPTION_BLOCK.jump, 1), 0)),                     \
+        (void) PRINT_EXCEPTION, exit(EXIT_FAILURE), 0));                    \
   )                                                                         \
-    if (exceptions4c.block[exceptions4c.blocks - 1].stage == 1)
+    if (EXCEPTION_BLOCK.stage == 1)
 
 /**
  * Introduces a block of code that handles exceptions thrown by a
@@ -209,12 +209,9 @@ extern struct e4c_context exceptions4c;
  */
 #define CATCH(exception_type)                                               \
                                                                             \
-    else if (exceptions4c.blocks > 0                                        \
-      && exceptions4c.blocks <= EXCEPTIONS4C_MAX_BLOCKS                     \
-      && exceptions4c.block[exceptions4c.blocks - 1].stage == 2             \
-      && exceptions4c.block[exceptions4c.blocks - 1].uncaught               \
-      && (exception_type) == exceptions4c.exception.type                    \
-      && (exceptions4c.block[exceptions4c.blocks - 1].uncaught = 0, 1))
+    else if (IS_UNCAUGHT && EXCEPTION_BLOCK.stage == 2                      \
+      && (exception_type) == EXCEPTION.type                                 \
+      && (EXCEPTION_BLOCK.uncaught = 0, 1))
 
 /**
  * Introduces a block of code that handles any exception thrown by a
@@ -239,11 +236,8 @@ extern struct e4c_context exceptions4c;
  */
 #define CATCH_ALL                                                           \
                                                                             \
-    else if (exceptions4c.blocks > 0                                        \
-      && exceptions4c.blocks <= EXCEPTIONS4C_MAX_BLOCKS                     \
-      && exceptions4c.block[exceptions4c.blocks - 1].stage == 2             \
-      && exceptions4c.block[exceptions4c.blocks - 1].uncaught               \
-      && (exceptions4c.block[exceptions4c.blocks - 1].uncaught = 0, 1))
+    else if (IS_UNCAUGHT && EXCEPTION_BLOCK.stage == 2                      \
+      && (EXCEPTION_BLOCK.uncaught = 0, 1))
 
 /**
  * Introduces a block of code that is executed after a #TRY block,
@@ -260,14 +254,44 @@ extern struct e4c_context exceptions4c;
                                                                             \
     else if (exceptions4c.blocks > 0                                        \
       && exceptions4c.blocks <= EXCEPTIONS4C_MAX_BLOCKS                     \
-      && exceptions4c.block[exceptions4c.blocks - 1].stage == 3)
+      && EXCEPTION_BLOCK.stage == 3)
 
 /**
  * Throws an exception, interrupting the normal flow of execution.
  *
  * @param exception_type the type of the exception to throw.
+ * @param error_message the error message.
+ *
+ * #THROW is used within a #TRY block, a #CATCH block, or any other
+ * function to signal that an error has occurred. The thrown exception
+ * will be of the specified type, and it MAY be handled by a preceding
+ * #CATCH block.
+ *
+ * If a thrown exception is not handled by any of the #CATCH blocks in
+ * the current function, it propagates up the call stack to the function
+ * that called the current function. This continues until the exception
+ * is either handled by a #CATCH block higher in the stack, or it reaches
+ * the top level of the program. If no #CATCH block handles the
+ * exception, the program terminates and an error message is printed to
+ * the console.
+ *
+ * @note
+ * The error message will be copied as it is into the thrown #EXCEPTION.
+ * To use a formatted error message, use #THROWF instead.
+ */
+#define THROW(exception_type, error_message)                                \
+                                                                            \
+  (EXCEPTION.type = (exception_type), EXCEPTION.name = #exception_type,     \
+    EXCEPTION.file = (error_message),                                       \
+    (void) snprintf(EXCEPTION.message, EXCEPTIONS4C_MESSAGE_LENGTH,         \
+      EXCEPTION.file ? EXCEPTION.file : EXCEPTION.type), RETHROW)
+
+/**
+ * Throws an exception with a formatted error message.
+ *
+ * @param exception_type the type of the exception to throw.
  * @param format the error message.
- * @param ... an optional list of arguments that will be formatted according to <tt>format</tt>.
+ * @param ... a list of arguments that will be formatted according to <tt>format</tt>.
  *
  * #THROW is used within a #TRY block, a #CATCH block, or any other
  * function to signal that an error has occurred. The thrown exception
@@ -282,39 +306,25 @@ extern struct e4c_context exceptions4c;
  * exception, the program terminates and an error message is printed to
  * the console.
  */
-#define THROW(exception_type, format, ...)                                  \
+#define THROWF(exception_type, format, ...)                                 \
                                                                             \
-  (                                                                         \
-    exceptions4c.exception.type = (exception_type),                         \
-    exceptions4c.exception.name = #exception_type,                          \
-    exceptions4c.exception.file = (format),                                 \
-    (void) snprintf(                                                        \
-      exceptions4c.exception.message,                                       \
-      sizeof(exceptions4c.exception.message) - 1,                           \
-      exceptions4c.exception.file ? exceptions4c.exception.file             \
-        : exceptions4c.exception.type                                       \
-      __VA_OPT__(,) __VA_ARGS__                                             \
-    ),                                                                      \
-    exceptions4c.exception.file = __FILE__,                                 \
-    exceptions4c.exception.line = __LINE__,                                 \
-    (                                                                       \
-      exceptions4c.blocks <= 0                                              \
-      && (                                                                  \
-        (void) fprintf(stderr,                                              \
-          "\n%s: %s\n    at %s:%d\n",                                       \
-          exceptions4c.exception.name,                                      \
-          exceptions4c.exception.message,                                   \
-          exceptions4c.exception.file,                                      \
-          exceptions4c.exception.line                                       \
-        ),                                                                  \
-        (void) fflush(stderr),                                              \
-        exit(EXIT_FAILURE),                                                 \
-        0                                                                   \
-      )                                                                     \
-    ),                                                                      \
-    exceptions4c.block[exceptions4c.blocks - 1].uncaught = 1,               \
-    longjmp(exceptions4c.block[exceptions4c.blocks - 1].jump, 1)            \
-  )
+  (EXCEPTION.type = (exception_type), EXCEPTION.name = #exception_type,     \
+    (void) snprintf(EXCEPTION.message, EXCEPTIONS4C_MESSAGE_LENGTH,         \
+      (format), __VA_ARGS__), RETHROW)
+
+/**
+ * Throws the current exception again.
+ *
+ * @remark
+ * This macro SHOULD be used in the body of #CATCH or #CATCH_ALL blocks
+ * to throw the exception that is currently being.
+ */
+#define RETHROW                                                             \
+                                                                            \
+  (EXCEPTION.file = __FILE__, EXCEPTION.line = __LINE__,                    \
+    (exceptions4c.blocks <= 0 &&                                            \
+      ((void) PRINT_EXCEPTION, exit(EXIT_FAILURE), 0)),                     \
+    EXCEPTION_BLOCK.uncaught = 1, longjmp(EXCEPTION_BLOCK.jump, 1))
 
 /**
  * Retrieves the last exception that was thrown.
@@ -334,16 +344,17 @@ extern struct e4c_context exceptions4c;
  * @see #FINALLY
  * @see #IS_UNCAUGHT
  */
-#define THROWN_EXCEPTION                                                    \
+#define EXCEPTION                                                           \
                                                                             \
-  exceptions4c.exception
+  exceptions4c.thrown
+
 
 /**
  * Determines whether the current exception (if any) hasn't been handled
  * yet by any #CATCH or #CATCH_ALL block.
  *
- * @return <tt>1</tt> if the exception from the #TRY block was not caught
- *   by any #CATCH or #CATCH_ALL block; <tt>0</tt> otherwise.
+ * @return whether the thrown exception was not caught by any #CATCH or
+ *   #CATCH_ALL block.
  *
  * An exception is considered "uncaught" if no matching #CATCH or
  * #CATCH_ALL block has been executed for it. In other words, this macro
@@ -359,13 +370,29 @@ extern struct e4c_context exceptions4c;
  * handled.
  *
  * @see FINALLY
- * @see THROWN_EXCEPTION
+ * @see EXCEPTION
  */
 #define IS_UNCAUGHT                                                         \
                                                                             \
-  (exceptions4c.blocks > 0                                                  \
-    && exceptions4c.blocks <= EXCEPTIONS4C_MAX_BLOCKS                       \
-    && exceptions4c.block[exceptions4c.blocks - 1].uncaught)
+  (exceptions4c.blocks > 0 && exceptions4c.blocks <= EXCEPTIONS4C_MAX_BLOCKS\
+    && EXCEPTION_BLOCK.uncaught)
+
+
+/**
+ * @internal
+ * @brief Returns the current exception block.
+ */
+#define EXCEPTION_BLOCK                                                     \
+                                                                            \
+  exceptions4c.block[exceptions4c.blocks - 1]
+
+/**
+ * Prints the current exception to standard error output and flushes it.
+ */
+#define PRINT_EXCEPTION                                                     \
+                                                                            \
+  (fprintf(stderr, "\n%s: %s\n    at %s:%d\n", EXCEPTION.name,              \
+    EXCEPTION.message, EXCEPTION.file, EXCEPTION.line), fflush(stderr))
 
 /* OpenMP support */
 #ifdef _OPENMP

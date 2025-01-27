@@ -9,7 +9,7 @@ const e4c_exception_type FATAL_ERROR = "Fatal error.";
  */
 int main(void) {
 
-    THROW(FATAL_ERROR, "This is an uncaught exception");
+    THROWF(FATAL_ERROR, "This is an %s exception", "uncaught");
 
     return 0;
 }

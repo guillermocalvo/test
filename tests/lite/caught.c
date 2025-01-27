@@ -22,9 +22,9 @@ int main(void) {
 
         caught = 1;
 
-        printf("The exception was caught: %s: %s\n", THROWN_EXCEPTION.name, THROWN_EXCEPTION.message);
+        printf("The exception was caught: %s: %s\n", EXCEPTION.name, EXCEPTION.message);
 
-        message_ok = strcmp(THROWN_EXCEPTION.message, "This is my exception") == 0;
+        message_ok = strcmp(EXCEPTION.message, "This is my exception") == 0;
     }
 
     return !caught || !message_ok;
