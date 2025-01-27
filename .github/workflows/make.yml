@@ -31,13 +31,19 @@ jobs:
     # MAKE ALL
     # ================================
     - name: Make all
-      run: autoreconf --install; ./configure CFLAGS=""; make all
+      run: autoreconf --install; ./configure CFLAGS="-Og -g3"; make all
 
     # ================================
     # TEST
     # ================================
     - name: Test
       run: make check
+
+    # ================================
+    # COVERAGE
+    # ================================
+    - name: Coverage
+      run: make coverage
 
     # ================================
     # UPLOAD TEST REPORT

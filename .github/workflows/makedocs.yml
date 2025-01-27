@@ -31,16 +31,28 @@ jobs:
         sudo make install
 
     # ================================
+    # INSTALL LCOV
+    # ================================
+    - name: Install LCOV
+      run: sudo apt-get install lcov
+
+    # ================================
     # SHALLOW CLONE
     # ================================
     - name: Shallow clone
       uses: actions/checkout@v4
 
     # ================================
-    # BUILD WITH MAKE
+    # DOCS
     # ================================
     - name: Make docs
-      run: autoreconf --install; ./configure; make clean && make docs
+      run: autoreconf --install; ./configure CFLAGS="-Og -g3"; make clean && make docs
+
+    # ================================
+    # COVERAGE REPORT
+    # ================================
+    - name: Make coverage report
+      run: make coverage-report
 
     # ================================
     # UPLOAD DOXYGEN

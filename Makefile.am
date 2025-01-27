@@ -290,21 +290,34 @@ bin_check_pthreads_multithread_SOURCES  = src/exceptions4c.c src/pthreads/except
 # exceptions4c-backtrace tests
 
 bin_check_backtrace_backtraced_SOURCES  = src/exceptions4c.c src/backtrace/exceptions4c-backtrace.c tests/backtrace/backtraced.c
-bin_check_backtrace_backtraced_CFLAGS   = $(AM_CFLAGS) -Og -g3
 
 
 # coverage
 
-coverage: check exceptions4c.c.gcov exceptions4c-pthreads.c.gcov exceptions4c-backtrace.c.gcov
+coverage: exceptions4c.c.gcov exceptions4c-pthreads.c.gcov exceptions4c-backtrace.c.gcov
 
-exceptions4c.c.gcov:
-	gcov src/exceptions4c.c --object-directory src/*
+coverage-report: docs/html/coverage/index.html
 
-exceptions4c-pthreads.c.gcov:
-	gcov src/exceptions4c-pthreads.c --object-directory src/pthreads/*
+docs/html/coverage/index.html: coverage.info
+	genhtml coverage.info --output-directory docs/html/coverage
 
-exceptions4c-backtrace.c.gcov:
-	gcov src/exceptions4c-backtrace.c --object-directory src/backtrace/*
+coverage.info: exceptions4c.c.gcov exceptions4c-pthreads.c.gcov exceptions4c-backtrace.c.gcov
+	lcov --ignore-errors mismatch --capture --directory . --output-file coverage.info
+
+exceptions4c.c.gcov: src/exceptions4c.gcda
+	gcov --verbose src/exceptions4c.c
+
+exceptions4c-pthreads.c.gcov: src/pthreads/exceptions4c-pthreads.gcda
+	gcov --verbose src/pthreads/exceptions4c-pthreads.c
+
+exceptions4c-backtrace.c.gcov: src/backtrace/exceptions4c-backtrace.gcda
+	gcov --verbose src/backtrace/exceptions4c-backtrace.c
+
+src/exceptions4c.gcda: check
+
+src/pthreads/exceptions4c-pthreads.gcda: check
+
+src/backtrace/exceptions4c-backtrace.gcda: check
 
 # generate documentation
 
