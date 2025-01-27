@@ -310,5 +310,11 @@ exceptions4c-backtrace.c.gcov:
 
 docs: docs/html/index.html
 
-docs/html/index.html:
-	doxygen ./etc/Doxyfile
+docs/html/index.html: docs/Doxyfile docs/doxygen-awesome.css docs/doxygen-awesome-sidebar-only.css
+	doxygen docs/Doxyfile
+
+docs/doxygen-awesome.css:
+	wget --verbose --output-document docs/doxygen-awesome.css https://github.com/jothepro/doxygen-awesome-css/raw/refs/heads/main/doxygen-awesome.css
+
+docs/doxygen-awesome-sidebar-only.css:
+	wget --verbose --output-document docs/doxygen-awesome-sidebar-only.css https://github.com/jothepro/doxygen-awesome-css/raw/refs/heads/main/doxygen-awesome-sidebar-only.css

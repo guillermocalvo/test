@@ -48,7 +48,7 @@ jobs:
     - name: Upload Doxygen files as artifact
       uses: actions/upload-pages-artifact@v3
       with:
-        path: ${{github.workspace}}/doc/html
+        path: ${{github.workspace}}/docs/html
 
     # ================================
     # PUBLISH DOCUMENTATION
