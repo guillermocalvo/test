@@ -53,9 +53,9 @@
 /**
  * Represents a category of problematic situations in a program.
  *
- * #e4c_exception_type is used to define a kind of error or exceptional
- * condition that a program might want to #THROW and #CATCH. It serves as
- * a way to group related issues that share common characteristics.
+ * Defines a kind of error or exceptional condition that a program might
+ * want to #THROW and #CATCH. It serves as a way to group related issues
+ * that share common characteristics.
  *
  * Exception types SHOULD be defined as <tt>const</tt>.
  *
@@ -128,28 +128,6 @@ struct e4c_context {
 extern struct e4c_context exceptions4c;
 
 /**
- * @internal
- * @brief Represents the execution stage of the current exception block.
- */
-enum e4c_stage {
-
-  /** @internal The exception block has started. */
-  EXCEPTIONS4C_START,
-
-  /** @internal The exception block is [trying something](#TRY). */
-  EXCEPTIONS4C_TRY,
-
-  /** @internal The exception block is [catching an exception](#CATCH). */
-  EXCEPTIONS4C_CATCH,
-
-  /** @internal The exception block is [finalizing](#FINALLY). */
-  EXCEPTIONS4C_FINALLY,
-
-  /** @internal The exception block has finished. */
-  EXCEPTIONS4C_DONE
-};
-
-/**
  * Introduces a block of code that may throw exceptions during execution.
  *
  * The #TRY block is used to define a section of code where exceptions
@@ -188,12 +166,12 @@ enum e4c_stage {
         abort(), 0                                                          \
       )                                                                     \
     ),                                                                      \
-    exceptions4c.block[exceptions4c.blocks].stage = EXCEPTIONS4C_START,     \
+    exceptions4c.block[exceptions4c.blocks].stage = 0,                      \
     exceptions4c.block[exceptions4c.blocks].uncaught = 0,                   \
     exceptions4c.blocks++,                                                  \
     (void) setjmp(exceptions4c.block[exceptions4c.blocks - 1].jump);        \
                                                                             \
-    ++exceptions4c.block[exceptions4c.blocks - 1].stage < EXCEPTIONS4C_DONE \
+    ++exceptions4c.block[exceptions4c.blocks - 1].stage < 4                 \
     || (                                                                    \
       exceptions4c.block[--exceptions4c.blocks].uncaught && (               \
         (void) (                                                            \
@@ -214,9 +192,7 @@ enum e4c_stage {
       )                                                                     \
     );                                                                      \
   )                                                                         \
-    if (                                                                    \
-      exceptions4c.block[exceptions4c.blocks - 1].stage == EXCEPTIONS4C_TRY \
-    )
+    if (exceptions4c.block[exceptions4c.blocks - 1].stage == 1)
 
 /**
  * Introduces a block of code that handles exceptions thrown by a
@@ -233,20 +209,12 @@ enum e4c_stage {
  */
 #define CATCH(exception_type)                                               \
                                                                             \
-    else if (                                                               \
-      exceptions4c.blocks > 0                                               \
-      &&                                                                    \
-      exceptions4c.blocks <= EXCEPTIONS4C_MAX_BLOCKS                        \
-      &&                                                                    \
-      exceptions4c.block[exceptions4c.blocks - 1].stage ==                  \
-        EXCEPTIONS4C_CATCH                                                  \
-      &&                                                                    \
-      exceptions4c.block[exceptions4c.blocks - 1].uncaught == 1             \
-      &&                                                                    \
-      (exception_type) == exceptions4c.exception.type                      \
-      &&                                                                    \
-      (exceptions4c.block[exceptions4c.blocks - 1].uncaught = 0, 1)         \
-    )
+    else if (exceptions4c.blocks > 0                                        \
+      && exceptions4c.blocks <= EXCEPTIONS4C_MAX_BLOCKS                     \
+      && exceptions4c.block[exceptions4c.blocks - 1].stage == 2             \
+      && exceptions4c.block[exceptions4c.blocks - 1].uncaught               \
+      && (exception_type) == exceptions4c.exception.type                    \
+      && (exceptions4c.block[exceptions4c.blocks - 1].uncaught = 0, 1))
 
 /**
  * Introduces a block of code that handles any exception thrown by a
@@ -271,18 +239,11 @@ enum e4c_stage {
  */
 #define CATCH_ALL                                                           \
                                                                             \
-    else if (                                                               \
-      exceptions4c.blocks > 0                                               \
-      &&                                                                    \
-      exceptions4c.blocks <= EXCEPTIONS4C_MAX_BLOCKS                        \
-      &&                                                                    \
-      exceptions4c.block[exceptions4c.blocks - 1].stage ==                  \
-        EXCEPTIONS4C_CATCH                                                  \
-      &&                                                                    \
-      exceptions4c.block[exceptions4c.blocks - 1].uncaught == 1             \
-      &&                                                                    \
-      (exceptions4c.block[exceptions4c.blocks - 1].uncaught = 0, 1)         \
-    )
+    else if (exceptions4c.blocks > 0                                        \
+      && exceptions4c.blocks <= EXCEPTIONS4C_MAX_BLOCKS                     \
+      && exceptions4c.block[exceptions4c.blocks - 1].stage == 2             \
+      && exceptions4c.block[exceptions4c.blocks - 1].uncaught               \
+      && (exceptions4c.block[exceptions4c.blocks - 1].uncaught = 0, 1))
 
 /**
  * Introduces a block of code that is executed after a #TRY block,
@@ -297,14 +258,9 @@ enum e4c_stage {
  */
 #define FINALLY                                                             \
                                                                             \
-    else if (                                                               \
-      exceptions4c.blocks > 0                                               \
-      &&                                                                    \
-      exceptions4c.blocks <= EXCEPTIONS4C_MAX_BLOCKS                        \
-      &&                                                                    \
-      exceptions4c.block[exceptions4c.blocks - 1].stage ==                  \
-        EXCEPTIONS4C_FINALLY                                                \
-    )
+    else if (exceptions4c.blocks > 0                                        \
+      && exceptions4c.blocks <= EXCEPTIONS4C_MAX_BLOCKS                     \
+      && exceptions4c.block[exceptions4c.blocks - 1].stage == 3)
 
 /**
  * Throws an exception, interrupting the normal flow of execution.
@@ -343,8 +299,7 @@ enum e4c_stage {
     exceptions4c.exception.line = __LINE__,                                 \
     (                                                                       \
       exceptions4c.blocks <= 0                                              \
-      &&                                                                    \
-      (                                                                     \
+      && (                                                                  \
         (void) fprintf(stderr,                                              \
           "\n%s: %s\n    at %s:%d\n",                                       \
           exceptions4c.exception.name,                                      \
@@ -408,13 +363,9 @@ enum e4c_stage {
  */
 #define IS_UNCAUGHT                                                         \
                                                                             \
-  (                                                                         \
-    exceptions4c.blocks > 0                                                 \
-    &&                                                                      \
-    exceptions4c.blocks <= EXCEPTIONS4C_MAX_BLOCKS                          \
-    &&                                                                      \
-    exceptions4c.block[exceptions4c.blocks - 1].uncaught                    \
-  )
+  (exceptions4c.blocks > 0                                                  \
+    && exceptions4c.blocks <= EXCEPTIONS4C_MAX_BLOCKS                       \
+    && exceptions4c.block[exceptions4c.blocks - 1].uncaught)
 
 /* OpenMP support */
 #ifdef _OPENMP
