@@ -46,7 +46,56 @@ jobs:
       run: make coverage
 
     # ================================
-    # UPLOAD TEST REPORT
+    # TEST REPORT
+    # ================================
+    - name: Generate test report
+      if: success() || failure()
+      run: |
+        ICON_PASS=":white_check_mark:"
+        ICON_XFAIL=":negative_squared_cross_mark:"
+        ICON_SKIP=":warning:"
+        ICON_FAIL=":x:"
+        ICON_XPASS=":exclamation:"
+        ICON_ERROR=":bomb:"
+        LOG="test-suite.log"
+        TITLE=`grep "test-suite.log" ${LOG} | cut -d: -f1`
+        TOTAL=`grep "# TOTAL: "      ${LOG} | cut -d: -f2`
+        PASS=`grep  "# PASS: "       ${LOG} | cut -d: -f2`
+        SKIP=`grep  "# SKIP: "       ${LOG} | cut -d: -f2`
+        XFAIL=`grep "# XFAIL: "      ${LOG} | cut -d: -f2`
+        FAIL=`grep  "# FAIL: "       ${LOG} | cut -d: -f2`
+        XPASS=`grep "# XPASS: "      ${LOG} | cut -d: -f2`
+        ERROR=`grep "# ERROR: "      ${LOG} | cut -d: -f2`
+        FILES=`find -name *.trs`
+        echo "# Test Report" >> $GITHUB_STEP_SUMMARY
+        echo >> $GITHUB_STEP_SUMMARY
+        echo "|          | Total    | ${ICON_PASS} Pass | ${ICON_XFAIL} Xfail | ${ICON_SKIP} Skip | ${ICON_FAIL} Fail | ${ICON_XPASS} Xpass | ${ICON_ERROR} Error |" >> $GITHUB_STEP_SUMMARY
+        echo "|----------|----------|-------------------|---------------------|-------------------|-------------------|---------------------|---------------------|" >> $GITHUB_STEP_SUMMARY
+        echo "| ${TITLE} | ${TOTAL} | ${PASS}           | ${XFAIL}            | ${SKIP}           | ${FAIL}           | ${XPASS}            | ${ERROR}            |" >> $GITHUB_STEP_SUMMARY
+        echo >> $GITHUB_STEP_SUMMARY
+        echo "| Test | Result |" >> $GITHUB_STEP_SUMMARY
+        echo "|------|--------|" >> $GITHUB_STEP_SUMMARY
+        for FILE in $FILES; do
+          RESULT=`head -n1 $FILE`
+          RESULT=${RESULT#:test-result: }
+          RESULT=${RESULT,,}
+          ICON=$(case $RESULT in
+            "pass")  echo "${ICON_PASS}"  ;;
+            "xfail") echo "${ICON_XFAIL}" ;;
+            "skip")  echo "${ICON_SKIP}"  ;;
+            "fail")  echo "${ICON_FAIL}"  ;;
+            "xpass") echo "${ICON_XPASS}" ;;
+            "error") echo "${ICON_ERROR}" ;;
+            *)       echo ":interrobang:" ;;
+          esac)
+          NAME=${FILE#./bin/check/}
+          NAME=${NAME%.trs}
+          echo "| ${NAME} | ${ICON} ${RESULT} |" >> $GITHUB_STEP_SUMMARY
+        done
+        echo >> $GITHUB_STEP_SUMMARY
+
+    # ================================
+    # UPLOAD TEST LOG
     # ================================
     - name: Upload test report as artifact
       uses: actions/upload-artifact@v4
