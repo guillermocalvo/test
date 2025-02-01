@@ -23,12 +23,14 @@
  * - exceptions4c.h
  * - exceptions4c.c
  *
- * All you need to do is include the header file <exceptions4c.h>, and
- * link your code against the library code.
+ * To use the library in your project, include the header file in your
+ * source code files.
  *
  * ```c
  * #include <exceptions4c.h>
  * ```
+ *
+ * And then link your program against the library code.
  *
  * @file        exceptions4c.h
  * @version     4.0.0
@@ -338,6 +340,38 @@
   )
 
 /**
+ * Introduces a block of code with automatic acquisition and disposal of a
+ * resource
+ *
+ * @param resource the thing to acquire, use and then dispose of.
+ * @param dispose the function (or macro) to dispose of the resource.
+ * @param acquire the function (or macro) to acquire the resource.
+ * @param ... an optional list of arguments to be passed to <tt>acquire</tt>.
+ *
+ * The specified resource will be *acquired*, *used* and then *disposed*. The
+ * automatic acquisition and disposal is achieved by calling the supplied
+ * functions (or macros) <strong>acquire</strong> and <strong>dispose</strong>:
+ *
+ *   - <tt>typeof(resource) acquire(...)</tt>
+ *   - <tt>void dispose(typeof(resource) resource, bool is_uncaught)</tt>
+ *
+ * The semantics of the automatic acquisition and disposal are the same as for
+ * blocks introduced by #WITH... #USE. For example, a #USING block can also
+ * precede #CATCH and #FINALLY blocks.
+ *
+ * @pre
+ *   - A #USING block MUST NOT be exited through any of: <tt>goto</tt>, <tt>break</tt>,
+ *     <tt>continue</tt>, or <tt>return</tt> (but it is legal to #THROW an exception).
+ *
+ * @see #WITH
+ */
+#define USING(resource, dispose, acquire, ...)                              \
+                                                                            \
+  WITH((resource), dispose) {                                               \
+    (resource) = (void) &(resource), acquire(__VA_ARGS__);                  \
+  } USE
+
+/**
  * Opens a block of code with automatic disposal of a resource
  *
  * @param resource the thing to dispose of.
@@ -443,38 +477,6 @@
 #define USE                                                                 \
                                                                             \
   } else if (e4c_try(EXCEPTIONS4C_DEBUG))
-
-/**
- * Introduces a block of code with automatic acquisition and disposal of a
- * resource
- *
- * @param resource the thing to acquire, use and then dispose of.
- * @param dispose the function (or macro) to dispose of the resource.
- * @param acquire the function (or macro) to acquire the resource.
- * @param ... an optional list of arguments to be passed to <tt>acquire</tt>.
- *
- * The specified resource will be *acquired*, *used* and then *disposed*. The
- * automatic acquisition and disposal is achieved by calling the supplied
- * functions (or macros) <strong>acquire</strong> and <strong>dispose</strong>:
- *
- *   - <tt>typeof(resource) acquire(...)</tt>
- *   - <tt>void dispose(typeof(resource) resource, bool is_uncaught)</tt>
- *
- * The semantics of the automatic acquisition and disposal are the same as for
- * blocks introduced by #WITH... #USE. For example, a #USING block can also
- * precede #CATCH and #FINALLY blocks.
- *
- * @pre
- *   - A #USING block MUST NOT be exited through any of: <tt>goto</tt>, <tt>break</tt>,
- *     <tt>continue</tt>, or <tt>return</tt> (but it is legal to #THROW an exception).
- *
- * @see #WITH
- */
-#define USING(resource, dispose, acquire, ...)                              \
-                                                                            \
-  WITH((resource), dispose) {                                               \
-    (resource) = (void) &(resource), acquire(__VA_ARGS__);                  \
-  } USE
 
 /**
  * Repeats the previous #WITH block entirely
