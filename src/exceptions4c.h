@@ -417,7 +417,7 @@
                                                                             \
   EXCEPTIONS4C_START_BLOCK(true)                                            \
   if (e4c_dispose(EXCEPTIONS4C_DEBUG)) {                                    \
-    (void) dispose((resource), e4c_is_uncaught());                          \
+    (void) dispose(resource);                                               \
   } else if (e4c_acquire(EXCEPTIONS4C_DEBUG)) {
 
 /**
