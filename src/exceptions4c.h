@@ -368,7 +368,7 @@
 #define USING(resource, dispose, acquire, ...)                              \
                                                                             \
   WITH((resource), dispose) {                                               \
-    (resource) = (void) &(resource), acquire(__VA_ARGS__);                  \
+    (resource) = acquire(__VA_ARGS__);                                      \
   } USE
 
 /**
