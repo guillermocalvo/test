@@ -34,7 +34,7 @@ SORT_MEMBER_DOCS       = NO
 #---------------------------------------------------------------------------
 
 WARN_NO_PARAMDOC       = YES
-WARN_AS_ERROR          = NO
+WARN_AS_ERROR          = YES
 
 
 #---------------------------------------------------------------------------
@@ -49,6 +49,7 @@ INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/src/ \
 FILE_PATTERNS          = *.c \
                          *.h \
                          *.md
+EXAMPLE_PATH           = @CMAKE_CURRENT_SOURCE_DIR@/examples/
 IMAGE_PATH             = @CMAKE_CURRENT_SOURCE_DIR@/docs
 USE_MDFILE_AS_MAINPAGE = @CMAKE_CURRENT_SOURCE_DIR@/docs/README.md
 
@@ -78,7 +79,11 @@ GENERATE_TREEVIEW      = YES
 HTML_EXTRA_STYLESHEET  = @AWESOME_CSS_DIR@/doxygen-awesome.css \
                          @AWESOME_CSS_DIR@/doxygen-awesome-sidebar-only.css \
                          @CMAKE_CURRENT_SOURCE_DIR@/docs/exceptions4c.css
-
+HTML_EXTRA_FILES       = @CMAKE_CURRENT_SOURCE_DIR@/docs/info-16.svg \
+                         @CMAKE_CURRENT_SOURCE_DIR@/docs/alert-16.svg \
+                         @CMAKE_CURRENT_SOURCE_DIR@/docs/report-16.svg \
+                         @CMAKE_CURRENT_SOURCE_DIR@/docs/stop-16.svg \
+                         @CMAKE_CURRENT_SOURCE_DIR@/docs/light-bulb-16.svg
 
 #---------------------------------------------------------------------------
 # Configuration options related to the LaTeX output

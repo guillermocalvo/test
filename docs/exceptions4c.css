@@ -1,1 +1,62 @@
-/* custom css */
+html {
+  --important-color: var(--todo-color);
+  --important-color-dark: var(--todo-color-dark);
+  --important-color-darker: var(--todo-color-darker);
+  --attention-color: var(--bug-color);
+  --attention-color-dark: var(--bug-color-dark);
+  --attention-color-darker: var(--bug-color-darker);
+  --remark-color: var(--invariant-color);
+  --remark-color-dark: var(--invariant-color-dark);
+  --remark-color-darker: var(--invariant-color-darker);
+}
+
+dl.note > dt::before, dl.warning > dt::before, dl.important > dt::before, dl.attention > dt::before, dl.remark > dt::before {
+  margin-right: 0.5em;
+}
+
+dl.note > dt::before {
+  content: url(info-16.svg);
+}
+
+dl.warning > dt::before {
+  content: url(alert-16.svg);
+}
+
+dl.important > dt::before {
+  content: url(report-16.svg);
+}
+
+dl.attention > dt::before {
+  content: url(stop-16.svg);
+}
+
+dl.remark > dt::before {
+  content: url(light-bulb-16.svg);
+}
+
+dl.important {
+  background: var(--important-color);
+  border-color: var(--important-color-dark);
+  color: var(--important-color-darker);
+  dt {
+    color: var(--important-color-dark);
+  }
+}
+
+dl.attention {
+  background: var(--attention-color);
+  border-color: var(--attention-color-dark);
+  color: var(--attention-color-darker);
+  dt {
+    color: var(--attention-color-dark);
+  }
+}
+
+dl.remark {
+  background: var(--remark-color);
+  border-color: var(--remark-color-dark);
+  color: var(--remark-color-darker);
+  dt {
+    color: var(--remark-color-dark);
+  }
+}

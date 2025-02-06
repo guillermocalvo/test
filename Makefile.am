@@ -119,6 +119,11 @@ check_PROGRAMS =                        \
     bin/check/i14                       \
     bin/check/i15                       \
     bin/check/i17                       \
+    bin/check/examples/pthreads         \
+    bin/check/examples/signals          \
+    bin/check/examples/pet-store        \
+    bin/check/examples/customization    \
+    bin/check/examples/uncaught-handler \
     bin/check/lite/uncaught             \
     bin/check/lite/caught               \
     bin/check/lite/catch-all            \
@@ -174,6 +179,11 @@ TESTS =                                 \
     bin/check/i14                       \
     bin/check/i15                       \
     bin/check/i17                       \
+    bin/check/examples/pthreads         \
+    bin/check/examples/signals          \
+    bin/check/examples/pet-store        \
+    bin/check/examples/customization    \
+    bin/check/examples/uncaught-handler \
     bin/check/lite/uncaught             \
     bin/check/lite/caught               \
     bin/check/lite/catch-all            \
@@ -198,6 +208,7 @@ XFAIL_TESTS =                           \
     bin/check/g05                       \
     bin/check/g06                       \
     bin/check/i05                       \
+    bin/check/examples/uncaught-handler \
     bin/check/lite/uncaught             \
     bin/check/lite/overflow             \
     bin/check/backtrace/backtraced
@@ -270,6 +281,15 @@ bin_check_i11_SOURCES                   = src/exceptions4c.c tests/i11.c
 bin_check_i14_SOURCES                   = src/exceptions4c.c tests/i14.c
 bin_check_i15_SOURCES                   = src/exceptions4c.c tests/i15.c
 bin_check_i17_SOURCES                   = src/exceptions4c.c tests/i17.c
+
+# exceptions4c examples
+
+bin_check_examples_pthreads_CFLAGS      = -Wall -Werror --pedantic -Wno-missing-braces -I$(EXCEPTIONS4C_PATH) -Iexamples
+bin_check_examples_pthreads_SOURCES     = src/exceptions4c.c examples/pthreads.c
+bin_check_examples_signals_SOURCES      = src/exceptions4c.c examples/signals.c
+bin_check_examples_pet_store_SOURCES    = src/exceptions4c.c examples/pet-store.c
+bin_check_examples_customization_SOURCES = src/exceptions4c.c examples/customization.c
+bin_check_examples_uncaught_handler_SOURCES = src/exceptions4c.c examples/uncaught-handler.c
 
 
 # exceptions4c tests (lightweight version)

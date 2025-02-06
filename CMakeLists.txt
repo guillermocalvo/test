@@ -142,3 +142,31 @@ foreach(TEST IN LISTS TESTS)
 endforeach()
 
 set_property(TEST uncaught PROPERTY WILL_FAIL TRUE)
+
+# EXAMPLES
+
+add_executable(pthreads "examples/pthreads.c")
+target_link_libraries(pthreads exceptions4c Threads::Threads)
+target_include_directories(pthreads PUBLIC src examples)
+add_test(NAME pthreads COMMAND $<TARGET_FILE:pthreads>)
+
+add_executable(signals "examples/signals.c")
+target_link_libraries(signals exceptions4c)
+target_include_directories(signals PUBLIC src)
+add_test(NAME signals COMMAND $<TARGET_FILE:signals>)
+
+add_executable(pet-store "examples/pet-store.c")
+target_link_libraries(pet-store exceptions4c)
+target_include_directories(pet-store PUBLIC src)
+add_test(NAME pet-store COMMAND $<TARGET_FILE:pet-store>)
+
+add_executable(customization "examples/customization.c")
+target_link_libraries(customization exceptions4c)
+target_include_directories(customization PUBLIC src)
+add_test(NAME customization COMMAND $<TARGET_FILE:customization>)
+
+add_executable(uncaught-handler "examples/uncaught-handler.c")
+target_link_libraries(uncaught-handler exceptions4c)
+target_include_directories(uncaught-handler PUBLIC src)
+add_test(NAME uncaught-handler COMMAND $<TARGET_FILE:uncaught-handler>)
+set_property(TEST uncaught-handler PROPERTY WILL_FAIL TRUE)
