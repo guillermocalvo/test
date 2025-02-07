@@ -348,7 +348,6 @@ extern struct e4c_context exceptions4c;
                                                                             \
   exceptions4c.thrown
 
-
 /**
  * Determines whether the current exception (if any) hasn't been handled
  * yet by any #CATCH or #CATCH_ALL block.
@@ -376,7 +375,6 @@ extern struct e4c_context exceptions4c;
                                                                             \
   (exceptions4c.blocks > 0 && exceptions4c.blocks <= EXCEPTIONS4C_MAX_BLOCKS\
     && EXCEPTION_BLOCK.uncaught)
-
 
 /**
  * @internal
