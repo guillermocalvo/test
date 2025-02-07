@@ -149,9 +149,9 @@ that must be called. The code block using the resource is free to throw exceptio
 
 @snippet pet-store.c using
 
-1. The result will be acquired by calling the function with the supplied arguments, if any.
-2. The code block will be executed.
-3. The result will be disposed of, by calling the other function, no matter whether an exception happens or not.
+1. The resource `pet` will be acquired by calling `pet_find` with the supplied argument `id`.
+2. The #USING block will be executed.
+3. The resource `pet` will be disposed of, by calling `pet_free`, no matter whether an exception happens or not.
 
 You can append #CATCH blocks to deal with exceptions that may happen during the manipulation of the resource. Just
 remember: by the time the #CATCH block is executed, the resource will already have been disposed of.
@@ -189,7 +189,7 @@ Once you have a reference to this structure, you can set up different handlers.
 Exceptions support [custom data](#e4c_exception.data). By default, this data is left uninitialized when an exception is
 thrown.
 
-You can set the your own [exception initializer](#e4c_context.initialize_exception) and your function will be executed
+You can set a custom [exception initializer](#e4c_context.initialize_exception) and your function will be executed
 whenever an exception is thrown.
 
 @snippet customization.c initialize_exception
