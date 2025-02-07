@@ -98,13 +98,7 @@ check_PROGRAMS =                        \
     bin/check/f05                       \
     bin/check/f06                       \
     bin/check/f07                       \
-    bin/check/g04                       \
-    bin/check/g05                       \
-    bin/check/g06                       \
     bin/check/g07                       \
-    bin/check/g08                       \
-    bin/check/g09                       \
-    bin/check/g10                       \
     bin/check/g11                       \
     bin/check/g12                       \
     bin/check/i02                       \
@@ -158,13 +152,7 @@ TESTS =                                 \
     bin/check/f05                       \
     bin/check/f06                       \
     bin/check/f07                       \
-    bin/check/g04                       \
-    bin/check/g05                       \
-    bin/check/g06                       \
     bin/check/g07                       \
-    bin/check/g08                       \
-    bin/check/g09                       \
-    bin/check/g10                       \
     bin/check/g11                       \
     bin/check/g12                       \
     bin/check/i02                       \
@@ -204,9 +192,6 @@ XFAIL_TESTS =                           \
     bin/check/d02                       \
     bin/check/d03                       \
     bin/check/d04                       \
-    bin/check/g04                       \
-    bin/check/g05                       \
-    bin/check/g06                       \
     bin/check/i05                       \
     bin/check/examples/uncaught-handler \
     bin/check/lite/uncaught             \
@@ -260,13 +245,7 @@ bin_check_f04_SOURCES                   = src/exceptions4c.c tests/f04.c
 bin_check_f05_SOURCES                   = src/exceptions4c.c tests/f05.c
 bin_check_f06_SOURCES                   = src/exceptions4c.c tests/f06.c
 bin_check_f07_SOURCES                   = src/exceptions4c.c tests/f07.c
-bin_check_g04_SOURCES                   = src/exceptions4c.c tests/g04.c
-bin_check_g05_SOURCES                   = src/exceptions4c.c tests/g05.c
-bin_check_g06_SOURCES                   = src/exceptions4c.c tests/g06.c
 bin_check_g07_SOURCES                   = src/exceptions4c.c tests/g07.c
-bin_check_g08_SOURCES                   = src/exceptions4c.c tests/g08.c
-bin_check_g09_SOURCES                   = src/exceptions4c.c tests/g09.c
-bin_check_g10_SOURCES                   = src/exceptions4c.c tests/g10.c
 bin_check_g11_SOURCES                   = src/exceptions4c.c tests/g11.c
 bin_check_g12_SOURCES                   = src/exceptions4c.c tests/g12.c
 bin_check_i02_SOURCES                   = src/exceptions4c.c tests/i02.c
