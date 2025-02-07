@@ -125,6 +125,7 @@ check_PROGRAMS =                        \
     bin/check/lite/limits               \
     bin/check/lite/overflow             \
     bin/check/pthreads/multithread      \
+    bin/check/pthreads/dangling-context \
     bin/check/backtrace/backtraced
 
 TESTS =                                 \
@@ -179,6 +180,7 @@ TESTS =                                 \
     bin/check/lite/limits               \
     bin/check/lite/overflow             \
     bin/check/pthreads/multithread      \
+    bin/check/pthreads/dangling-context \
     bin/check/backtrace/backtraced
 
 XFAIL_TESTS =                           \
@@ -284,6 +286,7 @@ bin_check_lite_overflow_SOURCES         = tests/lite/overflow.c
 # exceptions4c-pthreads tests
 
 bin_check_pthreads_multithread_SOURCES  = src/exceptions4c.c src/pthreads/exceptions4c-pthreads.c tests/pthreads/multithread.c
+bin_check_pthreads_dangling_context_SOURCES = src/exceptions4c.c src/pthreads/exceptions4c-pthreads.c tests/pthreads/dangling-context.c
 
 
 # exceptions4c-backtrace tests
