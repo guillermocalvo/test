@@ -54,6 +54,10 @@
 #include <stdbool.h>
 #endif
 
+# ifdef __cplusplus
+extern "C" {
+# endif
+
 /**
  * Introduces a block of code aware of exceptions
  *
@@ -952,5 +956,9 @@ e4c_env * e4c_throw(const struct e4c_exception_type * type, const char * name, c
  * @warning This function SHOULD be called only via #RETRY or #REACQUIRE.
  */
 e4c_env * e4c_restart(bool should_reacquire, int max_attempts, const struct e4c_exception_type * type, const char * name, const char * file, int line, const char * function, const char * format, ...);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif
