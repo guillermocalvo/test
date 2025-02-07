@@ -65,9 +65,9 @@ set(TESTS
         f05
         f06
         f07
-        g07
-        g11
-        g12
+        catch-sigsegv
+        catch-sigterm
+        catch-sigint
         i02
         i03
         i04

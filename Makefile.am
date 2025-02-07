@@ -98,9 +98,9 @@ check_PROGRAMS =                        \
     bin/check/f05                       \
     bin/check/f06                       \
     bin/check/f07                       \
-    bin/check/g07                       \
-    bin/check/g11                       \
-    bin/check/g12                       \
+    bin/check/catch-sigsegv             \
+    bin/check/catch-sigterm             \
+    bin/check/catch-sigint              \
     bin/check/i02                       \
     bin/check/i03                       \
     bin/check/i04                       \
@@ -152,9 +152,9 @@ TESTS =                                 \
     bin/check/f05                       \
     bin/check/f06                       \
     bin/check/f07                       \
-    bin/check/g07                       \
-    bin/check/g11                       \
-    bin/check/g12                       \
+    bin/check/catch-sigsegv             \
+    bin/check/catch-sigterm             \
+    bin/check/catch-sigint              \
     bin/check/i02                       \
     bin/check/i03                       \
     bin/check/i04                       \
@@ -245,9 +245,9 @@ bin_check_f04_SOURCES                   = src/exceptions4c.c tests/f04.c
 bin_check_f05_SOURCES                   = src/exceptions4c.c tests/f05.c
 bin_check_f06_SOURCES                   = src/exceptions4c.c tests/f06.c
 bin_check_f07_SOURCES                   = src/exceptions4c.c tests/f07.c
-bin_check_g07_SOURCES                   = src/exceptions4c.c tests/g07.c
-bin_check_g11_SOURCES                   = src/exceptions4c.c tests/g11.c
-bin_check_g12_SOURCES                   = src/exceptions4c.c tests/g12.c
+bin_check_catch_sigsegv_SOURCES         = src/exceptions4c.c tests/catch-sigsegv.c
+bin_check_catch_sigterm_SOURCES         = src/exceptions4c.c tests/catch-sigterm.c
+bin_check_catch_sigint_SOURCES          = src/exceptions4c.c tests/catch-sigint.c
 bin_check_i02_SOURCES                   = src/exceptions4c.c tests/i02.c
 bin_check_i03_SOURCES                   = src/exceptions4c.c tests/i03.c
 bin_check_i04_SOURCES                   = src/exceptions4c.c tests/i04.c
