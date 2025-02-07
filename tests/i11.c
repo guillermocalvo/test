@@ -26,7 +26,7 @@ TEST_CASE{
             is_uncaught = e4c_is_uncaught();
         }
 
-    } CATCH(RuntimeException) {
+    } CATCH (RuntimeException) {
 
         TEST_DUMP("%s", e4c_get_exception()->message);
     }

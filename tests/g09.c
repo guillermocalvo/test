@@ -31,7 +31,7 @@ TEST_CASE{
 
         TEST_FAIL("AbortException should have been thrown");
 
-    } CATCH(RuntimeException) {
+    } CATCH (RuntimeException) {
 
         caught = true;
 

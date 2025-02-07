@@ -21,11 +21,11 @@ TEST_CASE{
 
         THROW(RuntimeException, "I can only be caught once for each try block.");
 
-    } CATCH(RuntimeException) {
+    } CATCH (RuntimeException) {
 
         caught1 = true;
 
-    } CATCH(RuntimeException) {
+    } CATCH (RuntimeException) {
 
         caught2 = true;
     }

@@ -14,7 +14,7 @@ TEST_CASE{
 
         THROW(RuntimeException, "%s_%s", "FORMATTED", "MESSAGE");
 
-    } CATCH(RuntimeException) {
+    } CATCH (RuntimeException) {
 
         TEST_ASSERT_STRING_EQUALS(e4c_get_exception()->message, "FORMATTED_MESSAGE");
     }

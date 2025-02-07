@@ -39,7 +39,7 @@ TEST_CASE{
         TEST_DUMP("%d", integer);
         TEST_DUMP("%p", (void *)pointer);
 
-    } CATCH(NullPointerException) {
+    } CATCH (NullPointerException) {
 
         caught = true;
 

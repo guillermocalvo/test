@@ -36,7 +36,7 @@ TEST_CASE{
 
         another_function(&cleanup1, &cleanup2);
 
-    } CATCH(RuntimeException) {
+    } CATCH (RuntimeException) {
 
         TEST_ASSERT_EQUALS(e4c_get_exception()->type, &NullPointerException);
     }

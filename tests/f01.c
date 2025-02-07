@@ -19,7 +19,7 @@ TEST_CASE{
 
         THROW(NullPointerException, "I'm going to be caught.");
 
-    } CATCH(NullPointerException) {
+    } CATCH (NullPointerException) {
 
         caught = true;
     }

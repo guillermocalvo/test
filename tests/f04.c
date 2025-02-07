@@ -25,7 +25,7 @@ TEST_CASE{
 
         aux(&uncaught);
 
-    } CATCH(RuntimeException) {
+    } CATCH (RuntimeException) {
 
         TEST_ASSERT( e4c_get_exception()->type == &NullPointerException );
     }
@@ -40,9 +40,9 @@ void aux(volatile bool * flag){
 
         THROW(NullPointerException, "I am not an instance of NotEnoughMemoryException.");
 
-    } CATCH(NotEnoughMemoryException) {
+    } CATCH (NotEnoughMemoryException) {
 
-        TEST_FAIL("Block `catch(NotEnoughMemoryException)` cannot handle an NullPointerException");
+        TEST_FAIL("Block `CATCH (NotEnoughMemoryException)` cannot handle an NullPointerException");
 
     } FINALLY {
 

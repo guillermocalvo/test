@@ -19,11 +19,11 @@ TEST_CASE{
 
         total_tries++;
 
-        if(total_tries == 1){
+        if (total_tries == 1) {
 
             TEST_ECHO("First try");
 
-        }else{
+        } else {
 
             int retries = total_tries - 1;
 

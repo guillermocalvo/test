@@ -19,12 +19,12 @@ TEST_CASE{
 
             THROW(CustomException, "This is the original cause of the issue");
 
-        } CATCH(RuntimeException) {
+        } CATCH (RuntimeException) {
 
             THROW(RuntimeException, "This is the wrapper exception");
         }
 
-    } CATCH(RuntimeException) {
+    } CATCH (RuntimeException) {
 
         TEST_ASSERT_EQUALS(e4c_get_exception()->cause->type, &CustomException);
     }

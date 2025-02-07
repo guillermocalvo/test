@@ -14,7 +14,7 @@ int main(int argc, char * argv[]) {
   e4c_get_context()->initialize_exception = my_custom_data;
   TRY {
     THROW(MY_ERROR, "Oops");
-  } CATCH(MY_ERROR) {
+  } CATCH (MY_ERROR) {
     const char * data = e4c_get_exception()->data;
     printf("Custom data: %s\n", data);
   }
@@ -42,7 +42,7 @@ int main(int argc, char * argv[]) {
   context->finalize_exception = my_finalizer;
   TRY {
     THROW(MY_ERROR, "Oops");
-  } CATCH(MY_ERROR) {
+  } CATCH (MY_ERROR) {
     const struct my_custom_data * data = e4c_get_exception()->data;
     printf("ID: %d MSG: %s\n", data->id, data->msg);
   }
@@ -79,7 +79,7 @@ int main(int argc, char * argv[]) {
   e4c_set_context_supplier(my_context_supplier);
   TRY {
     THROW(MY_ERROR, "Oops");
-  } CATCH(MY_ERROR) {
+  } CATCH (MY_ERROR) {
     const struct my_custom_data * data = e4c_get_exception()->data;
     printf("MSG: %s\n", data->msg);
   }

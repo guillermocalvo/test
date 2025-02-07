@@ -16,7 +16,7 @@ TEST_CASE{
 
         THROW(RuntimeException, "Please catch me");
 
-    } CATCH(RuntimeException) {
+    } CATCH (RuntimeException) {
 
         TEST_ASSERT( e4c_get_exception() );
 

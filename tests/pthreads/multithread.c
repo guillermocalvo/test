@@ -69,7 +69,7 @@ static void * catching_exception(void * arg) {
 
         foobar("CATCHING_EXCEPTION");
 
-    } CATCH(MY_EXCEPTION) {
+    } CATCH (MY_EXCEPTION) {
         const struct e4c_exception * thrown = e4c_get_exception();
 
         printf("Thread #%llu: Caught %s: %s\n", (long long unsigned) self, thrown->name, thrown->message);

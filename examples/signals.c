@@ -17,7 +17,7 @@ int main(void) {
 
   TRY {
     *null_pointer = 123;
-  } CATCH(SEGFAULT) {
+  } CATCH (SEGFAULT) {
     printf("Danger avoided!\n");
   }
 

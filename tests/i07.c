@@ -22,7 +22,7 @@ TEST_CASE{
 
         THROW(RuntimeException, "Initialize my custom data with the result of a function");
 
-    } CATCH(RuntimeException) {
+    } CATCH (RuntimeException) {
 
         custom_handler_was_initialized = ( strcmp(e4c_get_exception()->data, foobar) == 0 );
     }

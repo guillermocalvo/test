@@ -33,7 +33,7 @@ TEST_CASE{
 
         another_function(&cleanup);
 
-    } CATCH(RuntimeException) {
+    } CATCH (RuntimeException) {
 
         TEST_ASSERT_EQUALS(e4c_get_exception()->type, &NullPointerException);
     }
@@ -49,7 +49,7 @@ void another_function(volatile bool * flag){
 
         THROW(NullPointerException, "Get me out of here.");
 
-    } CATCH(RuntimeException) {
+    } CATCH (RuntimeException) {
 
         THROW(NullPointerException, "Told you to get me out of here.");
 

@@ -26,7 +26,7 @@ TEST_CASE{
 
         THROW(RuntimeException, "Finalize my custom data");
 
-    } CATCH(RuntimeException) {
+    } CATCH (RuntimeException) {
 
         custom_handler_was_initialized = ( strcmp(e4c_get_exception()->data, foobar) == 0 );
     }

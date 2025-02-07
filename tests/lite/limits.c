@@ -17,7 +17,7 @@ int main(void) {
 
 void nest_try_block(int keep_nesting){
 
-    if(keep_nesting){
+    if (keep_nesting) {
 
         TRY {
 

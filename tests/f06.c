@@ -22,11 +22,11 @@ TEST_CASE{
 
         THROW(NullPointerException, "I'm going to be caught by the first (generic) catch block.");
 
-    } CATCH(RuntimeException) {
+    } CATCH (RuntimeException) {
 
         caught1 = true;
 
-    } CATCH(NullPointerException) {
+    } CATCH (NullPointerException) {
 
         caught2 = true;
     }

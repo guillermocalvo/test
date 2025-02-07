@@ -18,7 +18,7 @@ int main(void) {
 
         THROW(MY_EXCEPTION, "This is my exception");
 
-    } CATCH(MY_EXCEPTION) {
+    } CATCH (MY_EXCEPTION) {
 
         caught = 1;
 

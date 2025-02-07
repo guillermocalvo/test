@@ -23,7 +23,7 @@ TEST_CASE{
 
         aux(&uncaught);
 
-    } CATCH(RuntimeException) {
+    } CATCH (RuntimeException) {
 
         TEST_ASSERT( e4c_get_exception()->type == &RuntimeException );
     }
@@ -38,9 +38,9 @@ void aux(volatile bool * flag){
 
         THROW(RuntimeException, "I am not an instance of NullPointerException.");
 
-    } CATCH(NullPointerException) {
+    } CATCH (NullPointerException) {
 
-        TEST_FAIL("Block `catch(NullPointerException)` cannot handle a RuntimeException");
+        TEST_FAIL("Block `CATCH (NullPointerException)` cannot handle a RuntimeException");
 
     } FINALLY {
 

@@ -28,7 +28,7 @@ TEST_CASE{
 
         TEST_FAIL("TerminationException should have been thrown");
 
-    } CATCH(RuntimeException) {
+    } CATCH (RuntimeException) {
 
         caught = true;
 

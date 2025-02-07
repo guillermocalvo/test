@@ -29,7 +29,7 @@ TEST_CASE{
 
         TEST_FAIL("IllegalInstructionException should have been thrown");
 
-    } CATCH(RuntimeException) {
+    } CATCH (RuntimeException) {
 
         exception_was_caught = true;
 

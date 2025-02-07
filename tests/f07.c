@@ -27,7 +27,7 @@ TEST_CASE{
 
         aux1();
 
-    } CATCH(RuntimeException) {
+    } CATCH (RuntimeException) {
 
         caught = true;
 
@@ -67,9 +67,9 @@ void aux4(void){
 
         aux5();
 
-    } CATCH(NullPointerException) {
+    } CATCH (NullPointerException) {
 
-        TEST_FAIL("Block `catch(NullPointerException)` cannot handle a RuntimeException");
+        TEST_FAIL("Block `CATCH (NullPointerException)` cannot handle a RuntimeException");
     }
 }
 

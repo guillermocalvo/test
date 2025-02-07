@@ -33,7 +33,7 @@ int main(void) {
             destroyed = 1;
         }
 
-    } CATCH(PROBLEM) {
+    } CATCH (PROBLEM) {
 
         printf("No problem :-)");
     }

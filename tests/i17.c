@@ -24,17 +24,17 @@ TEST_CASE{
 
                 THROW(CustomException, "This is the original cause of the issue");
 
-            } CATCH(CustomException) {
+            } CATCH (CustomException) {
 
                 THROW(NullPointerException, "First wrapper");
             }
 
-        } CATCH(NullPointerException) {
+        } CATCH (NullPointerException) {
 
             THROW(RuntimeException, "Second wrapper");
         }
 
-    } CATCH(RuntimeException) {
+    } CATCH (RuntimeException) {
 
         const struct e4c_exception * exception = e4c_get_exception();
 

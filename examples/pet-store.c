@@ -81,9 +81,9 @@ pet_status get_pet_status(int id) {
   pet_status status;
   TRY {
     status = pet_find(id)->status;
-  } CATCH(PET_ERROR) {
+  } CATCH (PET_ERROR) {
     status = UNKNOWN;
-  } CATCH(NOT_ENOUGH_MEMORY) {
+  } CATCH (NOT_ENOUGH_MEMORY) {
     abort();
   }
   return status;
@@ -118,7 +118,7 @@ pet_status get_pet_status(int id) {
   TRY {
     pet = pet_find(id);
     status = pet->status;
-  } CATCH(PET_NOT_FOUND) {
+  } CATCH (PET_NOT_FOUND) {
     status = UNKNOWN;
   } FINALLY {
     pet_free(pet);
@@ -150,7 +150,7 @@ pet_status get_pet_status(int id) {
   Pet pet;
   USING(pet, pet_free, pet_find, id) {
     status = pet->status;
-  } CATCH(PET_NOT_FOUND) {
+  } CATCH (PET_NOT_FOUND) {
     status = UNKNOWN;
   }
   return status;
@@ -171,7 +171,7 @@ pet_status get_pet_status(int id) {
     pet = pet_find(id);
   } USE {
     status = pet->status;
-  } CATCH(PET_NOT_FOUND) {
+  } CATCH (PET_NOT_FOUND) {
     status = UNKNOWN;
   }
   return status;

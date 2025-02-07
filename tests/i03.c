@@ -24,18 +24,18 @@ TEST_CASE{
 
         total_acquisitions++;
 
-        if(total_acquisitions == 1){
+        if (total_acquisitions == 1) {
 
             TEST_ECHO("First acquisition");
 
-        }else{
+        } else {
 
             int reacquisitions = total_acquisitions - 1;
 
             TEST_DUMP("%d", reacquisitions);
         }
 
-        if(total_acquisitions < 4) {
+        if (total_acquisitions < 4) {
             THROW(RuntimeException, "Simulates an error while acquiring foo");
         }
 
@@ -43,7 +43,7 @@ TEST_CASE{
 
         TEST_DUMP("%d", foo);
 
-    } CATCH(RuntimeException) {
+    } CATCH (RuntimeException) {
 
         REACQUIRE(4, RuntimeException, NULL);
     }
