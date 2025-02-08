@@ -68,7 +68,7 @@ set(TESTS
         retry
         reacquire
         throw-with-format
-        i05
+        uncaught-handler
         initialize-exception
         finalize-exception
         exception-cause
@@ -85,7 +85,6 @@ endforeach()
 
 set_property(TEST uncaught-exception-1 PROPERTY WILL_FAIL TRUE)
 set_property(TEST uncaught-exception-2 PROPERTY WILL_FAIL TRUE)
-set_property(TEST i05 PROPERTY WILL_FAIL TRUE)
 
 set(TESTS
         uncaught
@@ -146,8 +145,8 @@ target_link_libraries(customization exceptions4c)
 target_include_directories(customization PUBLIC src)
 add_test(NAME customization COMMAND $<TARGET_FILE:customization>)
 
-add_executable(uncaught-handler "examples/uncaught-handler.c")
-target_link_libraries(uncaught-handler exceptions4c)
-target_include_directories(uncaught-handler PUBLIC src)
-add_test(NAME uncaught-handler COMMAND $<TARGET_FILE:uncaught-handler>)
-set_property(TEST uncaught-handler PROPERTY WILL_FAIL TRUE)
+add_executable(examples-uncaught-handler "examples/uncaught-handler.c")
+target_link_libraries(examples-uncaught-handler exceptions4c)
+target_include_directories(examples-uncaught-handler PUBLIC src)
+add_test(NAME examples-uncaught-handler COMMAND $<TARGET_FILE:examples-uncaught-handler>)
+set_property(TEST examples-uncaught-handler PROPERTY WILL_FAIL TRUE)

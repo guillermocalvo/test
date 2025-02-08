@@ -101,7 +101,7 @@ check_PROGRAMS =                        \
     bin/check/retry                     \
     bin/check/reacquire                 \
     bin/check/throw-with-format         \
-    bin/check/i05                       \
+    bin/check/uncaught-handler          \
     bin/check/initialize-exception      \
     bin/check/finalize-exception        \
     bin/check/exception-cause           \
@@ -148,7 +148,7 @@ TESTS =                                 \
     bin/check/retry                     \
     bin/check/reacquire                 \
     bin/check/throw-with-format         \
-    bin/check/i05                       \
+    bin/check/uncaught-handler          \
     bin/check/initialize-exception      \
     bin/check/finalize-exception        \
     bin/check/exception-cause           \
@@ -176,7 +176,6 @@ XFAIL_TESTS =                           \
     bin/check/b22                       \
     bin/check/uncaught-exception-1      \
     bin/check/uncaught-exception-2      \
-    bin/check/i05                       \
     bin/check/examples/uncaught-handler \
     bin/check/lite/uncaught             \
     bin/check/lite/overflow             \
@@ -232,7 +231,7 @@ bin_check_catch_sigint_SOURCES          = src/exceptions4c.c tests/catch-sigint.
 bin_check_retry_SOURCES                 = src/exceptions4c.c tests/retry.c
 bin_check_reacquire_SOURCES             = src/exceptions4c.c tests/reacquire.c
 bin_check_throw_with_format_SOURCES     = src/exceptions4c.c tests/throw-with-format.c
-bin_check_i05_SOURCES                   = src/exceptions4c.c tests/i05.c
+bin_check_uncaught_handler_SOURCES      = src/exceptions4c.c tests/uncaught-handler.c
 bin_check_initialize_exception_SOURCES  = src/exceptions4c.c tests/initialize-exception.c
 bin_check_finalize_exception_SOURCES    = src/exceptions4c.c tests/finalize-exception.c
 bin_check_exception_cause_SOURCES       = src/exceptions4c.c tests/exception-cause.c
