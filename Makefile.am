@@ -79,11 +79,11 @@ check_PROGRAMS =                        \
     bin/check/is-uncaught               \
     bin/check/b08                       \
     bin/check/b10                       \
-    bin/check/b15                       \
+    bin/check/catch-exception           \
     bin/check/b18                       \
     bin/check/b19                       \
     bin/check/b22                       \
-    bin/check/d01                       \
+    bin/check/uncaught-exception        \
     bin/check/d02                       \
     bin/check/d03                       \
     bin/check/d04                       \
@@ -133,11 +133,11 @@ TESTS =                                 \
     bin/check/is-uncaught               \
     bin/check/b08                       \
     bin/check/b10                       \
-    bin/check/b15                       \
+    bin/check/catch-exception           \
     bin/check/b18                       \
     bin/check/b19                       \
     bin/check/b22                       \
-    bin/check/d01                       \
+    bin/check/uncaught-exception        \
     bin/check/d02                       \
     bin/check/d03                       \
     bin/check/d04                       \
@@ -188,7 +188,7 @@ XFAIL_TESTS =                           \
     bin/check/b18                       \
     bin/check/b19                       \
     bin/check/b22                       \
-    bin/check/d01                       \
+    bin/check/uncaught-exception        \
     bin/check/d02                       \
     bin/check/d03                       \
     bin/check/d04                       \
@@ -226,11 +226,11 @@ bin_check_get_exception_SOURCES         = src/exceptions4c.c tests/get-exception
 bin_check_is_uncaught_SOURCES           = src/exceptions4c.c tests/is-uncaught.c
 bin_check_b08_SOURCES                   = src/exceptions4c.c tests/b08.c
 bin_check_b10_SOURCES                   = src/exceptions4c.c tests/b10.c
-bin_check_b15_SOURCES                   = src/exceptions4c.c tests/b15.c
+bin_check_catch_exception_SOURCES       = src/exceptions4c.c tests/catch-exception.c
 bin_check_b18_SOURCES                   = src/exceptions4c.c tests/b18.c
 bin_check_b19_SOURCES                   = src/exceptions4c.c tests/b19.c
 bin_check_b22_SOURCES                   = src/exceptions4c.c tests/b22.c
-bin_check_d01_SOURCES                   = src/exceptions4c.c tests/d01.c
+bin_check_uncaught_exception_SOURCES    = src/exceptions4c.c tests/uncaught-exception.c
 bin_check_d02_SOURCES                   = src/exceptions4c.c tests/d02.c
 bin_check_d03_SOURCES                   = src/exceptions4c.c tests/d03.c
 bin_check_d04_SOURCES                   = src/exceptions4c.c tests/d04.c
