@@ -699,9 +699,6 @@ struct e4c_exception {
 
     /** A possibly-null pointer to custom data associated to this exception. */
     void * data;
-
-    /* @internal Number of times this exception is referenced. */
-    int _ref_count;
 };
 
 /**

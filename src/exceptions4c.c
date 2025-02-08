@@ -185,15 +185,15 @@ bool e4c_next(const char * file, const int line, const char * function) {
 
     /* deallocate this block and promote its outer block to be the current one */
     context->_innermost_block = block->outer_block;
-    if (!uncaught) {
-        /* deallocate also its exception only if it has been caught */
-        delete_exception(context, exception);
-    }
     free(block);
 
-    /* check for uncaught exceptions */
-    if (exception != NULL && uncaught) {
-        propagate(context, exception);
+    /* deallocate or propagate its exception, depending on whether it was caught */
+    if (exception != NULL) {
+        if (uncaught) {
+            propagate(context, exception);
+        } else {
+            delete_exception(context, exception);
+        }
     }
 
     /* get out of the loop */
@@ -276,9 +276,11 @@ e4c_env * e4c_restart(const bool should_reacquire, const int max_attempts, const
         throw(context, type, name, error_number, file, line, function, format, arguments_list);
         va_end(arguments_list);
     } else {
-        /* delete the currently thrown exception; jump back to the TRY or WITH block */
-        delete_exception(context, block->exception);
-        block->exception    = NULL;
+        /* suppress the currently thrown exception; jump back to the TRY or WITH block */
+        if (block->exception != NULL) {
+            delete_exception(context, block->exception);
+            block->exception = NULL;
+        }
         block->uncaught     = false;
         block->stage        = should_reacquire ? BEGINNING : ACQUIRING;
     }
@@ -357,7 +359,7 @@ static void propagate(const struct e4c_context * context, struct e4c_exception *
     }
 
     /** if the block already had an exception, it will be suppressed by the new one */
-    if (exception != block->exception) {
+    if (block->exception != NULL && block->exception != exception) {
         delete_exception(context, block->exception);
     }
 
@@ -432,7 +434,6 @@ static void throw(const struct e4c_context * context, const struct e4c_exception
     }
 
     /* "instantiate" the specified exception */
-    exception->_ref_count   = 1;
     exception->name         = name;
     exception->file         = file;
     exception->line         = line;
@@ -449,11 +450,11 @@ static void throw(const struct e4c_context * context, const struct e4c_exception
     }
 
     /* capture the cause of this exception */
-    const struct e4c_block * block;
+    struct e4c_block * block;
     for (block = context->_innermost_block; block != NULL; block = block->outer_block) {
-        if (block->exception != NULL) {
+        if (block->exception != NULL && (block->uncaught || block->stage == CATCHING)) {
             exception->cause = block->exception;
-            block->exception->_ref_count++;
+            block->exception = NULL;
             break;
         }
     }
@@ -473,17 +474,13 @@ static void throw(const struct e4c_context * context, const struct e4c_exception
  * @param exception the exception to delete.
  */
 static void delete_exception(const struct e4c_context * context, struct e4c_exception * exception) {
-    if (exception != NULL) {
-        /* keep track of the number of references this exception has */
-        exception->_ref_count--;
-        if (exception->_ref_count <= 0) {
-            if (context->finalize_exception != NULL) {
-                context->finalize_exception(exception);
-            }
-            delete_exception(context, exception->cause);
-            free(exception);
-        }
+    if (context->finalize_exception != NULL) {
+        context->finalize_exception(exception);
     }
+    if (exception->cause != NULL) {
+        delete_exception(context, exception->cause);
+    }
+    free(exception);
 }
 
 /**
