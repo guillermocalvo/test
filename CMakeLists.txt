@@ -65,8 +65,8 @@ set(TESTS
         catch-sigsegv
         catch-sigterm
         catch-sigint
-        i02
-        i03
+        retry
+        reacquire
         i04
         i05
         i07
