@@ -67,7 +67,7 @@ set(TESTS
         catch-sigint
         retry
         reacquire
-        i04
+        throw-with-format
         i05
         i07
         i08

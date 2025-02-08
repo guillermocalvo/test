@@ -100,7 +100,7 @@ check_PROGRAMS =                        \
     bin/check/catch-sigint              \
     bin/check/retry                     \
     bin/check/reacquire                 \
-    bin/check/i04                       \
+    bin/check/throw-with-format         \
     bin/check/i05                       \
     bin/check/i07                       \
     bin/check/i08                       \
@@ -152,7 +152,7 @@ TESTS =                                 \
     bin/check/catch-sigint              \
     bin/check/retry                     \
     bin/check/reacquire                 \
-    bin/check/i04                       \
+    bin/check/throw-with-format         \
     bin/check/i05                       \
     bin/check/i07                       \
     bin/check/i08                       \
@@ -241,7 +241,7 @@ bin_check_catch_sigterm_SOURCES         = src/exceptions4c.c tests/catch-sigterm
 bin_check_catch_sigint_SOURCES          = src/exceptions4c.c tests/catch-sigint.c
 bin_check_retry_SOURCES                 = src/exceptions4c.c tests/retry.c
 bin_check_reacquire_SOURCES             = src/exceptions4c.c tests/reacquire.c
-bin_check_i04_SOURCES                   = src/exceptions4c.c tests/i04.c
+bin_check_throw_with_format_SOURCES     = src/exceptions4c.c tests/throw-with-format.c
 bin_check_i05_SOURCES                   = src/exceptions4c.c tests/i05.c
 bin_check_i07_SOURCES                   = src/exceptions4c.c tests/i07.c
 bin_check_i08_SOURCES                   = src/exceptions4c.c tests/i08.c
