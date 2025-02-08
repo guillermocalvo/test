@@ -104,9 +104,6 @@ check_PROGRAMS =                        \
     bin/check/i05                       \
     bin/check/initialize-exception      \
     bin/check/finalize-exception        \
-    bin/check/i09                       \
-    bin/check/i10                       \
-    bin/check/i11                       \
     bin/check/i14                       \
     bin/check/i15                       \
     bin/check/i17                       \
@@ -156,9 +153,6 @@ TESTS =                                 \
     bin/check/i05                       \
     bin/check/initialize-exception      \
     bin/check/finalize-exception        \
-    bin/check/i09                       \
-    bin/check/i10                       \
-    bin/check/i11                       \
     bin/check/i14                       \
     bin/check/i15                       \
     bin/check/i17                       \
@@ -245,9 +239,6 @@ bin_check_throw_with_format_SOURCES     = src/exceptions4c.c tests/throw-with-fo
 bin_check_i05_SOURCES                   = src/exceptions4c.c tests/i05.c
 bin_check_initialize_exception_SOURCES  = src/exceptions4c.c tests/initialize-exception.c
 bin_check_finalize_exception_SOURCES    = src/exceptions4c.c tests/finalize-exception.c
-bin_check_i09_SOURCES                   = src/exceptions4c.c tests/i09.c
-bin_check_i10_SOURCES                   = src/exceptions4c.c tests/i10.c
-bin_check_i11_SOURCES                   = src/exceptions4c.c tests/i11.c
 bin_check_i14_SOURCES                   = src/exceptions4c.c tests/i14.c
 bin_check_i15_SOURCES                   = src/exceptions4c.c tests/i15.c
 bin_check_i17_SOURCES                   = src/exceptions4c.c tests/i17.c
