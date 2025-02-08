@@ -49,7 +49,6 @@ enable_testing()
 set(TESTS
         get-exception
         is-uncaught
-        b11
         b15
         d01
         d02

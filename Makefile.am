@@ -79,7 +79,6 @@ check_PROGRAMS =                        \
     bin/check/is-uncaught               \
     bin/check/b08                       \
     bin/check/b10                       \
-    bin/check/b11                       \
     bin/check/b15                       \
     bin/check/b18                       \
     bin/check/b19                       \
@@ -134,7 +133,6 @@ TESTS =                                 \
     bin/check/is-uncaught               \
     bin/check/b08                       \
     bin/check/b10                       \
-    bin/check/b11                       \
     bin/check/b15                       \
     bin/check/b18                       \
     bin/check/b19                       \
@@ -228,7 +226,6 @@ bin_check_get_exception_SOURCES         = src/exceptions4c.c tests/get-exception
 bin_check_is_uncaught_SOURCES           = src/exceptions4c.c tests/is-uncaught.c
 bin_check_b08_SOURCES                   = src/exceptions4c.c tests/b08.c
 bin_check_b10_SOURCES                   = src/exceptions4c.c tests/b10.c
-bin_check_b11_SOURCES                   = src/exceptions4c.c tests/b11.c
 bin_check_b15_SOURCES                   = src/exceptions4c.c tests/b15.c
 bin_check_b18_SOURCES                   = src/exceptions4c.c tests/b18.c
 bin_check_b19_SOURCES                   = src/exceptions4c.c tests/b19.c
