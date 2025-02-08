@@ -50,8 +50,8 @@ set(TESTS
         get-exception
         is-uncaught
         catch-exception
-        uncaught-exception
-        d03
+        uncaught-exception-1
+        uncaught-exception-2
         e01
         e02
         e03
@@ -88,8 +88,8 @@ foreach(TEST IN LISTS TESTS)
     set_property(TEST ${TEST} PROPERTY SKIP_RETURN_CODE 77)
 endforeach()
 
-set_property(TEST uncaught-exception PROPERTY WILL_FAIL TRUE)
-set_property(TEST d03 PROPERTY WILL_FAIL TRUE)
+set_property(TEST uncaught-exception-1 PROPERTY WILL_FAIL TRUE)
+set_property(TEST uncaught-exception-2 PROPERTY WILL_FAIL TRUE)
 set_property(TEST i05 PROPERTY WILL_FAIL TRUE)
 
 set(TESTS
