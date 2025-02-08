@@ -102,8 +102,8 @@ check_PROGRAMS =                        \
     bin/check/reacquire                 \
     bin/check/throw-with-format         \
     bin/check/i05                       \
-    bin/check/i07                       \
-    bin/check/i08                       \
+    bin/check/initialize-exception      \
+    bin/check/finalize-exception        \
     bin/check/i09                       \
     bin/check/i10                       \
     bin/check/i11                       \
@@ -154,8 +154,8 @@ TESTS =                                 \
     bin/check/reacquire                 \
     bin/check/throw-with-format         \
     bin/check/i05                       \
-    bin/check/i07                       \
-    bin/check/i08                       \
+    bin/check/initialize-exception      \
+    bin/check/finalize-exception        \
     bin/check/i09                       \
     bin/check/i10                       \
     bin/check/i11                       \
@@ -243,8 +243,8 @@ bin_check_retry_SOURCES                 = src/exceptions4c.c tests/retry.c
 bin_check_reacquire_SOURCES             = src/exceptions4c.c tests/reacquire.c
 bin_check_throw_with_format_SOURCES     = src/exceptions4c.c tests/throw-with-format.c
 bin_check_i05_SOURCES                   = src/exceptions4c.c tests/i05.c
-bin_check_i07_SOURCES                   = src/exceptions4c.c tests/i07.c
-bin_check_i08_SOURCES                   = src/exceptions4c.c tests/i08.c
+bin_check_initialize_exception_SOURCES  = src/exceptions4c.c tests/initialize-exception.c
+bin_check_finalize_exception_SOURCES    = src/exceptions4c.c tests/finalize-exception.c
 bin_check_i09_SOURCES                   = src/exceptions4c.c tests/i09.c
 bin_check_i10_SOURCES                   = src/exceptions4c.c tests/i10.c
 bin_check_i11_SOURCES                   = src/exceptions4c.c tests/i11.c

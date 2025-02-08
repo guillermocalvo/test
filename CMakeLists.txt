@@ -69,8 +69,8 @@ set(TESTS
         reacquire
         throw-with-format
         i05
-        i07
-        i08
+        initialize-exception
+        finalize-exception
         i09
         i10
         i11
