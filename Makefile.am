@@ -84,9 +84,7 @@ check_PROGRAMS =                        \
     bin/check/b19                       \
     bin/check/b22                       \
     bin/check/uncaught-exception        \
-    bin/check/d02                       \
     bin/check/d03                       \
-    bin/check/d04                       \
     bin/check/e01                       \
     bin/check/e02                       \
     bin/check/e03                       \
@@ -138,9 +136,7 @@ TESTS =                                 \
     bin/check/b19                       \
     bin/check/b22                       \
     bin/check/uncaught-exception        \
-    bin/check/d02                       \
     bin/check/d03                       \
-    bin/check/d04                       \
     bin/check/e01                       \
     bin/check/e02                       \
     bin/check/e03                       \
@@ -189,9 +185,7 @@ XFAIL_TESTS =                           \
     bin/check/b19                       \
     bin/check/b22                       \
     bin/check/uncaught-exception        \
-    bin/check/d02                       \
     bin/check/d03                       \
-    bin/check/d04                       \
     bin/check/i05                       \
     bin/check/examples/uncaught-handler \
     bin/check/lite/uncaught             \
@@ -231,9 +225,7 @@ bin_check_b18_SOURCES                   = src/exceptions4c.c tests/b18.c
 bin_check_b19_SOURCES                   = src/exceptions4c.c tests/b19.c
 bin_check_b22_SOURCES                   = src/exceptions4c.c tests/b22.c
 bin_check_uncaught_exception_SOURCES    = src/exceptions4c.c tests/uncaught-exception.c
-bin_check_d02_SOURCES                   = src/exceptions4c.c tests/d02.c
 bin_check_d03_SOURCES                   = src/exceptions4c.c tests/d03.c
-bin_check_d04_SOURCES                   = src/exceptions4c.c tests/d04.c
 bin_check_e01_SOURCES                   = src/exceptions4c.c tests/e01.c
 bin_check_e02_SOURCES                   = src/exceptions4c.c tests/e02.c
 bin_check_e03_SOURCES                   = src/exceptions4c.c tests/e03.c

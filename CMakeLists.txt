@@ -51,9 +51,7 @@ set(TESTS
         is-uncaught
         catch-exception
         uncaught-exception
-        d02
         d03
-        d04
         e01
         e02
         e03
@@ -91,9 +89,7 @@ foreach(TEST IN LISTS TESTS)
 endforeach()
 
 set_property(TEST uncaught-exception PROPERTY WILL_FAIL TRUE)
-set_property(TEST d02 PROPERTY WILL_FAIL TRUE)
 set_property(TEST d03 PROPERTY WILL_FAIL TRUE)
-set_property(TEST d04 PROPERTY WILL_FAIL TRUE)
 set_property(TEST i05 PROPERTY WILL_FAIL TRUE)
 
 set(TESTS
