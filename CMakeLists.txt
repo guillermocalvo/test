@@ -49,7 +49,7 @@ enable_testing()
 set(TESTS
         get-exception
         is-uncaught
-        catch-exception
+        catch-all
         uncaught-exception-1
         uncaught-exception-2
         e01
