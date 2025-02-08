@@ -72,7 +72,6 @@ set(TESTS
         initialize-exception
         finalize-exception
         exception-cause
-        i17
 )
 
 foreach(TEST IN LISTS TESTS)

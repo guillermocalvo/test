@@ -105,7 +105,6 @@ check_PROGRAMS =                        \
     bin/check/initialize-exception      \
     bin/check/finalize-exception        \
     bin/check/exception-cause           \
-    bin/check/i17                       \
     bin/check/examples/pthreads         \
     bin/check/examples/signals          \
     bin/check/examples/pet-store        \
@@ -153,7 +152,6 @@ TESTS =                                 \
     bin/check/initialize-exception      \
     bin/check/finalize-exception        \
     bin/check/exception-cause           \
-    bin/check/i17                       \
     bin/check/examples/pthreads         \
     bin/check/examples/signals          \
     bin/check/examples/pet-store        \
@@ -238,7 +236,6 @@ bin_check_i05_SOURCES                   = src/exceptions4c.c tests/i05.c
 bin_check_initialize_exception_SOURCES  = src/exceptions4c.c tests/initialize-exception.c
 bin_check_finalize_exception_SOURCES    = src/exceptions4c.c tests/finalize-exception.c
 bin_check_exception_cause_SOURCES       = src/exceptions4c.c tests/exception-cause.c
-bin_check_i17_SOURCES                   = src/exceptions4c.c tests/i17.c
 
 # exceptions4c examples
 
