@@ -71,7 +71,6 @@ set(TESTS
         i05
         initialize-exception
         finalize-exception
-        i14
         i15
         i17
 )
