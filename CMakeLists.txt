@@ -47,8 +47,8 @@ endif (DOXYGEN_FOUND)
 enable_testing()
 
 set(TESTS
-        a11
-        a12
+        get-exception
+        is-uncaught
         b11
         b15
         d01

@@ -75,8 +75,8 @@ CLEANFILES =                            \
 
 check_PROGRAMS =                        \
     bin/check/a10                       \
-    bin/check/a11                       \
-    bin/check/a12                       \
+    bin/check/get-exception             \
+    bin/check/is-uncaught               \
     bin/check/b08                       \
     bin/check/b10                       \
     bin/check/b11                       \
@@ -130,8 +130,8 @@ check_PROGRAMS =                        \
 
 TESTS =                                 \
     bin/check/a10                       \
-    bin/check/a11                       \
-    bin/check/a12                       \
+    bin/check/get-exception             \
+    bin/check/is-uncaught               \
     bin/check/b08                       \
     bin/check/b10                       \
     bin/check/b11                       \
@@ -224,8 +224,8 @@ lib_libexceptions4c_backtrace_a_SOURCES = src/backtrace/exceptions4c-backtrace.c
 # exceptions4c tests
 
 bin_check_a10_SOURCES                   = src/exceptions4c.c tests/a10.c
-bin_check_a11_SOURCES                   = src/exceptions4c.c tests/a11.c
-bin_check_a12_SOURCES                   = src/exceptions4c.c tests/a12.c
+bin_check_get_exception_SOURCES         = src/exceptions4c.c tests/get-exception.c
+bin_check_is_uncaught_SOURCES           = src/exceptions4c.c tests/is-uncaught.c
 bin_check_b08_SOURCES                   = src/exceptions4c.c tests/b08.c
 bin_check_b10_SOURCES                   = src/exceptions4c.c tests/b10.c
 bin_check_b11_SOURCES                   = src/exceptions4c.c tests/b11.c
