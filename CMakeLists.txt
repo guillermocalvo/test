@@ -54,6 +54,7 @@ set(TESTS
         panic-block-try
         panic-block-catch
         panic-block-next
+        panic-dangling-context
         get-exception
         is-uncaught
         catch-all
@@ -97,6 +98,7 @@ set_property(TEST panic-context PROPERTY WILL_FAIL TRUE)
 set_property(TEST panic-block-try PROPERTY WILL_FAIL TRUE)
 set_property(TEST panic-block-catch PROPERTY WILL_FAIL TRUE)
 set_property(TEST panic-block-next PROPERTY WILL_FAIL TRUE)
+set_property(TEST panic-dangling-context PROPERTY WILL_FAIL TRUE)
 set_property(TEST uncaught-exception-1 PROPERTY WILL_FAIL TRUE)
 set_property(TEST uncaught-exception-2 PROPERTY WILL_FAIL TRUE)
 

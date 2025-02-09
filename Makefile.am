@@ -81,6 +81,7 @@ check_PROGRAMS =                        \
     bin/check/panic-block-try           \
     bin/check/panic-block-catch         \
     bin/check/panic-block-next          \
+    bin/check/panic-dangling-context    \
     bin/check/get-exception             \
     bin/check/is-uncaught               \
     bin/check/b08                       \
@@ -134,6 +135,7 @@ TESTS =                                 \
     bin/check/panic-block-try           \
     bin/check/panic-block-catch         \
     bin/check/panic-block-next          \
+    bin/check/panic-dangling-context    \
     bin/check/get-exception             \
     bin/check/is-uncaught               \
     bin/check/b08                       \
@@ -187,6 +189,7 @@ XFAIL_TESTS =                           \
     bin/check/panic-block-try           \
     bin/check/panic-block-catch         \
     bin/check/panic-block-next          \
+    bin/check/panic-dangling-context    \
     bin/check/b08                       \
     bin/check/b10                       \
     bin/check/b18                       \
@@ -229,6 +232,7 @@ bin_check_panic_context_SOURCES         = src/exceptions4c.c tests/panic-context
 bin_check_panic_block_try_SOURCES       = src/exceptions4c.c tests/panic-block-try.c
 bin_check_panic_block_catch_SOURCES     = src/exceptions4c.c tests/panic-block-catch.c
 bin_check_panic_block_next_SOURCES      = src/exceptions4c.c tests/panic-block-next.c
+bin_check_panic_dangling_context_SOURCES = src/exceptions4c.c tests/panic-dangling-context.c
 bin_check_get_exception_SOURCES         = src/exceptions4c.c tests/get-exception.c
 bin_check_is_uncaught_SOURCES           = src/exceptions4c.c tests/is-uncaught.c
 bin_check_b08_SOURCES                   = src/exceptions4c.c tests/b08.c
