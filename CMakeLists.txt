@@ -56,7 +56,7 @@ set(TESTS
         e02
         e03
         catch-specific-exception
-        f02
+        catch-generic-exception
         f03
         f04
         f05

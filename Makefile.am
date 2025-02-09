@@ -89,7 +89,7 @@ check_PROGRAMS =                        \
     bin/check/e02                       \
     bin/check/e03                       \
     bin/check/catch-specific-exception  \
-    bin/check/f02                       \
+    bin/check/catch-generic-exception   \
     bin/check/f03                       \
     bin/check/f04                       \
     bin/check/f05                       \
@@ -136,7 +136,7 @@ TESTS =                                 \
     bin/check/e02                       \
     bin/check/e03                       \
     bin/check/catch-specific-exception  \
-    bin/check/f02                       \
+    bin/check/catch-generic-exception   \
     bin/check/f03                       \
     bin/check/f04                       \
     bin/check/f05                       \
@@ -219,7 +219,7 @@ bin_check_e01_SOURCES                   = src/exceptions4c.c tests/e01.c
 bin_check_e02_SOURCES                   = src/exceptions4c.c tests/e02.c
 bin_check_e03_SOURCES                   = src/exceptions4c.c tests/e03.c
 bin_check_catch_specific_exception_SOURCES = src/exceptions4c.c tests/catch-specific-exception.c
-bin_check_f02_SOURCES                   = src/exceptions4c.c tests/f02.c
+bin_check_catch_generic_exception_SOURCES = src/exceptions4c.c tests/catch-generic-exception.c
 bin_check_f03_SOURCES                   = src/exceptions4c.c tests/f03.c
 bin_check_f04_SOURCES                   = src/exceptions4c.c tests/f04.c
 bin_check_f05_SOURCES                   = src/exceptions4c.c tests/f05.c
