@@ -84,7 +84,6 @@ foreach(TEST IN LISTS TESTS)
     target_link_libraries(${TEST} exceptions4c)
     target_include_directories(${TEST} PUBLIC src)
     add_test(NAME ${TEST} COMMAND $<TARGET_FILE:${TEST}>)
-    set_property(TEST ${TEST} PROPERTY SKIP_RETURN_CODE 77)
 endforeach()
 
 set_property(TEST panic-try PROPERTY WILL_FAIL TRUE)
@@ -111,7 +110,6 @@ foreach(TEST IN LISTS TESTS)
     set_target_properties(lite-${TEST} PROPERTIES COMPILE_WARNING_AS_ERROR ON)
     target_include_directories(lite-${TEST} PUBLIC src/lite)
     add_test(NAME lite-${TEST} COMMAND $<TARGET_FILE:lite-${TEST}>)
-    set_property(TEST lite-${TEST} PROPERTY SKIP_RETURN_CODE 77)
 endforeach()
 
 set_property(TEST lite-uncaught PROPERTY WILL_FAIL TRUE)
@@ -130,7 +128,6 @@ foreach(TEST IN LISTS TESTS)
     )
     target_include_directories(pthreads-${TEST} PUBLIC src src/pthreads)
     add_test(NAME pthreads-${TEST} COMMAND $<TARGET_FILE:pthreads-${TEST}>)
-    set_property(TEST pthreads-${TEST} PROPERTY SKIP_RETURN_CODE 77)
 endforeach()
 
 # EXAMPLES
