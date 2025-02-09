@@ -492,11 +492,7 @@ static void delete_exception(const struct e4c_context * context, struct e4c_exce
  */
 static void print_debug_info(const char * file, const int line, const char * function) {
     if (file != NULL) {
-        if (function != NULL) {
-            (void) fprintf(stderr, "    at %s (%s:%d)\n", function, file, line);
-        } else {
-            (void) fprintf(stderr, "    at %s:%d\n", file, line);
-        }
+        (void) fprintf(stderr, "    at %s (%s:%d)\n", function, file, line);
     }
 }
 
