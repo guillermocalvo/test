@@ -4,7 +4,8 @@
 
 # define DISPOSE_FOO(IGNORE) 0
 
-static const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
+static const struct e4c_exception_type OOPS = {NULL, "Oops"};
+static const struct e4c_exception_type GIVEUP = {NULL, "Giving up"};
 
 /**
  * Reacquiring a resource
@@ -20,35 +21,37 @@ TEST_CASE{
     volatile int foo          = 0;
     volatile int total_acquisitions = 0;
 
-    WITH(foo, DISPOSE_FOO) {
+    TRY {
+        WITH(foo, DISPOSE_FOO) {
 
-        total_acquisitions++;
+            total_acquisitions++;
 
-        if (total_acquisitions == 1) {
+            if (total_acquisitions == 1) {
 
-            TEST_ECHO("First acquisition");
+                TEST_ECHO("First acquisition");
 
-        } else {
+            } else {
 
-            int reacquisitions = total_acquisitions - 1;
+                int reacquisitions = total_acquisitions - 1;
 
-            TEST_DUMP("%d", reacquisitions);
+                TEST_DUMP("%d", reacquisitions);
+            }
+
+            THROW(OOPS, "Simulates an error while acquiring foo");
+
+        } USE {
+
+            TEST_DUMP("%d", foo);
+
+        } CATCH (OOPS) {
+
+            REACQUIRE(2, GIVEUP, NULL);
         }
 
-        if (total_acquisitions < 4) {
-            THROW(RuntimeException, "Simulates an error while acquiring foo");
-        }
+    } CATCH (GIVEUP) {
 
-    } USE {
-
-        TEST_DUMP("%d", foo);
-
-    } CATCH (RuntimeException) {
-
-        REACQUIRE(4, RuntimeException, NULL);
+        TEST_DUMP("%d", total_acquisitions);
     }
 
-    TEST_DUMP("%d", total_acquisitions);
-
-    TEST_ASSERT_EQUALS(total_acquisitions, 4);
+    TEST_ASSERT_EQUALS(total_acquisitions, 3);
 }
