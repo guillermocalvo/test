@@ -95,55 +95,53 @@ set(TESTS
 )
 
 foreach(TEST IN LISTS TESTS)
-    add_executable(${TEST} "tests/lite/${TEST}.c")
-    set_target_properties(${TEST} PROPERTIES COMPILE_WARNING_AS_ERROR ON)
-    target_include_directories(${TEST} PUBLIC src/lite)
-    add_test(NAME ${TEST} COMMAND $<TARGET_FILE:${TEST}>)
-    set_property(TEST ${TEST} PROPERTY SKIP_RETURN_CODE 77)
+    add_executable(lite-${TEST} "tests/lite/${TEST}.c")
+    set_target_properties(lite-${TEST} PROPERTIES COMPILE_WARNING_AS_ERROR ON)
+    target_include_directories(lite-${TEST} PUBLIC src/lite)
+    add_test(NAME lite-${TEST} COMMAND $<TARGET_FILE:lite-${TEST}>)
+    set_property(TEST lite-${TEST} PROPERTY SKIP_RETURN_CODE 77)
 endforeach()
 
-set_property(TEST uncaught PROPERTY WILL_FAIL TRUE)
+set_property(TEST lite-uncaught PROPERTY WILL_FAIL TRUE)
 
 set(TESTS
         multithread
 )
 
 foreach(TEST IN LISTS TESTS)
-    add_executable(${TEST} "tests/pthreads/${TEST}.c")
-    set_target_properties(${TEST} PROPERTIES COMPILE_WARNING_AS_ERROR ON)
-    target_link_libraries(${TEST}
+    add_executable(pthreads-${TEST} "tests/pthreads/${TEST}.c")
+    set_target_properties(pthreads-${TEST} PROPERTIES COMPILE_WARNING_AS_ERROR ON)
+    target_link_libraries(pthreads-${TEST}
             exceptions4c
             exceptions4c_pthreads
             Threads::Threads
     )
-    target_include_directories(${TEST} PUBLIC src src/pthreads)
-    add_test(NAME ${TEST} COMMAND $<TARGET_FILE:${TEST}>)
-    set_property(TEST ${TEST} PROPERTY SKIP_RETURN_CODE 77)
+    target_include_directories(pthreads-${TEST} PUBLIC src src/pthreads)
+    add_test(NAME pthreads-${TEST} COMMAND $<TARGET_FILE:pthreads-${TEST}>)
+    set_property(TEST pthreads-${TEST} PROPERTY SKIP_RETURN_CODE 77)
 endforeach()
-
-set_property(TEST uncaught PROPERTY WILL_FAIL TRUE)
 
 # EXAMPLES
 
-add_executable(pthreads "examples/pthreads.c")
-target_link_libraries(pthreads exceptions4c Threads::Threads)
-target_include_directories(pthreads PUBLIC src examples)
-add_test(NAME pthreads COMMAND $<TARGET_FILE:pthreads>)
+add_executable(examples-pthreads "examples/pthreads.c")
+target_link_libraries(examples-pthreads exceptions4c Threads::Threads)
+target_include_directories(examples-pthreads PUBLIC src examples)
+add_test(NAME examples-pthreads COMMAND $<TARGET_FILE:examples-pthreads>)
 
-add_executable(signals "examples/signals.c")
-target_link_libraries(signals exceptions4c)
-target_include_directories(signals PUBLIC src)
-add_test(NAME signals COMMAND $<TARGET_FILE:signals>)
+add_executable(examples-signals "examples/signals.c")
+target_link_libraries(examples-signals exceptions4c)
+target_include_directories(examples-signals PUBLIC src)
+add_test(NAME examples-signals COMMAND $<TARGET_FILE:examples-signals>)
 
-add_executable(pet-store "examples/pet-store.c")
-target_link_libraries(pet-store exceptions4c)
-target_include_directories(pet-store PUBLIC src)
-add_test(NAME pet-store COMMAND $<TARGET_FILE:pet-store>)
+add_executable(examples-pet-store "examples/pet-store.c")
+target_link_libraries(examples-pet-store exceptions4c)
+target_include_directories(examples-pet-store PUBLIC src)
+add_test(NAME examples-pet-store COMMAND $<TARGET_FILE:examples-pet-store>)
 
-add_executable(customization "examples/customization.c")
-target_link_libraries(customization exceptions4c)
-target_include_directories(customization PUBLIC src)
-add_test(NAME customization COMMAND $<TARGET_FILE:customization>)
+add_executable(examples-customization "examples/customization.c")
+target_link_libraries(examples-customization exceptions4c)
+target_include_directories(examples-customization PUBLIC src)
+add_test(NAME examples-customization COMMAND $<TARGET_FILE:examples-customization>)
 
 add_executable(examples-uncaught-handler "examples/uncaught-handler.c")
 target_link_libraries(examples-uncaught-handler exceptions4c)
