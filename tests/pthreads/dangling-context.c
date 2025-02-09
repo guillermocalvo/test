@@ -13,33 +13,19 @@ static int OK = 123;
  */
 int main(void) {
 
-    int error;
     pthread_t thread;
-    void * result = NULL;
 
     e4c_set_context_supplier(e4c_pthreads_context_supplier);
 
-    error = pthread_create(&thread, NULL, foobar, NULL);
+    int error = pthread_create(&thread, NULL, foobar, NULL);
     if (error) {
         errno = error;
         perror("pthread_join");
         fflush(stderr);
-        return EXIT_FAILURE;
+        return EXIT_SUCCESS;
     }
 
-    error = pthread_join(thread, &result);
-    if (error) {
-        errno = error;
-        perror("pthread_join");
-        fflush(stderr);
-        return EXIT_FAILURE;
-    }
-
-    if (result != PTHREAD_CANCELED) {
-        fprintf(stderr, "Thread was not canceled\n");
-        fflush(stderr);
-        return EXIT_FAILURE;
-    }
+    (void) pthread_join(thread, NULL);
 
     return EXIT_SUCCESS;
 }

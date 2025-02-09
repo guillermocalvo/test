@@ -177,6 +177,7 @@ XFAIL_TESTS =                           \
     bin/check/examples/uncaught-handler \
     bin/check/lite/uncaught             \
     bin/check/lite/overflow             \
+    bin/check/pthreads/dangling-context \
     bin/check/backtrace/backtraced
 
 tests: check
