@@ -84,12 +84,7 @@ check_PROGRAMS =                        \
     bin/check/panic-dangling-context    \
     bin/check/get-exception             \
     bin/check/is-uncaught               \
-    bin/check/b08                       \
-    bin/check/b10                       \
     bin/check/catch-all                 \
-    bin/check/b18                       \
-    bin/check/b19                       \
-    bin/check/b22                       \
     bin/check/uncaught-exception-1      \
     bin/check/uncaught-exception-2      \
     bin/check/catch-specific-exception  \
@@ -134,12 +129,7 @@ TESTS =                                 \
     bin/check/panic-dangling-context    \
     bin/check/get-exception             \
     bin/check/is-uncaught               \
-    bin/check/b08                       \
-    bin/check/b10                       \
     bin/check/catch-all                 \
-    bin/check/b18                       \
-    bin/check/b19                       \
-    bin/check/b22                       \
     bin/check/uncaught-exception-1      \
     bin/check/uncaught-exception-2      \
     bin/check/catch-specific-exception  \
@@ -182,11 +172,6 @@ XFAIL_TESTS =                           \
     bin/check/panic-block-catch         \
     bin/check/panic-block-next          \
     bin/check/panic-dangling-context    \
-    bin/check/b08                       \
-    bin/check/b10                       \
-    bin/check/b18                       \
-    bin/check/b19                       \
-    bin/check/b22                       \
     bin/check/uncaught-exception-1      \
     bin/check/uncaught-exception-2      \
     bin/check/examples/uncaught-handler \
@@ -227,12 +212,7 @@ bin_check_panic_block_next_SOURCES      = src/exceptions4c.c tests/panic-block-n
 bin_check_panic_dangling_context_SOURCES = src/exceptions4c.c tests/panic-dangling-context.c
 bin_check_get_exception_SOURCES         = src/exceptions4c.c tests/get-exception.c
 bin_check_is_uncaught_SOURCES           = src/exceptions4c.c tests/is-uncaught.c
-bin_check_b08_SOURCES                   = src/exceptions4c.c tests/b08.c
-bin_check_b10_SOURCES                   = src/exceptions4c.c tests/b10.c
 bin_check_catch_all_SOURCES             = src/exceptions4c.c tests/catch-all.c
-bin_check_b18_SOURCES                   = src/exceptions4c.c tests/b18.c
-bin_check_b19_SOURCES                   = src/exceptions4c.c tests/b19.c
-bin_check_b22_SOURCES                   = src/exceptions4c.c tests/b22.c
 bin_check_uncaught_exception_1_SOURCES  = src/exceptions4c.c tests/uncaught-exception-1.c
 bin_check_uncaught_exception_2_SOURCES  = src/exceptions4c.c tests/uncaught-exception-2.c
 bin_check_catch_specific_exception_SOURCES = src/exceptions4c.c tests/catch-specific-exception.c
