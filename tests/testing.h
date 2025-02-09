@@ -1,84 +1,165 @@
+/*
+ * Copyright 2025 Guillermo Calvo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-# ifndef TESTING_H
-# define TESTING_H
+#include <stddef.h>
+#include <stdio.h>
+#include <string.h>
 
+#define TEST_RESULT_PASS 0
+#define TEST_RESULT_FAIL 1
+#define TEST_RESULT_SKIP 77
+#define TEST_RESULT_HARD 99
 
-# include <stdlib.h>
-# include <stdio.h>
-# include <string.h>
-# include <exceptions4c.h>
+#define TEST_PRINT(stream, ...)                                                \
+  do {                                                                         \
+    (void) fprintf(stream, __VA_ARGS__);                                       \
+    (void) fflush(stream);                                                     \
+  } while(0)                                                                   \
 
+#define TEST_PRINT_OUT(...)                                                    \
+  TEST_PRINT(stdout, __VA_ARGS__)
 
-/* Output */
-# define TEST_PRINT_PREFIX              "    - "
-# define TEST_PRINT_SUFFIX              "\n"
-# define TEST_PRINT(FORMAT, ...) \
-    do{ \
-        (void)fprintf(stdout, TEST_PRINT_PREFIX FORMAT TEST_PRINT_SUFFIX, __VA_ARGS__); \
-        (void)fflush(stdout); \
-    }while(0)
-# define TEST_ECHO(MESSAGE)             TEST_PRINT("%s", (MESSAGE))
-# define TEST_DUMP(FORMAT, VARIABLE)    TEST_PRINT(#VARIABLE ": " FORMAT, (VARIABLE))
-# define TEST_EXPECTING(EXCEPTION)      TEST_PRINT("Expecting exception: %s", #EXCEPTION)
-# define THIS_SHOULD_NOT_HAPPEN         TEST_ECHO("ERROR! Something didn't quite work...")
+#define TEST_PRINT_ERR(...)                                                    \
+  TEST_PRINT(stderr, __VA_ARGS__)
 
+#define TEST_PASS                                                              \
+  do {                                                                         \
+    TEST_PRINT_OUT(                                                            \
+      "%s:%d [INFO] Test passed.\n",                                           \
+      __FILE__,                                                                \
+      __LINE__                                                                 \
+    );                                                                         \
+    exit(TEST_RESULT_PASS);                                                    \
+  } while(0)
 
-/* Test Results */
-# define TEST_RESULT_PASS               EXIT_SUCCESS
-# define TEST_RESULT_FAIL               EXIT_FAILURE
-# define TEST_RESULT_SKIP               77
+#define TEST_FAIL(...)                                                         \
+  do {                                                                         \
+    TEST_PRINT_ERR(__VA_ARGS__);                                               \
+    exit(TEST_RESULT_FAIL);                                                    \
+  } while(0)
 
+#define TEST_SKIP(reason)                                                      \
+  do {                                                                         \
+    TEST_PRINT_ERR(                                                            \
+      "%s:%d [WARNING] Test skipped because"                                   \
+          " " reason ".\n",                                                    \
+      __FILE__,                                                                \
+      __LINE__                                                                 \
+    );                                                                         \
+    exit(TEST_RESULT_SKIP);                                                    \
+  } while(0)
 
-/* Test Actions */
-# define TEST_EXIT(MESSAGE, RESULT) \
-    do{ \
-        TEST_ECHO(MESSAGE); \
-        exit(RESULT); \
-    }while(0)
-# define TEST_SKIP(MESSAGE)             TEST_EXIT(MESSAGE, TEST_RESULT_SKIP)
-# define TEST_PASS(MESSAGE)             TEST_EXIT(MESSAGE, TEST_RESULT_PASS)
-# define TEST_FAIL(MESSAGE)             TEST_EXIT(MESSAGE, TEST_RESULT_FAIL)
-# define TEST_X_PASS(MESSAGE)           TEST_EXIT(MESSAGE, TEST_RESULT_FAIL)
-# define TEST_X_FAIL(MESSAGE)           TEST_EXIT(MESSAGE, TEST_RESULT_PASS)
-# define TEST_ASSERT_THAT(CHECK, ACTION) \
-    do{ \
-        if( !(CHECK) ){ \
-            ACTION; \
-        } \
-    }while(0)
+# define TEST_ASSERT_THAT(check, action)                                       \
+  do {                                                                         \
+    if (!(check)){                                                             \
+      action;                                                                  \
+    }                                                                          \
+  } while(0)
 
-/* Assertions */
-# define TEST_ASSERT(CHECK) \
-    TEST_ASSERT_THAT( CHECK, TEST_FAIL("Assertion failed: " #CHECK "\n") )
-# define TEST_X_ASSERT(CHECK) \
-    TEST_ASSERT_THAT( CHECK, TEST_PASS("Assertion failed: " #CHECK "\n") )
-# define TEST_ASSERT_EQUALS(FOUND, EXPECTED) \
-    TEST_ASSERT_THAT( (FOUND) == (EXPECTED), TEST_FAIL(#FOUND " does not equals " #EXPECTED "\n") )
-# define TEST_ASSERT_STRING_EQUALS(FOUND, EXPECTED) \
-    TEST_ASSERT_THAT( strcmp( (FOUND), (EXPECTED) ) == 0, TEST_FAIL(#FOUND " does not contain string " #EXPECTED "\n") )
+#define TEST_ASSERT(check)                                                     \
+  TEST_ASSERT_THAT(                                                            \
+    check,                                                                     \
+    TEST_FAIL(                                                                 \
+      "%s:%d [ERROR] Test failed because"                                      \
+          " assertion failed: " #check "\n",                                   \
+      __FILE__,                                                                \
+      __LINE__                                                                 \
+    )                                                                          \
+  )
 
+#define TEST_ASSERT_EQUALS(check, format, found, expected)                     \
+  TEST_ASSERT_THAT(                                                            \
+    (check),                                                                   \
+    TEST_FAIL(                                                                 \
+      "%s:%d [ERROR] Test failed because"                                      \
+          " `%s` is: " format " (expecting: " format ").\n",                   \
+      __FILE__,                                                                \
+      __LINE__,                                                                \
+      #found,                                                                  \
+      (found),                                                                 \
+      (expected)                                                               \
+    )                                                                          \
+  )
 
-/* Test Cases */
-# define TEST_CASE \
-    \
-    void test_case(void); \
-    \
-    int main(void){ \
-        TEST_PRINT("Running test %s:%d", __FILE__, __LINE__); \
-        test_case(); \
-        return(EXIT_SUCCESS); \
-    } \
-    \
-    void test_case(void)
+#define TEST_ASSERT_INT_EQUALS(found, expected)                                \
+  TEST_ASSERT_EQUALS(found == expected, "%d", found, expected)
 
-# define TEST_X_CASE TEST_CASE
+#define TEST_ASSERT_PTR_EQUALS(found, expected)                                \
+  TEST_ASSERT_EQUALS(found == expected, "%p", found, expected)
 
+#define TEST_ASSERT_CHAR_EQUALS(found, expected)                               \
+  TEST_ASSERT_EQUALS(found == expected, "'%c'", found, expected)
 
-/* Third party library simulation */
-# define LIBRARY_SUCCESS 0
-# define LIBRARY_FAILURE -1
-# define LIBRARY_FAILURE_IO -2
-# define LIBRARY_FAILURE_ILLEGAL_ARGUMENT -3
+#define TEST_ASSERT_STR_EQUALS(found, expected)                                \
+  TEST_ASSERT_EQUALS(strcmp(found, expected) == 0, "\"%s\"", found, expected)
 
+#define TEST_ASSERT_STR_CONTAINS(haystack, needle)                             \
+  TEST_ASSERT_THAT(                                                            \
+    strstr((haystack), (needle)) != NULL,                                      \
+    TEST_FAIL(                                                                 \
+      "%s:%d [ERROR] Test failed because"                                      \
+          " `%s` does not contain \"%s\" (found: \"%s\").\n",                  \
+      __FILE__,                                                                \
+      __LINE__,                                                                \
+      #haystack,                                                               \
+      (needle),                                                                \
+      (haystack)                                                               \
+    )                                                                          \
+  )
 
-# endif
+#define TEST_ASSERT_BOOL_EQUALS(found, expected)                               \
+  TEST_ASSERT_THAT(                                                            \
+    (found) == (expected),                                                     \
+    TEST_FAIL(                                                                 \
+      "%s:%d [ERROR] Test failed because"                                      \
+          " `%s` is: %s (expecting: %s).\n",                                   \
+      __FILE__,                                                                \
+      __LINE__,                                                                \
+      #found,                                                                  \
+      (found) ? "true" : "false",                                              \
+      (expected) ? "true" : "false"                                            \
+    )                                                                          \
+  )
+
+#define TEST_ASSERT_TRUE(found)                                                \
+  TEST_ASSERT_BOOL_EQUALS(found, true)
+
+#define TEST_ASSERT_FALSE(found)                                               \
+  TEST_ASSERT_BOOL_EQUALS(found, false)
+
+#define TEST_ASSERT_NULL(pointer)                                              \
+  TEST_ASSERT_THAT(                                                            \
+    (pointer) == NULL,                                                         \
+    TEST_FAIL(                                                                 \
+      "%s:%d [ERROR] Test failed because"                                      \
+          " `%s` is not null.\n",                                              \
+      __FILE__,                                                                \
+      __LINE__,                                                                \
+      #pointer                                                                 \
+    )                                                                          \
+  )
+
+#define TEST_ASSERT_NOT_NULL(pointer)                                          \
+  TEST_ASSERT_THAT(                                                            \
+    (pointer) != NULL,                                                         \
+    TEST_FAIL(                                                                 \
+      "%s:%d [ERROR] Test failed because"                                      \
+          " `%s` is null.\n",                                                  \
+      __FILE__,                                                                \
+      __LINE__,                                                                \
+      #pointer                                                                 \
+    )                                                                          \
+  )

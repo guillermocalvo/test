@@ -1,43 +1,46 @@
+/*
+ * Copyright 2025 Guillermo Calvo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-# include <signal.h>
-# include "testing.h"
+#include <signal.h>
+#include <exceptions4c.h>
+#include "testing.h"
 
-static const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
-static const struct e4c_exception_type UserInterruptionException = {&RuntimeException, "User interruption exception."};
+static const struct e4c_exception_type USERINT = {NULL, "User interruption"};
 
-void throw_on_signal(int);
+static void throw_on_signal(int);
 
 /**
- * Catching `UserInterruptionException`
- *
- * This test raises `SIGINT`; the library signal handling is enabled; the
- * exception `UserInterruptionException` is caught and then the program exits.
- *
- * This functionality relies on the platform's ability to handle signals.
- *
+ * Tests that signal SIGINT can be converted into a exception.
  */
-TEST_CASE{
-
+int main(void) {
     volatile bool caught = false;
 
     signal(SIGINT, throw_on_signal);
 
     TRY {
-
         raise(SIGINT);
-
-        TEST_FAIL("UserInterruptionException should have been thrown");
-
-    } CATCH (RuntimeException) {
-
+        TEST_FAIL("Reached %s:%d\n", __FILE__, __LINE__);
+    } CATCH (USERINT) {
         caught = true;
-
-        TEST_ASSERT(e4c_get_exception()->type == &UserInterruptionException);
     }
 
     TEST_ASSERT(caught);
+    TEST_PASS;
 }
 
-void throw_on_signal(int _) {
-    THROW(UserInterruptionException, NULL);
+static void throw_on_signal(int _) {
+    THROW(USERINT, NULL);
 }

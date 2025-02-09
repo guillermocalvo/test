@@ -1,22 +1,41 @@
+/*
+ * Copyright 2025 Guillermo Calvo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-# include <signal.h>
-# include "testing.h"
+#include <signal.h>
+#include <exceptions4c.h>
+#include "testing.h"
+
+static void failure(int);
+static struct e4c_context * my_supplier(void);
 
 static struct e4c_context my_context = {0};
-static struct e4c_context * my_supplier(void);
-static void failure(int _);
 
 /**
- * Force panic due to null block.
- *
+ * Force library panic due to null block on next stage.
  */
-TEST_CASE{
+int main(void) {
 
     signal(SIGABRT, failure);
 
     e4c_set_context_supplier(my_supplier);
 
     (void) e4c_next(NULL, 0, NULL);
+
+    TEST_PRINT_ERR("Reached %s:%d\n", __FILE__, __LINE__);
+    TEST_PASS;
 }
 
 static struct e4c_context * my_supplier(void) {
@@ -26,5 +45,5 @@ static struct e4c_context * my_supplier(void) {
 }
 
 static void failure(int _) {
-    exit(EXIT_FAILURE);
+    TEST_FAIL("Handled SIGABORT %s:%d\n", __FILE__, __LINE__);
 }

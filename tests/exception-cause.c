@@ -1,62 +1,59 @@
+/*
+ * Copyright 2025 Guillermo Calvo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-# include "testing.h"
+#include <exceptions4c.h>
+#include "testing.h"
 
-static const struct e4c_exception_type ERROR1 = {NULL, "ERROR 1"};
-static const struct e4c_exception_type ERROR2 = {NULL, "ERROR 2"};
-static const struct e4c_exception_type ERROR3 = {NULL, "ERROR 3"};
+static const struct e4c_exception_type CAUSE = {NULL, "Root cause"};
+static const struct e4c_exception_type ERROR = {NULL, "Generic error"};
+static const struct e4c_exception_type PROBLEM = {NULL, "Specific problem"};
 
 /**
- * Finding the cause of an exception
- *
- * This test *throws* an exception from an inner `catch` block. An outter
- * `catch` block inspects the *cause*.
- *
+ * Tests that exceptions keep track of their root causes.
  */
-TEST_CASE{
+int main(void) {
 
     TRY {
-
         TRY {
-
-            THROW(ERROR1, "This is the original cause of the issue");
-
-        } CATCH (ERROR1) {
-
-            THROW(ERROR2, "This is the wrapper exception");
+            THROW(CAUSE, NULL);
+        } CATCH (CAUSE) {
+            THROW(ERROR, NULL);
         }
-
-    } CATCH (ERROR2) {
-
-        TEST_ASSERT_EQUALS(e4c_get_exception()->cause->type, &ERROR1);
+    } CATCH (ERROR) {
+        TEST_ASSERT_NOT_NULL(e4c_get_exception()->cause);
+        TEST_ASSERT_PTR_EQUALS(e4c_get_exception()->cause->type, &CAUSE);
     }
 
     TRY {
-
         TRY {
-
             TRY {
-
-                THROW(ERROR1, "This is the original cause of the issue");
-
-            } CATCH (ERROR1) {
-
-                THROW(ERROR2, "First wrapper");
+                THROW(CAUSE, NULL);
+            } CATCH (CAUSE) {
+                THROW(ERROR, NULL);
             }
-
-        } CATCH (ERROR2) {
-
-            THROW(ERROR3, "Second wrapper");
+        } CATCH (ERROR) {
+            THROW(PROBLEM, NULL);
         }
-
-    } CATCH (ERROR3) {
-
+    } CATCH (PROBLEM) {
         const struct e4c_exception * exception = e4c_get_exception();
-
-        TEST_ASSERT_EQUALS(exception->cause->type, &ERROR2);
-        TEST_ASSERT_EQUALS(exception->cause->cause->type, &ERROR1);
-
-        fprintf(stderr, "CAUGHT: %s: %s\n", exception->name, exception->message);
-        fprintf(stderr, "  CAUSED BY: %s: %s\n", exception->cause->name, exception->cause->message);
-        fprintf(stderr, "    CAUSED BY: %s: %s\n", exception->cause->cause->name, exception->cause->cause->message);
+        TEST_ASSERT_NOT_NULL(exception->cause);
+        TEST_ASSERT_PTR_EQUALS(exception->cause->type, &ERROR);
+        TEST_ASSERT_NOT_NULL(exception->cause->cause);
+        TEST_ASSERT_PTR_EQUALS(exception->cause->cause->type, &CAUSE);
     }
+
+    TEST_PASS;
 }

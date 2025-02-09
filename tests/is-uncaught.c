@@ -1,60 +1,56 @@
+/*
+ * Copyright 2025 Guillermo Calvo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-# include "testing.h"
+#include <exceptions4c.h>
+#include "testing.h"
 
 static const struct e4c_exception_type OOPS = {NULL, "Oops"};
 
 /**
- * `e4c_is_uncaught` call without starting a new exception frame
- *
- * This test uses the library improperly, by attempting to call
- * `e4c_is_uncaught`, without starting a new exception frame.
- *
- * The library must return false.
- *
+ * Tests function e4c_is_uncaught.
  */
-TEST_CASE{
+int main(void) {
 
     TEST_ASSERT(e4c_is_uncaught() == false);
 
     TRY {
-
         TEST_ASSERT(e4c_is_uncaught() == false);
-
     } FINALLY {
-
         TEST_ASSERT(e4c_is_uncaught() == false);
     }
 
     TRY {
-
-        THROW(OOPS, "Catch me");
-
+        THROW(OOPS, NULL);
     } CATCH (OOPS) {
-
         TEST_ASSERT(e4c_is_uncaught() == false);
-
     } FINALLY {
-
         TEST_ASSERT(e4c_is_uncaught() == false);
     }
 
     TRY {
-
         TRY {
-
-            THROW(OOPS, "Catch me");
-
+            THROW(OOPS, NULL);
         } FINALLY {
-
             TEST_ASSERT(e4c_is_uncaught() == true);
         }
-
     } CATCH (OOPS) {
-
         TEST_ASSERT(e4c_is_uncaught() == false);
-
     } FINALLY {
-
         TEST_ASSERT(e4c_is_uncaught() == false);
     }
+
+    TEST_PASS;
 }

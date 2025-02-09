@@ -1,47 +1,42 @@
+/*
+ * Copyright 2025 Guillermo Calvo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-# include "testing.h"
+#include <exceptions4c.h>
+#include "testing.h"
 
-
-char foobar[64] = "FOOBAR";
-void custom_initializer(struct e4c_exception * exception);
-void custom_finalizer(const struct e4c_exception * exception);
-volatile bool custom_handler_was_initialized = false;
-volatile bool custom_handler_was_finalized = false;
-static const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
+static void custom_finalizer(const struct e4c_exception *);
+static volatile bool custom_handler_was_finalized = false;
+static const struct e4c_exception_type OOPS = {NULL, "Oops"};
 
 /**
- * Setting a custom finalization handler
- *
- * This test sets a custom *finalization handler*. Then *throws* an exception
- * and *catches* it.
- *
+ * Tests that exception finalizers are called.
  */
-TEST_CASE{
-
-    struct e4c_context * context = e4c_get_context();
-    context->initialize_exception = custom_initializer;
-    context->finalize_exception = custom_finalizer;
+int main(void) {
+    e4c_get_context()->finalize_exception = custom_finalizer;
 
     TRY {
-
-        THROW(RuntimeException, "Finalize my custom data");
-
-    } CATCH (RuntimeException) {
-
-        custom_handler_was_initialized = ( strcmp(e4c_get_exception()->data, foobar) == 0 );
+        THROW(OOPS, NULL);
+    } CATCH (OOPS) {
+        TEST_PRINT_OUT("Exception caught");
     }
 
-    TEST_ASSERT(custom_handler_was_initialized);
     TEST_ASSERT(custom_handler_was_finalized);
+    TEST_PASS;
 }
 
-void custom_initializer(struct e4c_exception * exception) {
-    exception->data = foobar;
-}
-
-void custom_finalizer(const struct e4c_exception * exception) {
-
-    TEST_ASSERT_EQUALS(exception->data, foobar);
-
+static void custom_finalizer(const struct e4c_exception * _) {
     custom_handler_was_finalized = true;
 }

@@ -1,35 +1,40 @@
+/*
+ * Copyright 2025 Guillermo Calvo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-# include "testing.h"
+#include <exceptions4c.h>
+#include "testing.h"
 
-static const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
+static const struct e4c_exception_type OOPS = {NULL, "Oops"};
 
 /**
- * Same `catch` block twice
- *
- * This test starts a `try` block, throws `RuntimeException` and attempts to
- * `catch` it twice with two `catch(RuntimeException)` blocks.
- *
- * The exception will only be caught by the first one.
- *
+ * Duplicate CATCH blocks should have no effect.
  */
-TEST_CASE{
-
+int main(void) {
     volatile bool caught1 = false;
     volatile bool caught2 = false;
 
     TRY {
-
-        THROW(RuntimeException, "I can only be caught once for each try block.");
-
-    } CATCH (RuntimeException) {
-
+        THROW(OOPS, NULL);
+    } CATCH (OOPS) {
         caught1 = true;
-
-    } CATCH (RuntimeException) {
-
+    } CATCH (OOPS) {
         caught2 = true;
     }
 
     TEST_ASSERT(caught1);
     TEST_ASSERT(!caught2);
+    TEST_PASS;
 }

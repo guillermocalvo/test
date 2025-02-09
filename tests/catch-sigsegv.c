@@ -1,59 +1,55 @@
+/*
+ * Copyright 2025 Guillermo Calvo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
-# include <signal.h>
-# include "testing.h"
+#include <signal.h>
+#include <exceptions4c.h>
+#include "testing.h"
 
-void * null(int dummy);
-void throw_on_signal(int);
+static void * null(int);
+static void throw_on_signal(int);
 
-static const struct e4c_exception_type NullPointerException = {NULL, "Null pointer."};
+static const struct e4c_exception_type SEGFAULT = {NULL, "Segmentation fault"};
 
-int integer = 123;
+static int integer = 123;
 
 /**
- * Catching `NullPointerException`
- *
- * This test attempts to dereference a null pointer; the library signal handling
- * is enabled. The library will convert the signal `SIGSEGV` into the exception
- * `NullPointerException`. There is a `catch(NullPointerException)` block,
- * therefore the exception will be caught.
- *
- * This functionality relies on the platform's ability to handle signal
- * `SIGSEGV`.
- *
+ * Tests that signal SIGSEGV can be converted into a exception.
  */
-TEST_CASE{
-
+int main(void) {
     volatile bool caught = false;
 
     signal(SIGSEGV, throw_on_signal);
 
     TRY {
-
         int * pointer = &integer;
-
         pointer = null(integer);
         integer = *pointer;
-
-        TEST_FAIL("NullPointerException should have been thrown");
-
-        TEST_DUMP("%d", integer);
-        TEST_DUMP("%p", (void *)pointer);
-
-    } CATCH (NullPointerException) {
-
+        TEST_FAIL("Reached %s:%d\n", __FILE__, __LINE__);
+    } CATCH (SEGFAULT) {
         caught = true;
-
-        TEST_ASSERT(e4c_get_exception()->type == &NullPointerException);
     }
 
     TEST_ASSERT(caught);
+    TEST_PASS;
 }
 
-void * null(int dummy){
-
-    return(dummy ? NULL : &integer);
+static void * null(const int dummy){
+    return dummy ? NULL : &integer;
 }
 
-void throw_on_signal(int _) {
-    THROW(NullPointerException, NULL);
+static void throw_on_signal(int _) {
+    THROW(SEGFAULT, NULL);
 }
