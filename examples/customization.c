@@ -6,12 +6,12 @@
 //! [initialize_exception]
 const struct e4c_exception_type MY_ERROR = {NULL, "My error"};
 
-static void my_custom_data(struct e4c_exception * exception) {
+static void set_custom_data(struct e4c_exception * exception) {
   exception->data = "My custom data";
 }
 
 int main(int argc, char * argv[]) {
-  e4c_get_context()->initialize_exception = my_custom_data;
+  e4c_get_context()->initialize_exception = set_custom_data;
   TRY {
     THROW(MY_ERROR, "Oops");
   } CATCH (MY_ERROR) {
