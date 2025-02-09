@@ -1,8 +1,7 @@
 
 # include "testing.h"
 
-static const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
-static const struct e4c_exception_type NullPointerException = {&RuntimeException, "Null pointer."};
+static const struct e4c_exception_type SPECIFIC = {NULL, "Specific exception"};
 
 /**
  * Catching a specific exception
@@ -16,11 +15,8 @@ TEST_CASE{
     volatile bool caught = false;
 
     TRY {
-
-        THROW(NullPointerException, "I'm going to be caught.");
-
-    } CATCH (NullPointerException) {
-
+        THROW(SPECIFIC, NULL);
+    } CATCH (SPECIFIC) {
         caught = true;
     }
 

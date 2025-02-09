@@ -65,8 +65,6 @@ set(TESTS
         e03
         catch-specific-exception
         catch-generic-exception
-        f03
-        f04
         duplicate-catch
         unordered-catch
         finally

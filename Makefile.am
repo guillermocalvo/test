@@ -97,8 +97,6 @@ check_PROGRAMS =                        \
     bin/check/e03                       \
     bin/check/catch-specific-exception  \
     bin/check/catch-generic-exception   \
-    bin/check/f03                       \
-    bin/check/f04                       \
     bin/check/duplicate-catch           \
     bin/check/unordered-catch           \
     bin/check/finally                   \
@@ -152,8 +150,6 @@ TESTS =                                 \
     bin/check/e03                       \
     bin/check/catch-specific-exception  \
     bin/check/catch-generic-exception   \
-    bin/check/f03                       \
-    bin/check/f04                       \
     bin/check/duplicate-catch           \
     bin/check/unordered-catch           \
     bin/check/finally                   \
@@ -250,8 +246,6 @@ bin_check_e02_SOURCES                   = src/exceptions4c.c tests/e02.c
 bin_check_e03_SOURCES                   = src/exceptions4c.c tests/e03.c
 bin_check_catch_specific_exception_SOURCES = src/exceptions4c.c tests/catch-specific-exception.c
 bin_check_catch_generic_exception_SOURCES = src/exceptions4c.c tests/catch-generic-exception.c
-bin_check_f03_SOURCES                   = src/exceptions4c.c tests/f03.c
-bin_check_f04_SOURCES                   = src/exceptions4c.c tests/f04.c
 bin_check_duplicate_catch_SOURCES       = src/exceptions4c.c tests/duplicate-catch.c
 bin_check_unordered_catch_SOURCES       = src/exceptions4c.c tests/unordered-catch.c
 bin_check_finally_SOURCES               = src/exceptions4c.c tests/finally.c
