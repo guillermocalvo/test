@@ -22,6 +22,10 @@ TEST_CASE{
 
     TRY {
 
-        THROW(OOPS, "Nobody will catch me.");
+        THROW(OOPS, "I am the root cause.");
+
+    } CATCH(OOPS) {
+
+        THROW(OOPS, NULL);
     }
 }
