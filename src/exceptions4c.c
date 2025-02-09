@@ -113,7 +113,7 @@ static struct e4c_context default_context = {
 };
 
 /** Flag that determines if the exception system has been already initialized. */
-static volatile bool is_cleanup_registered = false;
+static bool is_cleanup_registered = false;
 
 void e4c_set_context_supplier(struct e4c_context * (*supplier)(void)) {
     context_supplier = supplier;
@@ -134,14 +134,13 @@ bool e4c_is_uncaught(void) {
 }
 
 e4c_env * e4c_start(const bool should_acquire, const char * file, const int line, const char * function) {
-
     struct e4c_block * new_block = allocate(sizeof(*new_block), "Not enough memory to create a new exception block", file, line, function);
     struct e4c_context * context = get_context(file, line, function);
     if (context == &default_context && !is_cleanup_registered) {
-        is_cleanup_registered = atexit(cleanup_default_context) == 0;
-        if (!is_cleanup_registered) {
+        if (atexit(cleanup_default_context) != 0) {
             panic("Cleanup function could not be registered.", file, line, function);
         }
+        is_cleanup_registered = true;
     }
 
     new_block->outer_block          = context->_innermost_block;
@@ -157,7 +156,6 @@ e4c_env * e4c_start(const bool should_acquire, const char * file, const int line
 }
 
 bool e4c_next(const char * file, const int line, const char * function) {
-
     struct e4c_context * context = get_context(file, line, function);
     struct e4c_block * block = context->_innermost_block;
     if (block == NULL) {
@@ -322,8 +320,7 @@ static void * allocate(size_t size, const char * error_message, const char * fil
  * Checks for dangling exception blocks at program exit.
  */
 static void cleanup_default_context(void) {
-    struct e4c_block * block = default_context._innermost_block;
-    if (block != NULL) {
+    if (default_context._innermost_block != NULL) {
         panic("Dangling exception block leaked. Some `TRY` block may have been exited improperly (via `goto`, `break`, `continue`, or `return`).", NULL, 0, NULL);
     }
 }
