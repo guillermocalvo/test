@@ -98,7 +98,7 @@
   TEST_ASSERT_EQUALS(found == expected, "%d", found, expected)
 
 #define TEST_ASSERT_PTR_EQUALS(found, expected)                                \
-  TEST_ASSERT_EQUALS(found == expected, "%p", found, expected)
+  TEST_ASSERT_EQUALS(found == expected, "%p", (void *) found, (void *) expected)
 
 #define TEST_ASSERT_CHAR_EQUALS(found, expected)                               \
   TEST_ASSERT_EQUALS(found == expected, "'%c'", found, expected)
