@@ -70,6 +70,7 @@ set(TESTS
         duplicate-catch
         unordered-catch
         finally
+        suppressed-exception
         catch-sigsegv
         catch-sigterm
         catch-sigint

@@ -102,6 +102,7 @@ check_PROGRAMS =                        \
     bin/check/duplicate-catch           \
     bin/check/unordered-catch           \
     bin/check/finally                   \
+    bin/check/suppressed-exception      \
     bin/check/catch-sigsegv             \
     bin/check/catch-sigterm             \
     bin/check/catch-sigint              \
@@ -156,6 +157,7 @@ TESTS =                                 \
     bin/check/duplicate-catch           \
     bin/check/unordered-catch           \
     bin/check/finally                   \
+    bin/check/suppressed-exception      \
     bin/check/catch-sigsegv             \
     bin/check/catch-sigterm             \
     bin/check/catch-sigint              \
@@ -253,6 +255,7 @@ bin_check_f04_SOURCES                   = src/exceptions4c.c tests/f04.c
 bin_check_duplicate_catch_SOURCES       = src/exceptions4c.c tests/duplicate-catch.c
 bin_check_unordered_catch_SOURCES       = src/exceptions4c.c tests/unordered-catch.c
 bin_check_finally_SOURCES               = src/exceptions4c.c tests/finally.c
+bin_check_suppressed_exception_SOURCES  = src/exceptions4c.c tests/suppressed-exception.c
 bin_check_catch_sigsegv_SOURCES         = src/exceptions4c.c tests/catch-sigsegv.c
 bin_check_catch_sigterm_SOURCES         = src/exceptions4c.c tests/catch-sigterm.c
 bin_check_catch_sigint_SOURCES          = src/exceptions4c.c tests/catch-sigint.c
