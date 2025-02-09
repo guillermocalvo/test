@@ -1,4 +1,5 @@
 
+
 # include "testing.h"
 
 void aux1(void);
@@ -7,8 +8,10 @@ void aux3(void);
 void aux4(void);
 void aux5(void);
 
-static const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
-static const struct e4c_exception_type NullPointerException = {&RuntimeException, "Null pointer."};
+static const struct e4c_exception_type OOPS = {NULL, "Oops"};
+
+volatile bool finalized1 = false;
+volatile bool finalized2 = false;
 
 /**
  * Catching an exception thrown deep down the call stack
@@ -27,20 +30,22 @@ TEST_CASE{
 
         aux1();
 
-    } CATCH (RuntimeException) {
+    } CATCH (OOPS) {
 
         caught = true;
-
-        TEST_ASSERT_EQUALS(e4c_get_exception()->type, &RuntimeException);
     }
 
     TEST_ASSERT(caught);
+    TEST_ASSERT(finalized1);
+    TEST_ASSERT(finalized2);
 }
 
 
 void aux1(void){
 
     aux2();
+
+    exit(EXIT_FAILURE);
 }
 
 void aux2(void){
@@ -51,9 +56,10 @@ void aux2(void){
 
     } FINALLY {
 
-        /* The exception has not been caught yet */
-        TEST_ASSERT(e4c_is_uncaught());
+        finalized1 = true;
     }
+
+    exit(EXIT_FAILURE);
 }
 
 void aux3(void){
@@ -67,15 +73,15 @@ void aux4(void){
 
         aux5();
 
-    } CATCH (NullPointerException) {
+    } FINALLY {
 
-        TEST_FAIL("Block `CATCH (NullPointerException)` cannot handle a RuntimeException");
+        finalized2 = true;
     }
+
+    exit(EXIT_FAILURE);
 }
 
 void aux5(void){
 
-    THROW(RuntimeException, "I'm going to be caught.");
-
-    TEST_FAIL("RuntimeException should have been thrown");
+    THROW(OOPS, NULL);
 }

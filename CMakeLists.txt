@@ -61,7 +61,7 @@ set(TESTS
         f04
         duplicate-catch
         unordered-catch
-        f07
+        finally
         catch-sigsegv
         catch-sigterm
         catch-sigint
