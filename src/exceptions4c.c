@@ -509,7 +509,7 @@ static void print_debug_info(const char * file, const int line, const char * fun
 static void print_exception(const struct e4c_exception * exception, const bool is_cause) {
     (void) fprintf(stderr, "%s%s: %s\n", is_cause ? "Caused by: " : "\n", exception->name, exception->message);
     print_debug_info(exception->file, exception->line, exception->function);
-    if (exception->cause != NULL && exception->cause != exception) {
+    if (exception->cause != NULL) {
         print_exception(exception->cause, true);
     }
 }
