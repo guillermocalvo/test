@@ -203,64 +203,35 @@ lib_libexceptions4c_backtrace_a_SOURCES = src/backtrace/exceptions4c-backtrace.c
 
 # exceptions4c tests
 
-bin_check_panic_try_SOURCES                 = tests/panic-try.c
-bin_check_panic_try_LDADD                   = $(EXCEPTIONS4C_LIBRARY)
-bin_check_panic_retry_SOURCES               = tests/panic-retry.c
-bin_check_panic_retry_LDADD                 = $(EXCEPTIONS4C_LIBRARY)
-bin_check_panic_reacquire_SOURCES           = tests/panic-reacquire.c
-bin_check_panic_reacquire_LDADD             = $(EXCEPTIONS4C_LIBRARY)
-bin_check_panic_context_SOURCES             = tests/panic-context.c
-bin_check_panic_context_LDADD               = $(EXCEPTIONS4C_LIBRARY)
-bin_check_panic_block_try_SOURCES           = tests/panic-block-try.c
-bin_check_panic_block_try_LDADD             = $(EXCEPTIONS4C_LIBRARY)
-bin_check_panic_block_catch_SOURCES         = tests/panic-block-catch.c
-bin_check_panic_block_catch_LDADD           = $(EXCEPTIONS4C_LIBRARY)
-bin_check_panic_block_next_SOURCES          = tests/panic-block-next.c
-bin_check_panic_block_next_LDADD            = $(EXCEPTIONS4C_LIBRARY)
-bin_check_panic_dangling_SOURCES            = tests/panic-dangling.c
-bin_check_panic_dangling_LDADD              = $(EXCEPTIONS4C_LIBRARY)
-bin_check_get_exception_SOURCES             = tests/get-exception.c
-bin_check_get_exception_LDADD               = $(EXCEPTIONS4C_LIBRARY)
-bin_check_is_uncaught_SOURCES               = tests/is-uncaught.c
-bin_check_is_uncaught_LDADD                 = $(EXCEPTIONS4C_LIBRARY)
-bin_check_catch_all_SOURCES                 = tests/catch-all.c
-bin_check_catch_all_LDADD                   = $(EXCEPTIONS4C_LIBRARY)
-bin_check_uncaught_exception_1_SOURCES      = tests/uncaught-exception-1.c
-bin_check_uncaught_exception_1_LDADD        = $(EXCEPTIONS4C_LIBRARY)
-bin_check_uncaught_exception_2_SOURCES      = tests/uncaught-exception-2.c
-bin_check_uncaught_exception_2_LDADD        = $(EXCEPTIONS4C_LIBRARY)
-bin_check_catch_specific_SOURCES            = tests/catch-specific.c
-bin_check_catch_specific_LDADD              = $(EXCEPTIONS4C_LIBRARY)
-bin_check_catch_generic_SOURCES             = tests/catch-generic.c
-bin_check_catch_generic_LDADD               = $(EXCEPTIONS4C_LIBRARY)
-bin_check_duplicate_catch_SOURCES           = tests/duplicate-catch.c
-bin_check_duplicate_catch_LDADD             = $(EXCEPTIONS4C_LIBRARY)
-bin_check_unordered_catch_SOURCES           = tests/unordered-catch.c
-bin_check_unordered_catch_LDADD             = $(EXCEPTIONS4C_LIBRARY)
-bin_check_finally_SOURCES                   = tests/finally.c
-bin_check_finally_LDADD                     = $(EXCEPTIONS4C_LIBRARY)
-bin_check_suppressed_exception_SOURCES      = tests/suppressed-exception.c
-bin_check_suppressed_exception_LDADD        = $(EXCEPTIONS4C_LIBRARY)
-bin_check_catch_sigsegv_SOURCES             = tests/catch-sigsegv.c
-bin_check_catch_sigsegv_LDADD               = $(EXCEPTIONS4C_LIBRARY)
-bin_check_catch_sigterm_SOURCES             = tests/catch-sigterm.c
-bin_check_catch_sigterm_LDADD               = $(EXCEPTIONS4C_LIBRARY)
-bin_check_catch_sigint_SOURCES              = tests/catch-sigint.c
-bin_check_catch_sigint_LDADD                = $(EXCEPTIONS4C_LIBRARY)
-bin_check_retry_SOURCES                     = tests/retry.c
-bin_check_retry_LDADD                       = $(EXCEPTIONS4C_LIBRARY)
-bin_check_reacquire_SOURCES                 = tests/reacquire.c
-bin_check_reacquire_LDADD                   = $(EXCEPTIONS4C_LIBRARY)
-bin_check_throw_with_format_SOURCES         = tests/throw-with-format.c
-bin_check_throw_with_format_LDADD           = $(EXCEPTIONS4C_LIBRARY)
-bin_check_uncaught_handler_SOURCES          = tests/uncaught-handler.c
-bin_check_uncaught_handler_LDADD            = $(EXCEPTIONS4C_LIBRARY)
-bin_check_initialize_exception_SOURCES      = tests/initialize-exception.c
-bin_check_initialize_exception_LDADD        = $(EXCEPTIONS4C_LIBRARY)
-bin_check_finalize_exception_SOURCES        = tests/finalize-exception.c
-bin_check_finalize_exception_LDADD          = $(EXCEPTIONS4C_LIBRARY)
-bin_check_exception_cause_SOURCES           = tests/exception-cause.c
-bin_check_exception_cause_LDADD             = $(EXCEPTIONS4C_LIBRARY)
+bin_check_panic_try_SOURCES                 = src/exceptions4c.c tests/panic-try.c
+bin_check_panic_retry_SOURCES               = src/exceptions4c.c tests/panic-retry.c
+bin_check_panic_reacquire_SOURCES           = src/exceptions4c.c tests/panic-reacquire.c
+bin_check_panic_context_SOURCES             = src/exceptions4c.c tests/panic-context.c
+bin_check_panic_block_try_SOURCES           = src/exceptions4c.c tests/panic-block-try.c
+bin_check_panic_block_catch_SOURCES         = src/exceptions4c.c tests/panic-block-catch.c
+bin_check_panic_block_next_SOURCES          = src/exceptions4c.c tests/panic-block-next.c
+bin_check_panic_dangling_SOURCES            = src/exceptions4c.c tests/panic-dangling.c
+bin_check_get_exception_SOURCES             = src/exceptions4c.c tests/get-exception.c
+bin_check_is_uncaught_SOURCES               = src/exceptions4c.c tests/is-uncaught.c
+bin_check_catch_all_SOURCES                 = src/exceptions4c.c tests/catch-all.c
+bin_check_uncaught_exception_1_SOURCES      = src/exceptions4c.c tests/uncaught-exception-1.c
+bin_check_uncaught_exception_2_SOURCES      = src/exceptions4c.c tests/uncaught-exception-2.c
+bin_check_catch_specific_SOURCES            = src/exceptions4c.c tests/catch-specific.c
+bin_check_catch_generic_SOURCES             = src/exceptions4c.c tests/catch-generic.c
+bin_check_duplicate_catch_SOURCES           = src/exceptions4c.c tests/duplicate-catch.c
+bin_check_unordered_catch_SOURCES           = src/exceptions4c.c tests/unordered-catch.c
+bin_check_finally_SOURCES                   = src/exceptions4c.c tests/finally.c
+bin_check_suppressed_exception_SOURCES      = src/exceptions4c.c tests/suppressed-exception.c
+bin_check_catch_sigsegv_SOURCES             = src/exceptions4c.c tests/catch-sigsegv.c
+bin_check_catch_sigterm_SOURCES             = src/exceptions4c.c tests/catch-sigterm.c
+bin_check_catch_sigint_SOURCES              = src/exceptions4c.c tests/catch-sigint.c
+bin_check_retry_SOURCES                     = src/exceptions4c.c tests/retry.c
+bin_check_reacquire_SOURCES                 = src/exceptions4c.c tests/reacquire.c
+bin_check_throw_with_format_SOURCES         = src/exceptions4c.c tests/throw-with-format.c
+bin_check_uncaught_handler_SOURCES          = src/exceptions4c.c tests/uncaught-handler.c
+bin_check_initialize_exception_SOURCES      = src/exceptions4c.c tests/initialize-exception.c
+bin_check_finalize_exception_SOURCES        = src/exceptions4c.c tests/finalize-exception.c
+bin_check_exception_cause_SOURCES           = src/exceptions4c.c tests/exception-cause.c
 
 # exceptions4c examples
 
@@ -289,16 +260,13 @@ bin_check_lite_overflow_SOURCES             = tests/lite/overflow.c
 
 # exceptions4c-pthreads tests
 
-bin_check_pthreads_multithread_SOURCES      = tests/pthreads/multithread.c
-bin_check_pthreads_multithread_LDADD        = $(EXCEPTIONS4C_LIBRARY) $(EXCEPTIONS4C_PTHREADS_LIBRARY)
-bin_check_pthreads_dangling_context_SOURCES = tests/pthreads/dangling-context.c
-bin_check_pthreads_dangling_context_LDADD   = $(EXCEPTIONS4C_LIBRARY) $(EXCEPTIONS4C_PTHREADS_LIBRARY)
+bin_check_pthreads_multithread_SOURCES      = src/exceptions4c.c src/pthreads/exceptions4c-pthreads.c tests/pthreads/multithread.c
+bin_check_pthreads_dangling_context_SOURCES = src/exceptions4c.c src/pthreads/exceptions4c-pthreads.c tests/pthreads/dangling-context.c
 
 
 # exceptions4c-backtrace tests
 
-bin_check_backtrace_backtraced_SOURCES      = tests/backtrace/backtraced.c
-bin_check_backtrace_backtraced_LDADD        = $(EXCEPTIONS4C_LIBRARY) $(EXCEPTIONS4C_BACKTRACE_LIBRARY)
+bin_check_backtrace_backtraced_SOURCES      = src/exceptions4c.c src/backtrace/exceptions4c-backtrace.c tests/backtrace/backtraced.c
 
 
 # coverage
