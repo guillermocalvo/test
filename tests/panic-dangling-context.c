@@ -14,7 +14,9 @@ TEST_CASE{
     TRY {
       goto oops;
     }
+
     oops:
+    printf("Oh oh...");
 }
 
 static void failure(int _) {
