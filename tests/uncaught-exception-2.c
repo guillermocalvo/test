@@ -1,5 +1,9 @@
 
+#ifdef NDEBUG
+#undef NDEBUG
+#else
 #define NDEBUG
+#endif
 
 # include "testing.h"
 
