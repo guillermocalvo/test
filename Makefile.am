@@ -75,6 +75,8 @@ CLEANFILES =                            \
 
 check_PROGRAMS =                        \
     bin/check/panic-try                 \
+    bin/check/panic-retry               \
+    bin/check/panic-reacquire           \
     bin/check/panic-context             \
     bin/check/panic-block-try           \
     bin/check/panic-block-catch         \
@@ -126,6 +128,8 @@ check_PROGRAMS =                        \
 
 TESTS =                                 \
     bin/check/panic-try                 \
+    bin/check/panic-retry               \
+    bin/check/panic-reacquire           \
     bin/check/panic-context             \
     bin/check/panic-block-try           \
     bin/check/panic-block-catch         \
@@ -177,6 +181,8 @@ TESTS =                                 \
 
 XFAIL_TESTS =                           \
     bin/check/panic-try                 \
+    bin/check/panic-retry               \
+    bin/check/panic-reacquire           \
     bin/check/panic-context             \
     bin/check/panic-block-try           \
     bin/check/panic-block-catch         \
@@ -217,6 +223,8 @@ lib_libexceptions4c_backtrace_a_SOURCES = src/backtrace/exceptions4c-backtrace.c
 # exceptions4c tests
 
 bin_check_panic_try_SOURCES             = src/exceptions4c.c tests/panic-try.c
+bin_check_panic_retry_SOURCES           = src/exceptions4c.c tests/panic-retry.c
+bin_check_panic_reacquire_SOURCES       = src/exceptions4c.c tests/panic-reacquire.c
 bin_check_panic_context_SOURCES         = src/exceptions4c.c tests/panic-context.c
 bin_check_panic_block_try_SOURCES       = src/exceptions4c.c tests/panic-block-try.c
 bin_check_panic_block_catch_SOURCES     = src/exceptions4c.c tests/panic-block-catch.c

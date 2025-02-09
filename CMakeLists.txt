@@ -48,6 +48,8 @@ enable_testing()
 
 set(TESTS
         panic-try
+        panic-retry
+        panic-reacquire
         panic-context
         panic-block-try
         panic-block-catch
@@ -89,6 +91,8 @@ foreach(TEST IN LISTS TESTS)
 endforeach()
 
 set_property(TEST panic-try PROPERTY WILL_FAIL TRUE)
+set_property(TEST panic-retry PROPERTY WILL_FAIL TRUE)
+set_property(TEST panic-reacquire PROPERTY WILL_FAIL TRUE)
 set_property(TEST panic-context PROPERTY WILL_FAIL TRUE)
 set_property(TEST panic-block-try PROPERTY WILL_FAIL TRUE)
 set_property(TEST panic-block-catch PROPERTY WILL_FAIL TRUE)
