@@ -47,25 +47,37 @@ static void delete_context_key(void);
 static void cleanup(void);
 static void delete_context(void * context);
 static void termination_handler(void);
+static void print_error(const char * cause, int error_code, const char * error_message);
 static void panic(const char * cause, int error_code, const char * error_message);
 
 /**
- * Causes abnormal thread termination due to a fatal error.
+ * Prints a fatal message to the standard error stream.
  *
  * @param cause The name of the function that failed.
  * @param error_code The error code returned by the function that failed.
  * @param error_message The message to print to standard error output.
  */
-static void panic(const char * cause, int error_code, const char * error_message) {
-    fprintf(stderr, "\n[exceptions4c-pthreads] Thread #%llu: %s\n",
+static void print_error(const char * cause, int error_code, const char * error_message) {
+    (void) fprintf(stderr, "\n[exceptions4c-pthreads] Thread #%llu: %s\n",
         (long long unsigned) pthread_self(),
         error_message);
     if (error_code) {
         errno = error_code;
         perror(cause);
     }
-    fflush(stderr);
-    pthread_exit(PTHREAD_CANCELED);
+    (void) fflush(stderr);
+}
+
+/**
+ * Causes abnormal program termination due to a fatal error.
+ *
+ * @param cause The name of the function that failed.
+ * @param error_code The error code returned by the function that failed.
+ * @param error_message The message to print to standard error output.
+ */
+static void panic(const char * cause, int error_code, const char * error_message) {
+    print_error(cause, error_code, error_message);
+    abort();
 }
 
 /**
@@ -102,7 +114,8 @@ static void cleanup(void) {
  * terminating the entire program.
  */
 static void termination_handler(void) {
-    panic(NULL, 0, "Terminating thread.");
+    print_error(NULL, 0, "Terminating due to uncaught exceptions.");
+    pthread_exit(PTHREAD_CANCELED);
 }
 
 /**
