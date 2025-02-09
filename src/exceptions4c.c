@@ -90,6 +90,7 @@ struct e4c_block {
 };
 
 static noreturn void panic(const char * error_message, const char * file, int line, const char * function);
+static void * allocate(size_t size, const char * error_message, const char * file, int line, const char * function);
 static struct e4c_context * get_context(const char * file, int line, const char * function);
 static void cleanup_default_context(void);
 static void throw(const struct e4c_context * context, const struct e4c_exception_type * type, const char * name, int error_number, const char * file, int line, const char * function, const char * format, va_list arguments_list);
@@ -134,11 +135,7 @@ bool e4c_is_uncaught(void) {
 
 e4c_env * e4c_start(const bool should_acquire, const char * file, const int line, const char * function) {
 
-    struct e4c_block * new_block = calloc(1, sizeof(*new_block));
-    if (new_block == NULL) {
-        panic("Not enough memory to create a new exception block", file, line, function);
-    }
-
+    struct e4c_block * new_block = allocate(sizeof(*new_block), "Not enough memory to create a new exception block", file, line, function);
     struct e4c_context * context = get_context(file, line, function);
     if (context == &default_context && !is_cleanup_registered) {
         is_cleanup_registered = atexit(cleanup_default_context) == 0;
@@ -304,6 +301,24 @@ static noreturn void panic(const char * error_message, const char * file, const 
 }
 
 /**
+ * Allocates memory for a object of size and initializes all bytes in the allocated storage to zero.
+ *
+ * @param size the size of the new object.
+ * @param error_message The message to print to standard error output.
+ * @param file the name of the client source code file that caused the fatal error.
+ * @param line the number of line that caused the fatal error.
+ * @param function the name of the client function that caused the fatal error.
+ * @return a pointer to the newly allocated memory.
+ */
+static void * allocate(size_t size, const char * error_message, const char * file, int line, const char * function) {
+    void * object = calloc(1, size);
+    if (object == NULL) {
+        panic(error_message, file, line, function);
+    }
+    return object;
+}
+
+/**
  * Checks for dangling exception blocks at program exit.
  */
 static void cleanup_default_context(void) {
@@ -426,12 +441,7 @@ static bool extends(const struct e4c_exception * exception, const struct e4c_exc
 static void throw(const struct e4c_context * context, const struct e4c_exception_type * type, const char * name, int error_number, const char * file, const int line, const char * function, const char * format, va_list arguments_list) {
 
     /* allocate new exception */
-    struct e4c_exception * exception = calloc(1, sizeof(*exception));
-
-    /* make sure there was enough memory */
-    if (exception == NULL) {
-        panic("Not enough memory to create a new exception", file, line, function);
-    }
+    struct e4c_exception * exception = allocate(sizeof(*exception), "Not enough memory to create a new exception", file, line, function);
 
     /* "instantiate" the specified exception */
     exception->name         = name;
