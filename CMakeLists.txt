@@ -59,8 +59,8 @@ set(TESTS
         catch-generic-exception
         f03
         f04
-        f05
-        f06
+        duplicate-catch
+        unordered-catch
         f07
         catch-sigsegv
         catch-sigterm

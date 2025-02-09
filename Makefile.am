@@ -92,8 +92,8 @@ check_PROGRAMS =                        \
     bin/check/catch-generic-exception   \
     bin/check/f03                       \
     bin/check/f04                       \
-    bin/check/f05                       \
-    bin/check/f06                       \
+    bin/check/duplicate-catch           \
+    bin/check/unordered-catch           \
     bin/check/f07                       \
     bin/check/catch-sigsegv             \
     bin/check/catch-sigterm             \
@@ -139,8 +139,8 @@ TESTS =                                 \
     bin/check/catch-generic-exception   \
     bin/check/f03                       \
     bin/check/f04                       \
-    bin/check/f05                       \
-    bin/check/f06                       \
+    bin/check/duplicate-catch           \
+    bin/check/unordered-catch           \
     bin/check/f07                       \
     bin/check/catch-sigsegv             \
     bin/check/catch-sigterm             \
@@ -222,8 +222,8 @@ bin_check_catch_specific_exception_SOURCES = src/exceptions4c.c tests/catch-spec
 bin_check_catch_generic_exception_SOURCES = src/exceptions4c.c tests/catch-generic-exception.c
 bin_check_f03_SOURCES                   = src/exceptions4c.c tests/f03.c
 bin_check_f04_SOURCES                   = src/exceptions4c.c tests/f04.c
-bin_check_f05_SOURCES                   = src/exceptions4c.c tests/f05.c
-bin_check_f06_SOURCES                   = src/exceptions4c.c tests/f06.c
+bin_check_duplicate_catch_SOURCES       = src/exceptions4c.c tests/duplicate-catch.c
+bin_check_unordered_catch_SOURCES       = src/exceptions4c.c tests/unordered-catch.c
 bin_check_f07_SOURCES                   = src/exceptions4c.c tests/f07.c
 bin_check_catch_sigsegv_SOURCES         = src/exceptions4c.c tests/catch-sigsegv.c
 bin_check_catch_sigterm_SOURCES         = src/exceptions4c.c tests/catch-sigterm.c
