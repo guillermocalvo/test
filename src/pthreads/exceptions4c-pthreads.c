@@ -32,6 +32,13 @@
 #include <pthread.h> /* PTHREAD_CANCELED, PTHREAD_ONCE_INIT, pthread_exit, pthread_getspecific, pthread_key_create, pthread_key_delete, pthread_key_t, pthread_once, pthread_once_t, pthread_setspecific */
 #include <exceptions4c-pthreads.h>
 
+#define PANIC_ON_ERROR(ERROR_MESSAGE, FUNCTION, ...)                        \
+    do {                                                                    \
+        int error_code = FUNCTION(__VA_ARGS__);                             \
+        panic_if(error_code != 0, #FUNCTION, ERROR_MESSAGE, error_code);    \
+    } while (false)
+
+
 /* Key for the thread-specific exception context */
 static pthread_key_t context_key;
 
@@ -48,7 +55,7 @@ static void cleanup(void);
 static void delete_context(void * context);
 static void termination_handler(void);
 static void print_error(const char * cause, int error_code, const char * error_message);
-static void panic(const char * cause, int error_code, const char * error_message);
+static void panic_if(bool failure, const char * cause, const char * error_message, int error_code);
 
 /**
  * Prints a fatal message to the standard error stream.
@@ -71,40 +78,34 @@ static void print_error(const char * cause, int error_code, const char * error_m
 /**
  * Causes abnormal program termination due to a fatal error.
  *
+ * @param failure Whether to terminate the program or not.
  * @param cause The name of the function that failed.
  * @param error_code The error code returned by the function that failed.
  * @param error_message The message to print to standard error output.
  */
-static void panic(const char * cause, int error_code, const char * error_message) {
-    print_error(cause, error_code, error_message);
-    abort();
+static void panic_if(bool failure, const char * cause, const char * error_message, int error_code) {
+    if (failure) {
+        print_error(cause, error_code, error_message);
+        abort();
+    }
 }
 
 /**
  * Allocates the context key.
  */
 static void create_context_key() {
-    const int error = pthread_key_create(&context_key, delete_context);
-    if (error) {
-        panic("pthread_key_create", error, "Could not create context key.");
-    }
+    PANIC_ON_ERROR("Could not create context key.", pthread_key_create, &context_key, delete_context);
 }
 
 /**
  * Deallocates the context key.
  */
 static void delete_context_key() {
-    const int error = pthread_key_delete(context_key);
-    if (error) {
-        panic("pthread_key_delete", error, "Could not delete context key.");
-    }
+    PANIC_ON_ERROR("Could not delete context key.", pthread_key_delete, context_key);
 }
 
 static void cleanup(void) {
-    const int error = atexit(delete_context_key);
-    if (error) {
-        panic("atexit", error, "Could not register cleanup function.");
-    }
+    PANIC_ON_ERROR("Could not register cleanup function.", atexit, delete_context_key);
 }
 
 /**
@@ -120,28 +121,14 @@ static void termination_handler(void) {
 
 /**
  * Allocates and initializes the thread-specific context.
- *
- * @param context the context to deallocate.
  */
 static struct e4c_context * create_context(void) {
-    int error = pthread_once(&context_key_once, create_context_key);
-    if (error) {
-        panic("pthread_once", error, "Could not initialize context key.");
-    }
-    error = pthread_once(&cleanup_once, cleanup);
-    if (error) {
-        panic("pthread_once", error, "Could not initialize cleanup function.");
-    }
+    PANIC_ON_ERROR("Could not initialize context key.", pthread_once, &context_key_once, create_context_key);
+    PANIC_ON_ERROR("Could not initialize cleanup function.", pthread_once, &cleanup_once, cleanup);
     struct e4c_context * context = calloc(1, sizeof(*context));
-    if (!context) {
-        panic("calloc", errno, "Could not allocate exception context.");
-    }
+    panic_if(context == NULL, "calloc", "Could not allocate exception context.", errno);
     context->termination_handler = termination_handler;
-    error = pthread_setspecific(context_key, context);
-    if (error) {
-        free(context);
-        panic("pthread_setspecific", error, "Could not save thread-specific context.");
-    }
+    PANIC_ON_ERROR("Could not save thread-specific context.", pthread_setspecific, context_key, context);
     return context;
 }
 
@@ -153,9 +140,7 @@ static struct e4c_context * create_context(void) {
 static void delete_context(void * context) {
     const void * block = ((struct e4c_context *) context)->_innermost_block;
     free(context);
-    if (block) {
-        panic(NULL, 0, "Dangling exception block leaked. Some `TRY` block may have been exited improperly (via `goto`, `break`, `continue`, or `return`).");
-    }
+    panic_if(block != NULL, NULL, "Dangling exception block leaked. Some `TRY` block may have been exited improperly (via `goto`, `break`, `continue`, or `return`).", 0);
 }
 
 struct e4c_context * e4c_pthreads_context_supplier() {
