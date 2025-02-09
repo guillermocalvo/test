@@ -85,24 +85,24 @@ check_PROGRAMS =                        \
     bin/check/get-exception             \
     bin/check/is-uncaught               \
     bin/check/catch-all                 \
-    bin/check/uncaught-exception-1      \
-    bin/check/uncaught-exception-2      \
+    bin/check/throw-uncaught-1          \
+    bin/check/throw-uncaught-2          \
     bin/check/catch-specific            \
     bin/check/catch-generic             \
-    bin/check/duplicate-catch           \
-    bin/check/unordered-catch           \
+    bin/check/catch-duplicate           \
+    bin/check/catch-unordered           \
     bin/check/finally                   \
-    bin/check/suppressed-exception      \
+    bin/check/throw-suppressed          \
     bin/check/catch-sigsegv             \
     bin/check/catch-sigterm             \
     bin/check/catch-sigint              \
     bin/check/retry                     \
     bin/check/reacquire                 \
-    bin/check/throw-with-format         \
-    bin/check/uncaught-handler          \
-    bin/check/initialize-exception      \
-    bin/check/finalize-exception        \
-    bin/check/exception-cause           \
+    bin/check/throw-format              \
+    bin/check/handler-uncaught          \
+    bin/check/handler-initialize        \
+    bin/check/handler-finalize          \
+    bin/check/throw-cause               \
     bin/check/examples/pthreads         \
     bin/check/examples/signals          \
     bin/check/examples/pet-store        \
@@ -130,24 +130,24 @@ TESTS =                                 \
     bin/check/get-exception             \
     bin/check/is-uncaught               \
     bin/check/catch-all                 \
-    bin/check/uncaught-exception-1      \
-    bin/check/uncaught-exception-2      \
+    bin/check/throw-uncaught-1          \
+    bin/check/throw-uncaught-2          \
     bin/check/catch-specific            \
     bin/check/catch-generic             \
-    bin/check/duplicate-catch           \
-    bin/check/unordered-catch           \
+    bin/check/catch-duplicate           \
+    bin/check/catch-unordered           \
     bin/check/finally                   \
-    bin/check/suppressed-exception      \
+    bin/check/throw-suppressed          \
     bin/check/catch-sigsegv             \
     bin/check/catch-sigterm             \
     bin/check/catch-sigint              \
     bin/check/retry                     \
     bin/check/reacquire                 \
-    bin/check/throw-with-format         \
-    bin/check/uncaught-handler          \
-    bin/check/initialize-exception      \
-    bin/check/finalize-exception        \
-    bin/check/exception-cause           \
+    bin/check/throw-format              \
+    bin/check/handler-uncaught          \
+    bin/check/handler-initialize        \
+    bin/check/handler-finalize          \
+    bin/check/throw-cause               \
     bin/check/examples/pthreads         \
     bin/check/examples/signals          \
     bin/check/examples/pet-store        \
@@ -172,8 +172,8 @@ XFAIL_TESTS =                           \
     bin/check/panic-block-catch         \
     bin/check/panic-block-next          \
     bin/check/panic-dangling            \
-    bin/check/uncaught-exception-1      \
-    bin/check/uncaught-exception-2      \
+    bin/check/throw-uncaught-1          \
+    bin/check/throw-uncaught-2          \
     bin/check/examples/uncaught-handler \
     bin/check/lite/uncaught             \
     bin/check/lite/overflow             \
@@ -214,24 +214,24 @@ bin_check_panic_dangling_SOURCES            = src/exceptions4c.c tests/panic-dan
 bin_check_get_exception_SOURCES             = src/exceptions4c.c tests/get-exception.c
 bin_check_is_uncaught_SOURCES               = src/exceptions4c.c tests/is-uncaught.c
 bin_check_catch_all_SOURCES                 = src/exceptions4c.c tests/catch-all.c
-bin_check_uncaught_exception_1_SOURCES      = src/exceptions4c.c tests/uncaught-exception-1.c
-bin_check_uncaught_exception_2_SOURCES      = src/exceptions4c.c tests/uncaught-exception-2.c
+bin_check_throw_uncaught_1_SOURCES          = src/exceptions4c.c tests/throw-uncaught-1.c
+bin_check_throw_uncaught_2_SOURCES          = src/exceptions4c.c tests/throw-uncaught-2.c
 bin_check_catch_specific_SOURCES            = src/exceptions4c.c tests/catch-specific.c
 bin_check_catch_generic_SOURCES             = src/exceptions4c.c tests/catch-generic.c
-bin_check_duplicate_catch_SOURCES           = src/exceptions4c.c tests/duplicate-catch.c
-bin_check_unordered_catch_SOURCES           = src/exceptions4c.c tests/unordered-catch.c
+bin_check_catch_duplicate_SOURCES           = src/exceptions4c.c tests/catch-duplicate.c
+bin_check_catch_unordered_SOURCES           = src/exceptions4c.c tests/catch-unordered.c
 bin_check_finally_SOURCES                   = src/exceptions4c.c tests/finally.c
-bin_check_suppressed_exception_SOURCES      = src/exceptions4c.c tests/suppressed-exception.c
+bin_check_throw_suppressed_SOURCES          = src/exceptions4c.c tests/throw-suppressed.c
 bin_check_catch_sigsegv_SOURCES             = src/exceptions4c.c tests/catch-sigsegv.c
 bin_check_catch_sigterm_SOURCES             = src/exceptions4c.c tests/catch-sigterm.c
 bin_check_catch_sigint_SOURCES              = src/exceptions4c.c tests/catch-sigint.c
 bin_check_retry_SOURCES                     = src/exceptions4c.c tests/retry.c
 bin_check_reacquire_SOURCES                 = src/exceptions4c.c tests/reacquire.c
-bin_check_throw_with_format_SOURCES         = src/exceptions4c.c tests/throw-with-format.c
-bin_check_uncaught_handler_SOURCES          = src/exceptions4c.c tests/uncaught-handler.c
-bin_check_initialize_exception_SOURCES      = src/exceptions4c.c tests/initialize-exception.c
-bin_check_finalize_exception_SOURCES        = src/exceptions4c.c tests/finalize-exception.c
-bin_check_exception_cause_SOURCES           = src/exceptions4c.c tests/exception-cause.c
+bin_check_throw_format_SOURCES              = src/exceptions4c.c tests/throw-format.c
+bin_check_handler_uncaught_SOURCES          = src/exceptions4c.c tests/handler-uncaught.c
+bin_check_handler_initialize_SOURCES        = src/exceptions4c.c tests/handler-initialize.c
+bin_check_handler_finalize_SOURCES          = src/exceptions4c.c tests/handler-finalize.c
+bin_check_throw_cause_SOURCES               = src/exceptions4c.c tests/throw-cause.c
 
 # exceptions4c examples
 

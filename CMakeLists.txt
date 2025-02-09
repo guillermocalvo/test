@@ -58,24 +58,24 @@ set(TESTS
         get-exception
         is-uncaught
         catch-all
-        uncaught-exception-1
-        uncaught-exception-2
+        throw-uncaught-1
+        throw-uncaught-2
         catch-specific
         catch-generic
-        duplicate-catch
-        unordered-catch
+        catch-duplicate
+        catch-unordered
         finally
-        suppressed-exception
+        throw-suppressed
         catch-sigsegv
         catch-sigterm
         catch-sigint
         retry
         reacquire
-        throw-with-format
-        uncaught-handler
-        initialize-exception
-        finalize-exception
-        exception-cause
+        throw-format
+        handler-uncaught
+        handler-initialize
+        handler-finalize
+        throw-cause
 )
 
 foreach(TEST IN LISTS TESTS)
@@ -94,8 +94,8 @@ set_property(TEST panic-block-try PROPERTY WILL_FAIL TRUE)
 set_property(TEST panic-block-catch PROPERTY WILL_FAIL TRUE)
 set_property(TEST panic-block-next PROPERTY WILL_FAIL TRUE)
 set_property(TEST panic-dangling PROPERTY WILL_FAIL TRUE)
-set_property(TEST uncaught-exception-1 PROPERTY WILL_FAIL TRUE)
-set_property(TEST uncaught-exception-2 PROPERTY WILL_FAIL TRUE)
+set_property(TEST throw-uncaught-1 PROPERTY WILL_FAIL TRUE)
+set_property(TEST throw-uncaught-2 PROPERTY WILL_FAIL TRUE)
 
 set(TESTS
         uncaught
