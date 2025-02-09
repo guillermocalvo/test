@@ -2,7 +2,7 @@
 # exceptions4c
 #
 # Copyright (c) 2025 Guillermo Calvo
-# Licensed under the GNU Lesser General Public License
+# Licensed under the Apache License, Version 2.0
 #
 
 AUTOMAKE_OPTIONS = foreign subdir-objects
@@ -12,12 +12,12 @@ AM_CFLAGS = -Wall -Werror --pedantic -Wno-missing-braces -Wno-dangling-else -cov
 
 # Library
 
-EXCEPTIONS4C_PATH           = src
-EXCEPTIONS4C_LIBRARY        = lib/libexceptions4c.a
-EXCEPTIONS4C_PTHREADS_PATH  = src/pthreads
-EXCEPTIONS4C_PTHREADS_LIBRARY = lib/libexceptions4c-pthreads.a
-EXCEPTIONS4C_BACKTRACE_PATH = src/backtrace
-EXCEPTIONS4C_BACKTRACE_LIBRARY = lib/libexceptions4c-backtrace.a
+EXCEPTIONS4C_PATH               = src
+EXCEPTIONS4C_LIBRARY            = lib/libexceptions4c.a
+EXCEPTIONS4C_PTHREADS_PATH      = src/pthreads
+EXCEPTIONS4C_PTHREADS_LIBRARY   = lib/libexceptions4c-pthreads.a
+EXCEPTIONS4C_BACKTRACE_PATH     = src/backtrace
+EXCEPTIONS4C_BACKTRACE_LIBRARY  = lib/libexceptions4c-backtrace.a
 
 
 # Install
@@ -42,163 +42,163 @@ docs_DATA = docs/*
 
 # Cleanup
 
-CLEANFILES =                            \
-    *.log                               \
-    *.gcda                              \
-    *.gcno                              \
-    *.gcov                              \
-    *.stackdump                         \
-    src/*.gcda                          \
-    src/*.gcno                          \
-    src/*.gcov                          \
-    src/pthreads/*.gcda                 \
-    src/pthreads/*.gcno                 \
-    src/pthreads/*.gcov                 \
-    src/backtrace/*.gcda                \
-    src/backtrace/*.gcno                \
-    src/backtrace/*.gcov                \
-    tests/*.gcda                        \
-    tests/*.gcno                        \
-    tests/*.gcov                        \
-    tests/lite/*.gcda                   \
-    tests/lite/*.gcno                   \
-    tests/lite/*.gcov                   \
-    tests/pthreads/*.gcda               \
-    tests/pthreads/*.gcno               \
-    tests/pthreads/*.gcov               \
-    tests/backtrace/*.gcda              \
-    tests/backtrace/*.gcno              \
+CLEANFILES =                                \
+    *.log                                   \
+    *.gcda                                  \
+    *.gcno                                  \
+    *.gcov                                  \
+    *.stackdump                             \
+    src/*.gcda                              \
+    src/*.gcno                              \
+    src/*.gcov                              \
+    tests/*.gcda                            \
+    tests/*.gcno                            \
+    tests/*.gcov                            \
+    tests/lite/*.gcda                       \
+    tests/lite/*.gcno                       \
+    tests/lite/*.gcov                       \
+    src/pthreads/*.gcda                     \
+    src/pthreads/*.gcno                     \
+    src/pthreads/*.gcov                     \
+    tests/pthreads/*.gcda                   \
+    tests/pthreads/*.gcno                   \
+    tests/pthreads/*.gcov                   \
+    src/backtrace/*.gcda                    \
+    src/backtrace/*.gcno                    \
+    src/backtrace/*.gcov                    \
+    tests/backtrace/*.gcda                  \
+    tests/backtrace/*.gcno                  \
     tests/backtrace/*.gcov
 
 
 # Check
 
-check_PROGRAMS =                        \
-    bin/check/panic-try                 \
-    bin/check/panic-retry               \
-    bin/check/panic-reacquire           \
-    bin/check/panic-context             \
-    bin/check/panic-block-try           \
-    bin/check/panic-block-catch         \
-    bin/check/panic-block-next          \
-    bin/check/panic-dangling            \
-    bin/check/get-exception             \
-    bin/check/is-uncaught               \
-    bin/check/catch-all                 \
-    bin/check/throw-uncaught-1          \
-    bin/check/throw-uncaught-2          \
-    bin/check/catch-specific            \
-    bin/check/catch-generic             \
-    bin/check/catch-duplicate           \
-    bin/check/catch-unordered           \
-    bin/check/finally                   \
-    bin/check/throw-suppressed          \
-    bin/check/catch-sigsegv             \
-    bin/check/catch-sigterm             \
-    bin/check/catch-sigint              \
-    bin/check/retry                     \
-    bin/check/reacquire                 \
-    bin/check/throw-format              \
-    bin/check/handler-uncaught          \
-    bin/check/handler-initialize        \
-    bin/check/handler-finalize          \
-    bin/check/throw-cause               \
-    bin/check/examples/pthreads         \
-    bin/check/examples/signals          \
-    bin/check/examples/pet-store        \
-    bin/check/examples/customization    \
-    bin/check/examples/uncaught-handler \
-    bin/check/lite/uncaught             \
-    bin/check/lite/caught               \
-    bin/check/lite/catch-all            \
-    bin/check/lite/cleanup              \
-    bin/check/lite/limits               \
-    bin/check/lite/overflow             \
-    bin/check/pthreads/multithread      \
-    bin/check/pthreads/dangling-context \
-    bin/check/backtrace/backtraced
+check_PROGRAMS =                            \
+    bin/check/backtrace/backtraced          \
+    bin/check/catch-all                     \
+    bin/check/catch-duplicate               \
+    bin/check/catch-generic                 \
+    bin/check/catch-sigint                  \
+    bin/check/catch-sigsegv                 \
+    bin/check/catch-sigterm                 \
+    bin/check/catch-specific                \
+    bin/check/catch-unordered               \
+    bin/check/examples/customization        \
+    bin/check/examples/pet-store            \
+    bin/check/examples/pthreads             \
+    bin/check/examples/signals              \
+    bin/check/examples/uncaught-handler     \
+    bin/check/finally                       \
+    bin/check/get-exception                 \
+    bin/check/handler-finalize              \
+    bin/check/handler-initialize            \
+    bin/check/handler-uncaught              \
+    bin/check/is-uncaught                   \
+    bin/check/lite/catch-all                \
+    bin/check/lite/caught                   \
+    bin/check/lite/cleanup                  \
+    bin/check/lite/limits                   \
+    bin/check/lite/overflow                 \
+    bin/check/lite/uncaught                 \
+    bin/check/panic-block-catch             \
+    bin/check/panic-block-next              \
+    bin/check/panic-block-try               \
+    bin/check/panic-context                 \
+    bin/check/panic-dangling                \
+    bin/check/panic-reacquire               \
+    bin/check/panic-retry                   \
+    bin/check/panic-try                     \
+    bin/check/pthreads/dangling-context     \
+    bin/check/pthreads/multithread          \
+    bin/check/reacquire                     \
+    bin/check/retry                         \
+    bin/check/throw-cause                   \
+    bin/check/throw-format                  \
+    bin/check/throw-suppressed              \
+    bin/check/throw-uncaught-1              \
+    bin/check/throw-uncaught-2
 
-TESTS =                                 \
-    bin/check/panic-try                 \
-    bin/check/panic-retry               \
-    bin/check/panic-reacquire           \
-    bin/check/panic-context             \
-    bin/check/panic-block-try           \
-    bin/check/panic-block-catch         \
-    bin/check/panic-block-next          \
-    bin/check/panic-dangling            \
-    bin/check/get-exception             \
-    bin/check/is-uncaught               \
-    bin/check/catch-all                 \
-    bin/check/throw-uncaught-1          \
-    bin/check/throw-uncaught-2          \
-    bin/check/catch-specific            \
-    bin/check/catch-generic             \
-    bin/check/catch-duplicate           \
-    bin/check/catch-unordered           \
-    bin/check/finally                   \
-    bin/check/throw-suppressed          \
-    bin/check/catch-sigsegv             \
-    bin/check/catch-sigterm             \
-    bin/check/catch-sigint              \
-    bin/check/retry                     \
-    bin/check/reacquire                 \
-    bin/check/throw-format              \
-    bin/check/handler-uncaught          \
-    bin/check/handler-initialize        \
-    bin/check/handler-finalize          \
-    bin/check/throw-cause               \
-    bin/check/examples/pthreads         \
-    bin/check/examples/signals          \
-    bin/check/examples/pet-store        \
-    bin/check/examples/customization    \
-    bin/check/examples/uncaught-handler \
-    bin/check/lite/uncaught             \
-    bin/check/lite/caught               \
-    bin/check/lite/catch-all            \
-    bin/check/lite/cleanup              \
-    bin/check/lite/limits               \
-    bin/check/lite/overflow             \
-    bin/check/pthreads/multithread      \
-    bin/check/pthreads/dangling-context \
-    bin/check/backtrace/backtraced
+TESTS =                                     \
+    bin/check/backtrace/backtraced          \
+    bin/check/catch-all                     \
+    bin/check/catch-duplicate               \
+    bin/check/catch-generic                 \
+    bin/check/catch-sigint                  \
+    bin/check/catch-sigsegv                 \
+    bin/check/catch-sigterm                 \
+    bin/check/catch-specific                \
+    bin/check/catch-unordered               \
+    bin/check/examples/customization        \
+    bin/check/examples/pet-store            \
+    bin/check/examples/pthreads             \
+    bin/check/examples/signals              \
+    bin/check/examples/uncaught-handler     \
+    bin/check/finally                       \
+    bin/check/get-exception                 \
+    bin/check/handler-finalize              \
+    bin/check/handler-initialize            \
+    bin/check/handler-uncaught              \
+    bin/check/is-uncaught                   \
+    bin/check/lite/catch-all                \
+    bin/check/lite/caught                   \
+    bin/check/lite/cleanup                  \
+    bin/check/lite/limits                   \
+    bin/check/lite/overflow                 \
+    bin/check/lite/uncaught                 \
+    bin/check/panic-block-catch             \
+    bin/check/panic-block-next              \
+    bin/check/panic-block-try               \
+    bin/check/panic-context                 \
+    bin/check/panic-dangling                \
+    bin/check/panic-reacquire               \
+    bin/check/panic-retry                   \
+    bin/check/panic-try                     \
+    bin/check/pthreads/dangling-context     \
+    bin/check/pthreads/multithread          \
+    bin/check/reacquire                     \
+    bin/check/retry                         \
+    bin/check/throw-cause                   \
+    bin/check/throw-format                  \
+    bin/check/throw-suppressed              \
+    bin/check/throw-uncaught-1              \
+    bin/check/throw-uncaught-2
 
-XFAIL_TESTS =                           \
-    bin/check/panic-try                 \
-    bin/check/panic-retry               \
-    bin/check/panic-reacquire           \
-    bin/check/panic-context             \
-    bin/check/panic-block-try           \
-    bin/check/panic-block-catch         \
-    bin/check/panic-block-next          \
-    bin/check/panic-dangling            \
-    bin/check/throw-uncaught-1          \
-    bin/check/throw-uncaught-2          \
-    bin/check/examples/uncaught-handler \
-    bin/check/lite/uncaught             \
-    bin/check/lite/overflow             \
-    bin/check/pthreads/dangling-context \
-    bin/check/backtrace/backtraced
+XFAIL_TESTS =                               \
+    bin/check/backtrace/backtraced          \
+    bin/check/examples/uncaught-handler     \
+    bin/check/lite/overflow                 \
+    bin/check/lite/uncaught                 \
+    bin/check/panic-block-catch             \
+    bin/check/panic-block-next              \
+    bin/check/panic-block-try               \
+    bin/check/panic-context                 \
+    bin/check/panic-dangling                \
+    bin/check/panic-reacquire               \
+    bin/check/panic-retry                   \
+    bin/check/panic-try                     \
+    bin/check/pthreads/dangling-context     \
+    bin/check/throw-uncaught-1              \
+    bin/check/throw-uncaught-2
 
 tests: check
 
 
 # exceptions4c library
 
-lib_libexceptions4c_a_CFLAGS            = -Wall -Werror --pedantic -Wno-missing-braces -I$(EXCEPTIONS4C_PATH)
-lib_libexceptions4c_a_SOURCES           = src/exceptions4c.c
+lib_libexceptions4c_a_CFLAGS                = -Wall -Werror --pedantic -Wno-missing-braces -I$(EXCEPTIONS4C_PATH)
+lib_libexceptions4c_a_SOURCES               = src/exceptions4c.c
 
 
 # exceptions4c-pthreads library
 
-lib_libexceptions4c_pthreads_a_CFLAGS   = -Wall -Werror --pedantic -Wno-missing-braces -I$(EXCEPTIONS4C_PATH) -I$(EXCEPTIONS4C_PTHREADS_PATH)
-lib_libexceptions4c_pthreads_a_SOURCES  = src/pthreads/exceptions4c-pthreads.c
+lib_libexceptions4c_pthreads_a_CFLAGS       = -Wall -Werror --pedantic -Wno-missing-braces -I$(EXCEPTIONS4C_PATH) -I$(EXCEPTIONS4C_PTHREADS_PATH)
+lib_libexceptions4c_pthreads_a_SOURCES      = src/pthreads/exceptions4c-pthreads.c
 
 
 # exceptions4c-backtrace library
 
-lib_libexceptions4c_backtrace_a_CFLAGS  = -Wall -Werror --pedantic -Wno-missing-braces -I$(EXCEPTIONS4C_PATH) -I$(EXCEPTIONS4C_BACKTRACE_PATH)
-lib_libexceptions4c_backtrace_a_SOURCES = src/backtrace/exceptions4c-backtrace.c
+lib_libexceptions4c_backtrace_a_CFLAGS      = -Wall -Werror --pedantic -Wno-missing-braces -I$(EXCEPTIONS4C_PATH) -I$(EXCEPTIONS4C_BACKTRACE_PATH)
+lib_libexceptions4c_backtrace_a_SOURCES     = src/backtrace/exceptions4c-backtrace.c
 
 
 # exceptions4c tests
@@ -248,7 +248,7 @@ bin_check_examples_uncaught_handler_SOURCES = examples/uncaught-handler.c
 bin_check_examples_uncaught_handler_LDADD   = $(EXCEPTIONS4C_LIBRARY)
 
 
-# exceptions4c tests (lightweight version)
+# exceptions4c-lite tests
 
 bin_check_lite_uncaught_SOURCES             = tests/lite/uncaught.c
 bin_check_lite_caught_SOURCES               = tests/lite/caught.c
