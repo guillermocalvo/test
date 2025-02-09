@@ -1,6 +1,8 @@
 
+# include <signal.h>
 # include "testing.h"
 
+static void failure(int _);
 
 /**
  * `e4c_try` call without starting a new exception frame
@@ -13,6 +15,12 @@
  */
 TEST_CASE{
 
+    signal(SIGABRT, failure);
+
     /* This function must not be called like this! */
     (void) e4c_try(__FILE__, __LINE__, __func__);
+}
+
+static void failure(int _) {
+    exit(EXIT_FAILURE);
 }
