@@ -74,7 +74,7 @@ CLEANFILES =                            \
 # Check
 
 check_PROGRAMS =                        \
-    bin/check/a10                       \
+    bin/check/panic-try                 \
     bin/check/get-exception             \
     bin/check/is-uncaught               \
     bin/check/b08                       \
@@ -121,7 +121,7 @@ check_PROGRAMS =                        \
     bin/check/backtrace/backtraced
 
 TESTS =                                 \
-    bin/check/a10                       \
+    bin/check/panic-try                 \
     bin/check/get-exception             \
     bin/check/is-uncaught               \
     bin/check/b08                       \
@@ -168,7 +168,7 @@ TESTS =                                 \
     bin/check/backtrace/backtraced
 
 XFAIL_TESTS =                           \
-    bin/check/a10                       \
+    bin/check/panic-try                 \
     bin/check/b08                       \
     bin/check/b10                       \
     bin/check/b18                       \
@@ -204,7 +204,7 @@ lib_libexceptions4c_backtrace_a_SOURCES = src/backtrace/exceptions4c-backtrace.c
 
 # exceptions4c tests
 
-bin_check_a10_SOURCES                   = src/exceptions4c.c tests/a10.c
+bin_check_panic_try_SOURCES             = src/exceptions4c.c tests/panic-try.c
 bin_check_get_exception_SOURCES         = src/exceptions4c.c tests/get-exception.c
 bin_check_is_uncaught_SOURCES           = src/exceptions4c.c tests/is-uncaught.c
 bin_check_b08_SOURCES                   = src/exceptions4c.c tests/b08.c
