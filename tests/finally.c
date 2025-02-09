@@ -12,6 +12,7 @@ static const struct e4c_exception_type OOPS = {NULL, "Oops"};
 
 volatile bool finalized1 = false;
 volatile bool finalized2 = false;
+volatile bool finalized3 = false;
 
 /**
  * Catching an exception thrown deep down the call stack
@@ -38,6 +39,7 @@ TEST_CASE{
     TEST_ASSERT(caught);
     TEST_ASSERT(finalized1);
     TEST_ASSERT(finalized2);
+    TEST_ASSERT(finalized3);
 }
 
 
@@ -65,16 +67,17 @@ void aux2(void){
 void aux3(void){
 
     aux4();
+
+    exit(EXIT_FAILURE);
 }
 
 void aux4(void){
 
     TRY {
-
         aux5();
-
+    } CATCH (OOPS) {
+        THROW(OOPS, NULL);
     } FINALLY {
-
         finalized2 = true;
     }
 
@@ -83,5 +86,11 @@ void aux4(void){
 
 void aux5(void){
 
-    THROW(OOPS, NULL);
+    TRY {
+        THROW(OOPS, NULL);
+    } FINALLY {
+         finalized3 = true;
+    }
+
+    exit(EXIT_FAILURE);
 }

@@ -92,9 +92,6 @@ check_PROGRAMS =                        \
     bin/check/b22                       \
     bin/check/uncaught-exception-1      \
     bin/check/uncaught-exception-2      \
-    bin/check/e01                       \
-    bin/check/e02                       \
-    bin/check/e03                       \
     bin/check/catch-specific-exception  \
     bin/check/catch-generic-exception   \
     bin/check/duplicate-catch           \
@@ -145,9 +142,6 @@ TESTS =                                 \
     bin/check/b22                       \
     bin/check/uncaught-exception-1      \
     bin/check/uncaught-exception-2      \
-    bin/check/e01                       \
-    bin/check/e02                       \
-    bin/check/e03                       \
     bin/check/catch-specific-exception  \
     bin/check/catch-generic-exception   \
     bin/check/duplicate-catch           \
@@ -241,9 +235,6 @@ bin_check_b19_SOURCES                   = src/exceptions4c.c tests/b19.c
 bin_check_b22_SOURCES                   = src/exceptions4c.c tests/b22.c
 bin_check_uncaught_exception_1_SOURCES  = src/exceptions4c.c tests/uncaught-exception-1.c
 bin_check_uncaught_exception_2_SOURCES  = src/exceptions4c.c tests/uncaught-exception-2.c
-bin_check_e01_SOURCES                   = src/exceptions4c.c tests/e01.c
-bin_check_e02_SOURCES                   = src/exceptions4c.c tests/e02.c
-bin_check_e03_SOURCES                   = src/exceptions4c.c tests/e03.c
 bin_check_catch_specific_exception_SOURCES = src/exceptions4c.c tests/catch-specific-exception.c
 bin_check_catch_generic_exception_SOURCES = src/exceptions4c.c tests/catch-generic-exception.c
 bin_check_duplicate_catch_SOURCES       = src/exceptions4c.c tests/duplicate-catch.c

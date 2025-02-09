@@ -60,9 +60,6 @@ set(TESTS
         catch-all
         uncaught-exception-1
         uncaught-exception-2
-        e01
-        e02
-        e03
         catch-specific-exception
         catch-generic-exception
         duplicate-catch
