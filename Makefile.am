@@ -75,6 +75,10 @@ CLEANFILES =                            \
 
 check_PROGRAMS =                        \
     bin/check/panic-try                 \
+    bin/check/panic-context             \
+    bin/check/panic-block-try           \
+    bin/check/panic-block-catch         \
+    bin/check/panic-block-next          \
     bin/check/get-exception             \
     bin/check/is-uncaught               \
     bin/check/b08                       \
@@ -122,6 +126,10 @@ check_PROGRAMS =                        \
 
 TESTS =                                 \
     bin/check/panic-try                 \
+    bin/check/panic-context             \
+    bin/check/panic-block-try           \
+    bin/check/panic-block-catch         \
+    bin/check/panic-block-next          \
     bin/check/get-exception             \
     bin/check/is-uncaught               \
     bin/check/b08                       \
@@ -169,6 +177,10 @@ TESTS =                                 \
 
 XFAIL_TESTS =                           \
     bin/check/panic-try                 \
+    bin/check/panic-context             \
+    bin/check/panic-block-try           \
+    bin/check/panic-block-catch         \
+    bin/check/panic-block-next          \
     bin/check/b08                       \
     bin/check/b10                       \
     bin/check/b18                       \
@@ -205,6 +217,10 @@ lib_libexceptions4c_backtrace_a_SOURCES = src/backtrace/exceptions4c-backtrace.c
 # exceptions4c tests
 
 bin_check_panic_try_SOURCES             = src/exceptions4c.c tests/panic-try.c
+bin_check_panic_context_SOURCES         = src/exceptions4c.c tests/panic-context.c
+bin_check_panic_block_try_SOURCES       = src/exceptions4c.c tests/panic-block-try.c
+bin_check_panic_block_catch_SOURCES     = src/exceptions4c.c tests/panic-block-catch.c
+bin_check_panic_block_next_SOURCES      = src/exceptions4c.c tests/panic-block-next.c
 bin_check_get_exception_SOURCES         = src/exceptions4c.c tests/get-exception.c
 bin_check_is_uncaught_SOURCES           = src/exceptions4c.c tests/is-uncaught.c
 bin_check_b08_SOURCES                   = src/exceptions4c.c tests/b08.c
