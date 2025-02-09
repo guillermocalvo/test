@@ -1,7 +1,9 @@
 
+#define NDEBUG
+
 # include "testing.h"
 
-static const struct e4c_exception_type RuntimeException = {NULL, "Runtime exception."};
+static const struct e4c_exception_type OOPS = {NULL, "Oops"};
 
 /**
  * Uncaught exception, thrown from `try` block
@@ -16,6 +18,6 @@ TEST_CASE{
 
     TRY {
 
-        THROW(RuntimeException, "Nobody will catch me.");
+        THROW(OOPS, "Nobody will catch me.");
     }
 }
