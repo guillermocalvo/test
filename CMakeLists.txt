@@ -54,14 +54,14 @@ set(TESTS
         panic-block-try
         panic-block-catch
         panic-block-next
-        panic-dangling-context
+        panic-dangling
         get-exception
         is-uncaught
         catch-all
         uncaught-exception-1
         uncaught-exception-2
-        catch-specific-exception
-        catch-generic-exception
+        catch-specific
+        catch-generic
         duplicate-catch
         unordered-catch
         finally
@@ -94,7 +94,7 @@ set_property(TEST panic-context PROPERTY WILL_FAIL TRUE)
 set_property(TEST panic-block-try PROPERTY WILL_FAIL TRUE)
 set_property(TEST panic-block-catch PROPERTY WILL_FAIL TRUE)
 set_property(TEST panic-block-next PROPERTY WILL_FAIL TRUE)
-set_property(TEST panic-dangling-context PROPERTY WILL_FAIL TRUE)
+set_property(TEST panic-dangling PROPERTY WILL_FAIL TRUE)
 set_property(TEST uncaught-exception-1 PROPERTY WILL_FAIL TRUE)
 set_property(TEST uncaught-exception-2 PROPERTY WILL_FAIL TRUE)
 

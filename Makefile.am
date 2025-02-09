@@ -81,14 +81,14 @@ check_PROGRAMS =                        \
     bin/check/panic-block-try           \
     bin/check/panic-block-catch         \
     bin/check/panic-block-next          \
-    bin/check/panic-dangling-context    \
+    bin/check/panic-dangling            \
     bin/check/get-exception             \
     bin/check/is-uncaught               \
     bin/check/catch-all                 \
     bin/check/uncaught-exception-1      \
     bin/check/uncaught-exception-2      \
-    bin/check/catch-specific-exception  \
-    bin/check/catch-generic-exception   \
+    bin/check/catch-specific            \
+    bin/check/catch-generic             \
     bin/check/duplicate-catch           \
     bin/check/unordered-catch           \
     bin/check/finally                   \
@@ -126,14 +126,14 @@ TESTS =                                 \
     bin/check/panic-block-try           \
     bin/check/panic-block-catch         \
     bin/check/panic-block-next          \
-    bin/check/panic-dangling-context    \
+    bin/check/panic-dangling            \
     bin/check/get-exception             \
     bin/check/is-uncaught               \
     bin/check/catch-all                 \
     bin/check/uncaught-exception-1      \
     bin/check/uncaught-exception-2      \
-    bin/check/catch-specific-exception  \
-    bin/check/catch-generic-exception   \
+    bin/check/catch-specific            \
+    bin/check/catch-generic             \
     bin/check/duplicate-catch           \
     bin/check/unordered-catch           \
     bin/check/finally                   \
@@ -171,7 +171,7 @@ XFAIL_TESTS =                           \
     bin/check/panic-block-try           \
     bin/check/panic-block-catch         \
     bin/check/panic-block-next          \
-    bin/check/panic-dangling-context    \
+    bin/check/panic-dangling            \
     bin/check/uncaught-exception-1      \
     bin/check/uncaught-exception-2      \
     bin/check/examples/uncaught-handler \
@@ -209,14 +209,14 @@ bin_check_panic_context_SOURCES         = src/exceptions4c.c tests/panic-context
 bin_check_panic_block_try_SOURCES       = src/exceptions4c.c tests/panic-block-try.c
 bin_check_panic_block_catch_SOURCES     = src/exceptions4c.c tests/panic-block-catch.c
 bin_check_panic_block_next_SOURCES      = src/exceptions4c.c tests/panic-block-next.c
-bin_check_panic_dangling_context_SOURCES = src/exceptions4c.c tests/panic-dangling-context.c
+bin_check_panic_dangling_SOURCES        = src/exceptions4c.c tests/panic-dangling.c
 bin_check_get_exception_SOURCES         = src/exceptions4c.c tests/get-exception.c
 bin_check_is_uncaught_SOURCES           = src/exceptions4c.c tests/is-uncaught.c
 bin_check_catch_all_SOURCES             = src/exceptions4c.c tests/catch-all.c
 bin_check_uncaught_exception_1_SOURCES  = src/exceptions4c.c tests/uncaught-exception-1.c
 bin_check_uncaught_exception_2_SOURCES  = src/exceptions4c.c tests/uncaught-exception-2.c
-bin_check_catch_specific_exception_SOURCES = src/exceptions4c.c tests/catch-specific-exception.c
-bin_check_catch_generic_exception_SOURCES = src/exceptions4c.c tests/catch-generic-exception.c
+bin_check_catch_specific_SOURCES        = src/exceptions4c.c tests/catch-specific.c
+bin_check_catch_generic_SOURCES         = src/exceptions4c.c tests/catch-generic.c
 bin_check_duplicate_catch_SOURCES       = src/exceptions4c.c tests/duplicate-catch.c
 bin_check_unordered_catch_SOURCES       = src/exceptions4c.c tests/unordered-catch.c
 bin_check_finally_SOURCES               = src/exceptions4c.c tests/finally.c
