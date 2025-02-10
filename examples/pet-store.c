@@ -1,6 +1,20 @@
+/*
+ * Copyright 2025 Guillermo Calvo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 
 #include <stdlib.h>
-#include <stdbool.h>
 #include <exceptions4c.h>
 
 typedef enum pet_status { UNKNOWN, AVAILABLE, PENDING, SOLD } pet_status;
@@ -9,14 +23,13 @@ typedef struct pet { int id; const char * name; pet_status status; } * Pet;
 //! [exception_types]
 /* Generic errors */
 const struct e4c_exception_type NOT_ENOUGH_MEMORY = {NULL, "Not enough memory"};
-const struct e4c_exception_type INVALID_ARGUMENT = {NULL, "Invalid argument"};
 
 /* Base exception for all pet-related errors */
-const struct e4c_exception_type PET_ERROR = {NULL, "Pet error."};
+const struct e4c_exception_type PET_ERROR = {NULL, "Pet error"};
 
 /* Specific types of pet errors */
-const struct e4c_exception_type PET_NOT_FOUND     = {&PET_ERROR, "Pet not found"};
-const struct e4c_exception_type PET_NOT_AVAILABLE = {&PET_ERROR, "Pet not available"};
+const struct e4c_exception_type PET_NOT_FOUND = {&PET_ERROR, "Pet not found"};
+const struct e4c_exception_type PET_STORE_CLOSED = {&PET_ERROR, "Pet store closed"};
 //! [exception_types]
 
 // Available pets in the store
@@ -48,6 +61,10 @@ static Pet pet_clone(const int id) {
     }
   }
   return NULL;
+}
+
+static bool pet_store_is_closed() {
+  return false;
 }
 
 //! [throw]
@@ -165,8 +182,8 @@ pet_status get_pet_status(int id) {
   pet_status status;
   Pet pet;
   WITH(pet, pet_free) {
-    if (id < 0) {
-      THROW(INVALID_ARGUMENT, "id");
+    if (pet_store_is_closed()) {
+      THROW(PET_STORE_CLOSED, NULL);
     }
     pet = pet_find(id);
   } USE {

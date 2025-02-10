@@ -1,10 +1,26 @@
-#include <signal.h>
+/*
+ * Copyright 2025 Guillermo Calvo
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <stdio.h>
+#include <signal.h>
 #include <exceptions4c.h>
 
 #define main main_initialize_exception
 //! [initialize_exception]
-const struct e4c_exception_type MY_ERROR = {NULL, "My error"};
+const struct e4c_exception_type PET_ERROR = {NULL, "Pet error"};
 
 static void set_custom_data(struct e4c_exception * exception) {
   exception->data = "My custom data";
@@ -13,8 +29,8 @@ static void set_custom_data(struct e4c_exception * exception) {
 int main(int argc, char * argv[]) {
   e4c_get_context()->initialize_exception = set_custom_data;
   TRY {
-    THROW(MY_ERROR, "Oops");
-  } CATCH (MY_ERROR) {
+    THROW(PET_ERROR, "Bad dog");
+  } CATCH_ALL {
     const char * data = e4c_get_exception()->data;
     printf("Custom data: %s\n", data);
   }
@@ -41,8 +57,8 @@ int main(int argc, char * argv[]) {
   context->initialize_exception = my_initializer;
   context->finalize_exception = my_finalizer;
   TRY {
-    THROW(MY_ERROR, "Oops");
-  } CATCH (MY_ERROR) {
+    THROW(PET_ERROR, "Bad dog");
+  } CATCH_ALL {
     const struct my_custom_data * data = e4c_get_exception()->data;
     printf("ID: %d MSG: %s\n", data->id, data->msg);
   }
@@ -59,7 +75,7 @@ static void my_termination_handler(void) {
 
 int main(int argc, char * argv[]) {
   e4c_get_context()->termination_handler = my_termination_handler;
-  THROW(MY_ERROR, "Oops");
+  THROW(PET_ERROR, "Bad dog");
 }
 //! [termination_handler]
 #undef main
@@ -78,8 +94,8 @@ static struct e4c_context * my_context_supplier(void) {
 int main(int argc, char * argv[]) {
   e4c_set_context_supplier(my_context_supplier);
   TRY {
-    THROW(MY_ERROR, "Oops");
-  } CATCH (MY_ERROR) {
+    THROW(PET_ERROR, "Bad dog");
+  } CATCH_ALL {
     const struct my_custom_data * data = e4c_get_exception()->data;
     printf("MSG: %s\n", data->msg);
   }
