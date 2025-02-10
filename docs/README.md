@@ -10,8 +10,8 @@ Bring the power of exceptions to your C applications!
 ![][EXAMPLE]
 
 > [!NOTE]
-> This library provides you with a set of macros and functions that map the exception handling semantics you are probably
-already used to.
+> This library provides you with a set of macros and functions that map the exception handling semantics you are
+> probably already used to.
 
 
 # Getting Started
@@ -23,7 +23,7 @@ This library consists of two files:
 - exceptions4c.h
 - exceptions4c.c
 
-To use the library in your project, include the header file in your source code files.
+To use it in your project, include the header file in your source code files.
 
 ```c
 #include <exceptions4c.h>
@@ -33,21 +33,19 @@ And then link your program against the library code.
 
 > [!NOTE]
 > There is also a lightweight version of this library, intended for small projects and embedded systems.
-> [exceptions4c-lite][EXCEPTIONS4C_LITE] is a header-only library that provides the
-> core functionality of exceptions4c in just one header file.
+> [exceptions4c-lite][EXCEPTIONS4C_LITE] is a header-only library that provides the core functionality of exceptions4c
+> in just one file.
 
 ## Defining Exception Types
 
-Create meaningful exceptions that reflect problematic situations.
+Create meaningful exceptions that reflect problematic situations in your program.
 
 @snippet pet-store.c exception_types
 
-A program must define the types of errors that can be raised and handled.
+An exception type is [a simple structure](#e4c_exception_type) with an optional supertype and a default error message.
 
 > [!NOTE]
-> Exception types may have a supertype, creating a hierarchy, where a more specific type can be built upon a more
-> generic one.
-
+> Exception types create a hierarchy, where a more specific type can be built upon a more generic one.
 
 # Basic Usage
 
@@ -98,8 +96,8 @@ Use a #CATCH block to handle an exception when it occurs.
 @snippet pet-store.c catch
 
 One or more #CATCH blocks can follow a #TRY block. Each #CATCH block must specify the type of exception it handles. If
-its type doesn't match the thrown exception, then the block is ignored, and the exception may be caught by the following
-blocks.
+its type doesn't match the thrown exception, then that block is ignored, and the exception may be caught by the
+following blocks.
 
 > [!IMPORTANT]
 > When looking for a match, #CATCH blocks are inspected in the order they appear. If you place a generic handler before
@@ -137,12 +135,12 @@ This block is optional. And, for each #TRY block, there can be only one #FINALLY
 This is a powerful design pattern for resource management. It is a clean and terse way to handle all kinds of resources
 with implicit acquisition and automatic disposal.
 
-These macros save you from having to call the disposing or acquiring functions manually in common situations.
+These macros can save you from having to call the disposing or acquiring functions manually in common situations.
 
 - #USING
 - #WITH ... #USE
 
-### Acquiring a Resource Implicitly
+### Implicit Resource Acquisition
 
 A #USING block allows you to automatically acquire and dispose of a resource, by supplying the name of the functions
 that must be called. The code block using the resource is free to throw exceptions.
@@ -161,7 +159,7 @@ remember: by the time the #CATCH block is executed, the resource will already ha
 > [!TIP]
 > You can even append a #FINALLY block for cleanup code other than disposing of the resource.
 
-### Acquiring a Resource Explicitly
+### Explicit Resource Acquisition
 
 Use a #WITH block when the steps to acquire a resource are more complex than simply calling a function. It works exactly
 the same as the #USING block, except that you can write the code block in charge of actually acquiring the resource.
@@ -182,7 +180,7 @@ Use #e4c_get_context to retrieve the current [exception context](#e4c_context) o
 
 @snippet customization.c get_context
 
-Once you have a reference to this structure, you can set up different handlers.
+Then use this object to set up different handlers.
 
 ### Custom Exception Initializer
 
@@ -197,7 +195,7 @@ whenever an exception is thrown.
 > [!TIP]
 > For example, you could use this opportunity to capture the entire stacktrace of your program.
 
-### Custom Exception Finalize
+### Custom Exception Finalizer
 
 You can also set a [exception finalizer](#e4c_context.finalize_exception) to execute your function whenever an exception
 is deleted.
@@ -217,7 +215,7 @@ that will be executed in the event of an uncaught exception.
 @snippet uncaught-handler.c uncaught_handler
 
 > [!TIP]
-> Instead of simply using `stderr`, you could save an error report in a local file.
+> Instead of simply using `stderr` you could save an error report in a local file.
 
 ### Custom Termination Handler
 
@@ -233,10 +231,8 @@ execute a function in the event of program termination.
 
 ### Exception Context Supplier
 
-By default, a predefined exception context is provided and used by the library.
-
-You can create a supplying function and pass it to #e4c_set_context_supplier so you are in full control of the exception
-context of your program.
+By default, a predefined exception context is provided and used by the library. But you can create a supplying function
+and pass it to #e4c_set_context_supplier so you are in full control of your program's exception context.
 
 @snippet customization.c set_context_supplier
 
@@ -257,9 +253,9 @@ In the event of an uncaught exception, instead of terminating the program, only 
 
 ## Signal Handling
 
-You can turn some standard signals such as `SIGHUP`, `SIGFPE`, and `SIGSEGV` into exceptions, so that they can be caught
-and handled in a regular #CATCH block. For example, you could do that to prevent your program from crashing when a null
-pointer is dereferenced.
+You can turn some standard signals such as `SIGHUP`, `SIGFPE`, and `SIGSEGV` into exceptions so they can be handled in a
+regular #CATCH block. For example, you could do that to prevent your program from crashing when a null pointer is
+dereferenced.
 
 @snippet signals.c null_pointer
 

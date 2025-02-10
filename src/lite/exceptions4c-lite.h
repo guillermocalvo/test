@@ -88,8 +88,8 @@
  * const e4c_exception_type IO_ERROR = "I/O Error";
  * ```
  *
- * @see #THROW
- * @see #CATCH
+ * @see THROW
+ * @see CATCH
  */
 typedef const char * e4c_exception_type;
 
@@ -203,8 +203,8 @@ extern struct e4c_context exceptions4c;
  * One or more #CATCH blocks can follow a #TRY block. Each #CATCH block
  * MUST specify the type of exception it handles.
  *
- * @see #TRY
- * @see #CATCH_ALL
+ * @see TRY
+ * @see CATCH_ALL
  *
  */
 #define CATCH(exception_type)                                               \
@@ -338,11 +338,11 @@ extern struct e4c_context exceptions4c;
  * exception was thrown in the corresponding #TRY block, or during the
  * execution of a #CATCH or #CATCH_ALL block.
  *
- * @see #e4c_exception
- * @see #THROW
- * @see #CATCH
- * @see #FINALLY
- * @see #IS_UNCAUGHT
+ * @see e4c_exception
+ * @see THROW
+ * @see CATCH
+ * @see FINALLY
+ * @see IS_UNCAUGHT
  */
 #define EXCEPTION                                                           \
                                                                             \
