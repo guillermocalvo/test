@@ -99,7 +99,7 @@ static enum block_stage get_stage(const char * file, int line, const char * func
 static void delete_exception(const struct e4c_context * context, struct e4c_exception * exception);
 static void print_debug_info(const char * file, int line, const char * function);
 static void print_exception(const struct e4c_exception * exception, bool is_cause);
-static bool extends(const struct e4c_exception * exception, const struct e4c_exception_type * supertype);
+static bool extends(const struct e4c_exception_type * type, const struct e4c_exception_type * supertype);
 
 /** Stores the exception context supplier. */
 static struct e4c_context * (*context_supplier)(void) = NULL;
@@ -219,7 +219,9 @@ bool e4c_catch(const struct e4c_exception_type * type, const char * file, const 
         panic("Invalid exception context state.", file, line, function);
     }
     /* check if the exception can be handled given the supplied exception type */
-    if (block->stage == CATCHING && block->exception != NULL && block->uncaught && extends(block->exception, type)) {
+    if (block->stage == CATCHING
+        && block->exception != NULL && block->uncaught
+        && (type == NULL || extends(block->exception->type, type))) {
         block->uncaught = false;
         return true;
     }
@@ -405,21 +407,16 @@ static enum block_stage get_stage(const char * file, const int line, const char 
 
 /**
  *
- * @param exception
+ * @param type
  * @param supertype
  * @return
  */
-static bool extends(const struct e4c_exception * exception, const struct e4c_exception_type * supertype) {
-    if (supertype == NULL) {
-        return true;
-    }
-    const struct e4c_exception_type * subtype;
-    for (subtype = exception->type; subtype != NULL; subtype = subtype != subtype->supertype ? subtype->supertype : NULL) {
-        if (subtype == supertype) {
+static bool extends(const struct e4c_exception_type * type, const struct e4c_exception_type * supertype) {
+    for (; type != NULL; type = type != type->supertype ? type->supertype : NULL) {
+        if (type == supertype) {
             return true;
         }
     }
-
     return false;
 }
 
