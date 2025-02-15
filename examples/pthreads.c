@@ -19,20 +19,23 @@
 #include <pthread.h>
 #include <exceptions4c-pthreads.h>
 
-const struct e4c_exception_type MY_EXCEPTION = {NULL, "My exception"};
+const struct e4c_exception_type OOPS = {NULL, "Oops"};
 
+/* A Thread that throws an exception */
 static void * my_thread(void * _) {
-    THROW(MY_EXCEPTION, "Oops!");
+    THROW(OOPS, "Oh no");
 }
 
 int main(void) {
+    /* Set the thread-safe exception context supplier */
+    e4c_set_context_supplier(&e4c_pthreads_context_supplier);
+
+    /* Start the thread */
     pthread_t thread;
-
-    e4c_set_context_supplier(e4c_pthreads_context_supplier);
-
     pthread_create(&thread, NULL, my_thread, NULL);
     pthread_join(thread, NULL);
 
+    /* The program was not terminated, only the thread was canceled */
     return EXIT_SUCCESS;
 }
 //! [setup]
