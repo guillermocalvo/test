@@ -21,7 +21,7 @@
 
 const struct e4c_exception_type SEGFAULT = {NULL, "Segmentation fault"};
 
-void segfault(int) {
+void segfault(int _) {
   signal(SIGSEGV, segfault);
   THROW(SEGFAULT, NULL);
 }
