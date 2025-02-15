@@ -454,8 +454,7 @@ static void throw(const struct e4c_context * context, const struct e4c_exception
     }
 
     /* capture the cause of this exception */
-    struct e4c_block * block;
-    for (block = context->_innermost_block; block != NULL; block = block->outer_block) {
+    for (struct e4c_block * block = context->_innermost_block; block != NULL; block = block->outer_block) {
         if (block->exception != NULL && (block->uncaught || block->stage == CATCHING)) {
             exception->cause = block->exception;
             block->exception = NULL;
