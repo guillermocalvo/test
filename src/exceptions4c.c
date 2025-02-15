@@ -439,7 +439,11 @@ static bool extends(const struct e4c_exception_type * type, const struct e4c_exc
  * @param format
  * @param arguments_list
  */
-static void throw(const struct e4c_context * context, const struct e4c_exception_type * type, const char * name, int error_number, const char * file, const int line, const char * function, const char * format, va_list arguments_list) {
+static void throw( /* NOSONAR */
+    const struct e4c_context * context,
+    const struct e4c_exception_type * type, const char * name, int error_number,
+    const char * file, const int line, const char * function,
+    const char * format, va_list arguments_list) {
 
     /* allocate new exception */
     struct e4c_exception * exception = allocate(sizeof(*exception), "Not enough memory to create a new exception", file, line, function);
