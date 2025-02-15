@@ -232,7 +232,10 @@ bool e4c_finally(const char * file, const int line, const char * function) {
     return get_stage(file, line, function) == FINALIZING;
 }
 
-e4c_env * e4c_throw(const struct e4c_exception_type * type, const char * name, const char * file, const int line, const char * function, const char * format, ...) {
+e4c_env * e4c_throw( /* NOSONAR */
+    const struct e4c_exception_type * type, const char * name,
+    const char * file, const int line, const char * function,
+    const char * format, ...) {
     const int error_number = errno;
     const struct e4c_context * context = get_context(file, line, function);
 
@@ -244,7 +247,11 @@ e4c_env * e4c_throw(const struct e4c_exception_type * type, const char * name, c
     return &((struct e4c_block *) context->_innermost_block)->env;
 }
 
-e4c_env * e4c_restart(const bool should_reacquire, const int max_attempts, const struct e4c_exception_type * type, const char * name, const char * file, const int line, const char * function, const char * format, ...) {
+e4c_env * e4c_restart( /* NOSONAR */
+    const bool should_reacquire, const int max_attempts,
+    const struct e4c_exception_type * type, const char * name,
+    const char * file, const int line, const char * function,
+    const char * format, ...) {
     const int error_number = errno;
     const struct e4c_context * context = get_context(file, line, function);
     struct e4c_block * block = context->_innermost_block;
