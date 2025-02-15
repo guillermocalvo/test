@@ -42,7 +42,6 @@ WARN_AS_ERROR          = YES
 #---------------------------------------------------------------------------
 
 INPUT                  = @CMAKE_CURRENT_SOURCE_DIR@/src/ \
-                         @CMAKE_CURRENT_SOURCE_DIR@/src/backtrace/ \
                          @CMAKE_CURRENT_SOURCE_DIR@/docs/README.md
 FILE_PATTERNS          = *.c \
                          *.h \

@@ -7,26 +7,20 @@
 
 AUTOMAKE_OPTIONS = foreign subdir-objects
 
-AM_CFLAGS = -Wall -Werror --pedantic -Wno-missing-braces -Wno-dangling-else -coverage -O0 -I$(EXCEPTIONS4C_PATH) -I$(EXCEPTIONS4C_BACKTRACE_PATH)
+AM_CFLAGS = -Wall -Werror --pedantic -Wno-missing-braces -Wno-dangling-else -coverage -O0 -I$(EXCEPTIONS4C_PATH)
 
 
 # Library
 
 EXCEPTIONS4C_PATH               = src
 EXCEPTIONS4C_LIBRARY            = lib/libexceptions4c.a
-EXCEPTIONS4C_BACKTRACE_PATH     = src/backtrace
-EXCEPTIONS4C_BACKTRACE_LIBRARY  = lib/libexceptions4c-backtrace.a
 
 
 # Install
 
-lib_LIBRARIES =                         \
-    $(EXCEPTIONS4C_LIBRARY)             \
-    $(EXCEPTIONS4C_BACKTRACE_LIBRARY)
+lib_LIBRARIES = $(EXCEPTIONS4C_LIBRARY)
 
-include_HEADERS =                       \
-    src/exceptions4c.h                  \
-    src/backtrace/exceptions4c-backtrace.h
+include_HEADERS = src/exceptions4c.h
 
 
 # Documentation
@@ -48,19 +42,12 @@ CLEANFILES =                                \
     src/*.gcov                              \
     tests/*.gcda                            \
     tests/*.gcno                            \
-    tests/*.gcov                            \
-    src/backtrace/*.gcda                    \
-    src/backtrace/*.gcno                    \
-    src/backtrace/*.gcov                    \
-    tests/backtrace/*.gcda                  \
-    tests/backtrace/*.gcno                  \
-    tests/backtrace/*.gcov
+    tests/*.gcov
 
 
 # Check
 
 check_PROGRAMS =                            \
-    bin/check/backtrace/backtraced          \
     bin/check/catch-all                     \
     bin/check/catch-duplicate               \
     bin/check/catch-generic                 \
@@ -97,7 +84,6 @@ check_PROGRAMS =                            \
     bin/check/throw-uncaught-2
 
 TESTS =                                     \
-    bin/check/backtrace/backtraced          \
     bin/check/catch-all                     \
     bin/check/catch-duplicate               \
     bin/check/catch-generic                 \
@@ -134,7 +120,6 @@ TESTS =                                     \
     bin/check/throw-uncaught-2
 
 XFAIL_TESTS =                               \
-    bin/check/backtrace/backtraced          \
     bin/check/examples/uncaught-handler     \
     bin/check/panic-block-catch             \
     bin/check/panic-block-next              \
@@ -150,19 +135,13 @@ XFAIL_TESTS =                               \
 tests: check
 
 
-# exceptions4c library
+# Library
 
 lib_libexceptions4c_a_CFLAGS                = -Wall -Werror --pedantic -Wno-missing-braces -I$(EXCEPTIONS4C_PATH)
 lib_libexceptions4c_a_SOURCES               = src/exceptions4c.c
 
 
-# exceptions4c-backtrace library
-
-lib_libexceptions4c_backtrace_a_CFLAGS      = -Wall -Werror --pedantic -Wno-missing-braces -I$(EXCEPTIONS4C_PATH) -I$(EXCEPTIONS4C_BACKTRACE_PATH)
-lib_libexceptions4c_backtrace_a_SOURCES     = src/backtrace/exceptions4c-backtrace.c
-
-
-# exceptions4c tests
+# Tests
 
 bin_check_panic_try_SOURCES                 = src/exceptions4c.c tests/panic-try.c
 bin_check_panic_retry_SOURCES               = src/exceptions4c.c tests/panic-retry.c
@@ -194,7 +173,7 @@ bin_check_handler_initialize_SOURCES        = src/exceptions4c.c tests/handler-i
 bin_check_handler_finalize_SOURCES          = src/exceptions4c.c tests/handler-finalize.c
 bin_check_throw_cause_SOURCES               = src/exceptions4c.c tests/throw-cause.c
 
-# exceptions4c examples
+# Examples
 
 bin_check_examples_pthreads_CFLAGS          = -Wall -Werror --pedantic -Wno-missing-braces -I$(EXCEPTIONS4C_PATH) -Iexamples
 bin_check_examples_pthreads_SOURCES         = examples/pthreads.c
@@ -209,34 +188,25 @@ bin_check_examples_uncaught_handler_SOURCES = examples/uncaught-handler.c
 bin_check_examples_uncaught_handler_LDADD   = $(EXCEPTIONS4C_LIBRARY)
 
 
-# exceptions4c-backtrace tests
+# Coverage
 
-bin_check_backtrace_backtraced_SOURCES      = src/exceptions4c.c src/backtrace/exceptions4c-backtrace.c tests/backtrace/backtraced.c
-
-
-# coverage
-
-coverage: exceptions4c.c.gcov exceptions4c-backtrace.c.gcov
+coverage: exceptions4c.c.gcov
 
 coverage-report: docs/html/coverage/index.html
 
 docs/html/coverage/index.html: coverage.info
 	genhtml coverage.info --output-directory docs/html/coverage
 
-coverage.info: exceptions4c.c.gcov exceptions4c-backtrace.c.gcov
+coverage.info: exceptions4c.c.gcov
 	lcov --ignore-errors mismatch --capture --directory . --output-file coverage.info
 
 exceptions4c.c.gcov: src/exceptions4c.gcda
 	gcov --verbose src/exceptions4c.c
 
-exceptions4c-backtrace.c.gcov: src/backtrace/exceptions4c-backtrace.gcda
-	gcov --verbose src/backtrace/exceptions4c-backtrace.c
-
 src/exceptions4c.gcda: check
 
-src/backtrace/exceptions4c-backtrace.gcda: check
 
-# generate documentation
+# Generate documentation
 
 docs: docs/html/index.html
 
