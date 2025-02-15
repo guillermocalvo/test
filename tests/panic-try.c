@@ -34,5 +34,6 @@ int main(void) {
 }
 
 static void failure(int _) {
+    (void) _;
     TEST_FAIL("Handled SIGABORT %s:%d\n", __FILE__, __LINE__);
 }
