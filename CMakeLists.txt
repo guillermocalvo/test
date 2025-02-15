@@ -10,11 +10,6 @@ add_library(exceptions4c
 
 target_include_directories(exceptions4c PUBLIC src)
 
-add_library(exceptions4c_pthreads
-        src/pthreads/exceptions4c-pthreads.c)
-
-target_include_directories(exceptions4c_pthreads PUBLIC src src/pthreads)
-
 include(FetchContent)
 FetchContent_Declare(
         doxygen-awesome-css
@@ -96,22 +91,6 @@ set_property(TEST panic-block-next PROPERTY WILL_FAIL TRUE)
 set_property(TEST panic-dangling PROPERTY WILL_FAIL TRUE)
 set_property(TEST throw-uncaught-1 PROPERTY WILL_FAIL TRUE)
 set_property(TEST throw-uncaught-2 PROPERTY WILL_FAIL TRUE)
-
-set(TESTS
-        multithread
-)
-
-foreach(TEST IN LISTS TESTS)
-    add_executable(pthreads-${TEST} "tests/pthreads/${TEST}.c")
-    set_target_properties(pthreads-${TEST} PROPERTIES COMPILE_WARNING_AS_ERROR ON)
-    target_link_libraries(pthreads-${TEST}
-            exceptions4c
-            exceptions4c_pthreads
-            Threads::Threads
-    )
-    target_include_directories(pthreads-${TEST} PUBLIC src src/pthreads)
-    add_test(NAME pthreads-${TEST} COMMAND $<TARGET_FILE:pthreads-${TEST}>)
-endforeach()
 
 # EXAMPLES
 

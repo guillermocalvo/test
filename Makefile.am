@@ -7,15 +7,13 @@
 
 AUTOMAKE_OPTIONS = foreign subdir-objects
 
-AM_CFLAGS = -Wall -Werror --pedantic -Wno-missing-braces -Wno-dangling-else -coverage -O0 -I$(EXCEPTIONS4C_PATH) -I$(EXCEPTIONS4C_PTHREADS_PATH) -I$(EXCEPTIONS4C_BACKTRACE_PATH)
+AM_CFLAGS = -Wall -Werror --pedantic -Wno-missing-braces -Wno-dangling-else -coverage -O0 -I$(EXCEPTIONS4C_PATH) -I$(EXCEPTIONS4C_BACKTRACE_PATH)
 
 
 # Library
 
 EXCEPTIONS4C_PATH               = src
 EXCEPTIONS4C_LIBRARY            = lib/libexceptions4c.a
-EXCEPTIONS4C_PTHREADS_PATH      = src/pthreads
-EXCEPTIONS4C_PTHREADS_LIBRARY   = lib/libexceptions4c-pthreads.a
 EXCEPTIONS4C_BACKTRACE_PATH     = src/backtrace
 EXCEPTIONS4C_BACKTRACE_LIBRARY  = lib/libexceptions4c-backtrace.a
 
@@ -24,12 +22,10 @@ EXCEPTIONS4C_BACKTRACE_LIBRARY  = lib/libexceptions4c-backtrace.a
 
 lib_LIBRARIES =                         \
     $(EXCEPTIONS4C_LIBRARY)             \
-    $(EXCEPTIONS4C_PTHREADS_LIBRARY)    \
     $(EXCEPTIONS4C_BACKTRACE_LIBRARY)
 
 include_HEADERS =                       \
     src/exceptions4c.h                  \
-    src/pthreads/exceptions4c-pthreads.h \
     src/backtrace/exceptions4c-backtrace.h
 
 
@@ -53,12 +49,6 @@ CLEANFILES =                                \
     tests/*.gcda                            \
     tests/*.gcno                            \
     tests/*.gcov                            \
-    src/pthreads/*.gcda                     \
-    src/pthreads/*.gcno                     \
-    src/pthreads/*.gcov                     \
-    tests/pthreads/*.gcda                   \
-    tests/pthreads/*.gcno                   \
-    tests/pthreads/*.gcov                   \
     src/backtrace/*.gcda                    \
     src/backtrace/*.gcno                    \
     src/backtrace/*.gcov                    \
@@ -98,8 +88,6 @@ check_PROGRAMS =                            \
     bin/check/panic-reacquire               \
     bin/check/panic-retry                   \
     bin/check/panic-try                     \
-    bin/check/pthreads/dangling-context     \
-    bin/check/pthreads/multithread          \
     bin/check/reacquire                     \
     bin/check/retry                         \
     bin/check/throw-cause                   \
@@ -137,8 +125,6 @@ TESTS =                                     \
     bin/check/panic-reacquire               \
     bin/check/panic-retry                   \
     bin/check/panic-try                     \
-    bin/check/pthreads/dangling-context     \
-    bin/check/pthreads/multithread          \
     bin/check/reacquire                     \
     bin/check/retry                         \
     bin/check/throw-cause                   \
@@ -158,7 +144,6 @@ XFAIL_TESTS =                               \
     bin/check/panic-reacquire               \
     bin/check/panic-retry                   \
     bin/check/panic-try                     \
-    bin/check/pthreads/dangling-context     \
     bin/check/throw-uncaught-1              \
     bin/check/throw-uncaught-2
 
@@ -169,12 +154,6 @@ tests: check
 
 lib_libexceptions4c_a_CFLAGS                = -Wall -Werror --pedantic -Wno-missing-braces -I$(EXCEPTIONS4C_PATH)
 lib_libexceptions4c_a_SOURCES               = src/exceptions4c.c
-
-
-# exceptions4c-pthreads library
-
-lib_libexceptions4c_pthreads_a_CFLAGS       = -Wall -Werror --pedantic -Wno-missing-braces -I$(EXCEPTIONS4C_PATH) -I$(EXCEPTIONS4C_PTHREADS_PATH)
-lib_libexceptions4c_pthreads_a_SOURCES      = src/pthreads/exceptions4c-pthreads.c
 
 
 # exceptions4c-backtrace library
@@ -230,12 +209,6 @@ bin_check_examples_uncaught_handler_SOURCES = examples/uncaught-handler.c
 bin_check_examples_uncaught_handler_LDADD   = $(EXCEPTIONS4C_LIBRARY)
 
 
-# exceptions4c-pthreads tests
-
-bin_check_pthreads_multithread_SOURCES      = src/exceptions4c.c src/pthreads/exceptions4c-pthreads.c tests/pthreads/multithread.c
-bin_check_pthreads_dangling_context_SOURCES = src/exceptions4c.c src/pthreads/exceptions4c-pthreads.c tests/pthreads/dangling-context.c
-
-
 # exceptions4c-backtrace tests
 
 bin_check_backtrace_backtraced_SOURCES      = src/exceptions4c.c src/backtrace/exceptions4c-backtrace.c tests/backtrace/backtraced.c
@@ -243,28 +216,23 @@ bin_check_backtrace_backtraced_SOURCES      = src/exceptions4c.c src/backtrace/e
 
 # coverage
 
-coverage: exceptions4c.c.gcov exceptions4c-pthreads.c.gcov exceptions4c-backtrace.c.gcov
+coverage: exceptions4c.c.gcov exceptions4c-backtrace.c.gcov
 
 coverage-report: docs/html/coverage/index.html
 
 docs/html/coverage/index.html: coverage.info
 	genhtml coverage.info --output-directory docs/html/coverage
 
-coverage.info: exceptions4c.c.gcov exceptions4c-pthreads.c.gcov exceptions4c-backtrace.c.gcov
+coverage.info: exceptions4c.c.gcov exceptions4c-backtrace.c.gcov
 	lcov --ignore-errors mismatch --capture --directory . --output-file coverage.info
 
 exceptions4c.c.gcov: src/exceptions4c.gcda
 	gcov --verbose src/exceptions4c.c
 
-exceptions4c-pthreads.c.gcov: src/pthreads/exceptions4c-pthreads.gcda
-	gcov --verbose src/pthreads/exceptions4c-pthreads.c
-
 exceptions4c-backtrace.c.gcov: src/backtrace/exceptions4c-backtrace.gcda
 	gcov --verbose src/backtrace/exceptions4c-backtrace.c
 
 src/exceptions4c.gcda: check
-
-src/pthreads/exceptions4c-pthreads.gcda: check
 
 src/backtrace/exceptions4c-backtrace.gcda: check
 
