@@ -26,7 +26,7 @@ static void set_custom_data(struct e4c_exception * exception) {
   exception->data = "My custom data";
 }
 
-int main(int argc, char * argv[]) {
+int main(void) {
   e4c_get_context()->initialize_exception = set_custom_data;
   TRY {
     THROW(PET_ERROR, "Bad dog");
@@ -52,7 +52,7 @@ static void my_finalizer(const struct e4c_exception * exception) {
   free(exception->data);
 }
 
-int main(int argc, char * argv[]) {
+int main(void) {
   struct e4c_context * context = e4c_get_context();
   context->initialize_exception = my_initializer;
   context->finalize_exception = my_finalizer;
@@ -73,8 +73,8 @@ static void my_termination_handler(void) {
   exit(EXIT_SUCCESS);
 }
 
-int main(int argc, char * argv[]) {
-  e4c_get_context()->termination_handler = my_termination_handler;
+int main(void) {
+  e4c_get_context()->termination_handler = &my_termination_handler;
   THROW(PET_ERROR, "Bad dog");
 }
 //! [termination_handler]
@@ -91,7 +91,7 @@ static struct e4c_context * my_context_supplier(void) {
   return &my_custom_context;
 }
 
-int main(int argc, char * argv[]) {
+int main(void) {
   e4c_set_context_supplier(my_context_supplier);
   TRY {
     THROW(PET_ERROR, "Bad dog");
@@ -112,10 +112,10 @@ struct e4c_context * context = e4c_get_context();
 
   printf("current context: %p\n", (void *) context);
 
-  main_initialize_exception(0, NULL);
-  main_finalize_exception(0, NULL);
-  main_set_context_supplier(0, NULL);
-  main_termination_handler(0, NULL);
+  main_initialize_exception();
+  main_finalize_exception();
+  main_set_context_supplier();
+  main_termination_handler();
 
   return EXIT_SUCCESS;
 }

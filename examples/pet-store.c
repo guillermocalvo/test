@@ -17,7 +17,7 @@
 #include <stdlib.h>
 #include <exceptions4c.h>
 
-typedef enum pet_status { UNKNOWN, AVAILABLE, PENDING, SOLD } pet_status;
+typedef enum pet_status { ERROR, UNKNOWN, AVAILABLE, PENDING, SOLD } pet_status;
 typedef struct pet { int id; const char * name; pet_status status; } * Pet;
 
 //! [exception_types]
@@ -39,25 +39,14 @@ static struct pet pets[] = {
   { .id = 2, .name = "Rantanplan", .status = SOLD }
 };
 
-static Pet pet_malloc(void) {
-  Pet pet = calloc(1, sizeof(*pet));
-  if (!pet) {
-    THROW(NOT_ENOUGH_MEMORY, "Could not allocate new pet");
-  }
-  return pet;
-}
-
 static void pet_free(Pet pet) {
-  free(pet);
+  (void) pet;
 }
 
 static Pet pet_clone(const int id) {
-  int index;
-  for (index = 0; index < sizeof(pets) / sizeof(pets[0]); index++) {
+  for (int index = 0; index < sizeof(pets) / sizeof(pets[0]); index++) {
     if (pets[index].id == id) {
-      Pet found = pet_malloc();
-      *found = pets[index];
-      return found;
+      return &pets[index];
     }
   }
   return NULL;
@@ -82,7 +71,7 @@ Pet pet_find(int id) {
 //! [try]
 /* Returns the status of a pet by id */
 pet_status get_pet_status(int id) {
-  pet_status status;
+  pet_status status = ERROR;
   TRY {
     status = pet_find(id)->status;
   }
@@ -95,7 +84,7 @@ pet_status get_pet_status(int id) {
 //! [catch]
 /* Returns the status of a pet by id */
 pet_status get_pet_status(int id) {
-  pet_status status;
+  pet_status status = ERROR;
   TRY {
     status = pet_find(id)->status;
   } CATCH (PET_ERROR) {
@@ -112,7 +101,7 @@ pet_status get_pet_status(int id) {
 //! [catch_all]
 /* Returns the status of a pet by id */
 pet_status get_pet_status(int id) {
-  pet_status status;
+  pet_status status = ERROR;
   TRY {
     status = pet_find(id)->status;
   } CATCH_ALL {
@@ -130,7 +119,7 @@ pet_status get_pet_status(int id) {
 //! [finally]
 /* Returns the status of a pet by id */
 pet_status get_pet_status(int id) {
-  pet_status status;
+  pet_status status = ERROR;
   Pet pet = NULL;
   TRY {
     pet = pet_find(id);
@@ -163,7 +152,7 @@ pet_status get_pet_status(int id) {
 //! [using_catch]
 /* Returns the status of a pet by id */
 pet_status get_pet_status(int id) {
-  pet_status status;
+  pet_status status = ERROR;
   Pet pet;
   USING(pet, pet_free, pet_find, id) {
     status = pet->status;
@@ -179,7 +168,7 @@ pet_status get_pet_status(int id) {
 //! [with_use]
 /* Returns the status of a pet by id */
 pet_status get_pet_status(int id) {
-  pet_status status;
+  pet_status status = ERROR;
   Pet pet;
   WITH(pet, pet_free) {
     if (pet_store_is_closed()) {

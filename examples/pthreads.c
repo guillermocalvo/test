@@ -21,7 +21,7 @@
 
 const struct e4c_exception_type MY_EXCEPTION = {NULL, "My exception"};
 
-static void * my_thread(void * arg) {
+static void * my_thread(void *) {
     THROW(MY_EXCEPTION, "Oops!");
 }
 

@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.29)
 
 project(exceptions4c C)
 
-set(CMAKE_C_STANDARD 90)
+set(CMAKE_C_STANDARD 99)
 set(EXCEPTIONS4C_VERSION "4.0")
 
 add_library(exceptions4c
