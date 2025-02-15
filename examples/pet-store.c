@@ -39,8 +39,8 @@ static struct pet pets[] = {
   { .id = 2, .name = "Rantanplan", .status = SOLD }
 };
 
-static void pet_free(Pet pet) {
-  (void) pet;
+static void pet_free(const Pet _) {
+  (void) _;
 }
 
 static Pet pet_clone(const int id) {
@@ -138,7 +138,7 @@ pet_status get_pet_status(int id) {
 //! [using]
 /* Returns the status of a pet by id */
 pet_status get_pet_status(int id) {
-  pet_status status;
+  pet_status status = ERROR;
   Pet pet;
   USING(pet, pet_free, pet_find, id) {
     status = pet->status;

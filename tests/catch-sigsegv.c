@@ -34,7 +34,7 @@ int main(void) {
     signal(SIGSEGV, throw_on_signal);
 
     TRY {
-        int * pointer = null(integer);
+        const int * pointer = null(integer);
         integer = *pointer;
         TEST_FAIL("Reached %s:%d\n", __FILE__, __LINE__);
     } CATCH (SEGFAULT) {

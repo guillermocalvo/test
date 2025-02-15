@@ -31,6 +31,8 @@ int main(void) {
     e4c_set_context_supplier(my_supplier);
 
     TRY {
+        TEST_PRINT_ERR("Reached %s:%d\n", __FILE__, __LINE__);
+        TEST_PASS;
     }
 
     TEST_PRINT_ERR("Reached %s:%d\n", __FILE__, __LINE__);

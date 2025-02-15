@@ -27,12 +27,12 @@ void segfault(int _) {
 }
 
 int main(void) {
-  int * null_pointer = NULL;
+  const int * null_pointer = NULL;
 
   signal(SIGSEGV, segfault);
 
   TRY {
-    *null_pointer = 123;
+    printf("Oh no %d", *null_pointer);
   } CATCH (SEGFAULT) {
     printf("Danger avoided!\n");
   }
