@@ -43,7 +43,6 @@ WARN_AS_ERROR          = YES
 #---------------------------------------------------------------------------
 
 INPUT                  = ./src/ \
-                         ./src/lite/ \
                          ./src/pthreads/ \
                          ./src/backtrace/ \
                          ./docs/README.md

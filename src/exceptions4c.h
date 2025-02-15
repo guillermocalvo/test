@@ -151,7 +151,8 @@ extern "C" {
  *
  * @param exception_type the type of the exception to throw.
  * @param format the error message.
- * @param ... a list of arguments that will be formatted according to <tt>format</tt>.
+ * @param ... a list of arguments that will be formatted according to
+ *   <tt>format</tt>.
  *
  * #THROW is used within a #TRY block, a #CATCH block, or any other
  * function to signal that an error has occurred. The thrown exception
@@ -167,8 +168,9 @@ extern "C" {
  * the console.
  *
  * @note
- * The error message will be copied as it is into the thrown #EXCEPTION.
- * To use a formatted error message, use #THROWF instead.
+ * The error message will be formatted just as it would with
+ * <tt>printf</tt>. If no message is specified, then the default message
+ * for the exception type will be used.
  */
 #define THROW(exception_type, format, ...)                                  \
                                                                             \
@@ -568,10 +570,10 @@ struct e4c_exception_type {
  *
  * After an exception is [thrown](#THROW), it may propagate through the
  * program and be caught by an appropriate #CATCH or #CATCH_ALL block.
- * When an exception is caught, #EXCEPTION can be used to retrieve the
- * exception currently being handled. This allows for inspection and
- * further handling of the error based on both its type and the detailed
- * context of the situation.
+ * When an exception is caught, #e4c_get_exception can be used to
+ * retrieve the exception currently being handled. This allows for
+ * inspection and further handling of the error based on both its type
+ * and the detailed context of the situation.
  */
 struct e4c_exception {
 

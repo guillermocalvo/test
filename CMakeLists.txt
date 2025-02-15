@@ -98,23 +98,6 @@ set_property(TEST throw-uncaught-1 PROPERTY WILL_FAIL TRUE)
 set_property(TEST throw-uncaught-2 PROPERTY WILL_FAIL TRUE)
 
 set(TESTS
-        uncaught
-        caught
-        catch-all
-        cleanup
-        limits
-)
-
-foreach(TEST IN LISTS TESTS)
-    add_executable(lite-${TEST} "tests/lite/${TEST}.c")
-    set_target_properties(lite-${TEST} PROPERTIES COMPILE_WARNING_AS_ERROR ON)
-    target_include_directories(lite-${TEST} PUBLIC src/lite)
-    add_test(NAME lite-${TEST} COMMAND $<TARGET_FILE:lite-${TEST}>)
-endforeach()
-
-set_property(TEST lite-uncaught PROPERTY WILL_FAIL TRUE)
-
-set(TESTS
         multithread
 )
 

@@ -7,7 +7,7 @@
 
 AUTOMAKE_OPTIONS = foreign subdir-objects
 
-AM_CFLAGS = -Wall -Werror --pedantic -Wno-missing-braces -Wno-dangling-else -coverage -O0 -I$(EXCEPTIONS4C_PATH) -Isrc/lite -I$(EXCEPTIONS4C_PTHREADS_PATH) -I$(EXCEPTIONS4C_BACKTRACE_PATH)
+AM_CFLAGS = -Wall -Werror --pedantic -Wno-missing-braces -Wno-dangling-else -coverage -O0 -I$(EXCEPTIONS4C_PATH) -I$(EXCEPTIONS4C_PTHREADS_PATH) -I$(EXCEPTIONS4C_BACKTRACE_PATH)
 
 
 # Library
@@ -29,7 +29,6 @@ lib_LIBRARIES =                         \
 
 include_HEADERS =                       \
     src/exceptions4c.h                  \
-    src/lite/exceptions4c-lite.h        \
     src/pthreads/exceptions4c-pthreads.h \
     src/backtrace/exceptions4c-backtrace.h
 
@@ -54,9 +53,6 @@ CLEANFILES =                                \
     tests/*.gcda                            \
     tests/*.gcno                            \
     tests/*.gcov                            \
-    tests/lite/*.gcda                       \
-    tests/lite/*.gcno                       \
-    tests/lite/*.gcov                       \
     src/pthreads/*.gcda                     \
     src/pthreads/*.gcno                     \
     src/pthreads/*.gcov                     \
@@ -94,12 +90,6 @@ check_PROGRAMS =                            \
     bin/check/handler-initialize            \
     bin/check/handler-uncaught              \
     bin/check/is-uncaught                   \
-    bin/check/lite/catch-all                \
-    bin/check/lite/caught                   \
-    bin/check/lite/cleanup                  \
-    bin/check/lite/limits                   \
-    bin/check/lite/overflow                 \
-    bin/check/lite/uncaught                 \
     bin/check/panic-block-catch             \
     bin/check/panic-block-next              \
     bin/check/panic-block-try               \
@@ -139,12 +129,6 @@ TESTS =                                     \
     bin/check/handler-initialize            \
     bin/check/handler-uncaught              \
     bin/check/is-uncaught                   \
-    bin/check/lite/catch-all                \
-    bin/check/lite/caught                   \
-    bin/check/lite/cleanup                  \
-    bin/check/lite/limits                   \
-    bin/check/lite/overflow                 \
-    bin/check/lite/uncaught                 \
     bin/check/panic-block-catch             \
     bin/check/panic-block-next              \
     bin/check/panic-block-try               \
@@ -166,8 +150,6 @@ TESTS =                                     \
 XFAIL_TESTS =                               \
     bin/check/backtrace/backtraced          \
     bin/check/examples/uncaught-handler     \
-    bin/check/lite/overflow                 \
-    bin/check/lite/uncaught                 \
     bin/check/panic-block-catch             \
     bin/check/panic-block-next              \
     bin/check/panic-block-try               \
@@ -246,16 +228,6 @@ bin_check_examples_customization_SOURCES    = examples/customization.c
 bin_check_examples_customization_LDADD      = $(EXCEPTIONS4C_LIBRARY)
 bin_check_examples_uncaught_handler_SOURCES = examples/uncaught-handler.c
 bin_check_examples_uncaught_handler_LDADD   = $(EXCEPTIONS4C_LIBRARY)
-
-
-# exceptions4c-lite tests
-
-bin_check_lite_uncaught_SOURCES             = tests/lite/uncaught.c
-bin_check_lite_caught_SOURCES               = tests/lite/caught.c
-bin_check_lite_catch_all_SOURCES            = tests/lite/catch-all.c
-bin_check_lite_cleanup_SOURCES              = tests/lite/cleanup.c
-bin_check_lite_limits_SOURCES               = tests/lite/limits.c
-bin_check_lite_overflow_SOURCES             = tests/lite/overflow.c
 
 
 # exceptions4c-pthreads tests
