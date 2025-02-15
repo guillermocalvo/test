@@ -461,7 +461,7 @@ static void throw( /* NOSONAR */
     if (format == NULL && type != NULL) {
         (void) snprintf(exception->message, sizeof(exception->message), "%s", type->default_message);
     } else if (format != NULL) {
-        (void) vsnprintf(exception->message, sizeof(exception->message), format, arguments_list);
+        (void) vsnprintf(exception->message, sizeof(exception->message), format, arguments_list); /* NOSONAR */
     }
 
     /* capture the cause of this exception */
