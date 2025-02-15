@@ -39,7 +39,7 @@ static struct pet pets[] = {
   { .id = 2, .name = "Rantanplan", .status = SOLD }
 };
 
-static void pet_free(const Pet _) {
+static void pet_free(const void * _) {
   (void) _;
 }
 
