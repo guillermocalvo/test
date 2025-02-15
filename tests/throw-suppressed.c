@@ -29,8 +29,7 @@ static volatile bool is_finalized = false;
  * Tests that exceptions may be suppressed.
  */
 int main(void) {
-    volatile bool caught1 = false;
-    volatile bool caught2 = false;
+    volatile bool caught1 = false, caught2 = false; /* NOSONAR */
 
     e4c_get_context()->finalize_exception = custom_finalizer;
 

@@ -27,8 +27,7 @@ static const struct e4c_exception_type GIVE_UP = {NULL, "Giving up"};
  */
 int main(void) {
 
-    volatile int foo = 0;
-    volatile int total_acquisitions = 0;
+    volatile int foo = 0, total_acquisitions = 0; /* NOSONAR */
 
     TRY {
         WITH(foo, DISPOSE_FOO) {

@@ -26,9 +26,7 @@ static const struct e4c_exception_type MORE_SPECIFIC = {&SPECIFIC, "More specifi
  * Tests macro CATCH with generic exception types.
  */
 int main(void) {
-    volatile bool caught1 = false;
-    volatile bool caught2 = false;
-    volatile bool caught3 = false;
+    volatile bool caught1 = false, caught2 = false, caught3 = false; /* NOSONAR */
 
     TRY {
         THROW(SPECIFIC, NULL);

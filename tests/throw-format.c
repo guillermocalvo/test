@@ -23,7 +23,7 @@ static const struct e4c_exception_type OOPS = {NULL, "Oops"};
  * Tests macro THROW with a formatted message.
  */
 int main(void) {
-    volatile bool caught = false;
+    volatile bool caught = false; /* NOSONAR */
 
     TRY {
         THROW(OOPS, "%s_%s", "FORMATTED", "MESSAGE");

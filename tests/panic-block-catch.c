@@ -45,5 +45,6 @@ static struct e4c_context * my_supplier(void) {
 }
 
 static void failure(int _) {
+    (void) _;
     TEST_FAIL("Handled SIGABORT %s:%d\n", __FILE__, __LINE__);
 }

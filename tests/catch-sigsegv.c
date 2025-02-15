@@ -29,13 +29,12 @@ static int integer = 123;
  * Tests that signal SIGSEGV can be converted into a exception.
  */
 int main(void) {
-    volatile bool caught = false;
+    volatile bool caught = false; /* NOSONAR */
 
     signal(SIGSEGV, throw_on_signal);
 
     TRY {
-        int * pointer = &integer;
-        pointer = null(integer);
+        int * pointer = null(integer);
         integer = *pointer;
         TEST_FAIL("Reached %s:%d\n", __FILE__, __LINE__);
     } CATCH (SEGFAULT) {
@@ -51,5 +50,6 @@ static void * null(const int dummy){
 }
 
 static void throw_on_signal(int _) {
+    (void) _;
     THROW(SEGFAULT, NULL);
 }

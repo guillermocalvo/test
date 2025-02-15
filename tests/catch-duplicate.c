@@ -23,8 +23,7 @@ static const struct e4c_exception_type OOPS = {NULL, "Oops"};
  * Duplicate CATCH blocks should have no effect.
  */
 int main(void) {
-    volatile bool caught1 = false;
-    volatile bool caught2 = false;
+    volatile bool caught1 = false, caught2 = false; /* NOSONAR */
 
     TRY {
         THROW(OOPS, NULL);

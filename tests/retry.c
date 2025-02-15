@@ -24,7 +24,7 @@ static const struct e4c_exception_type GIVE_UP = {NULL, "Giving up"};
  * Tests macro RETRY.
  */
 int main(void) {
-    volatile int total_tries = 0;
+    volatile int total_tries = 0; /* NOSONAR */
     TRY {
         TRY {
             total_tries++;

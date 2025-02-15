@@ -17,7 +17,7 @@
 #include <exceptions4c.h>
 #include "testing.h"
 
-static void custom_uncaught_handler(const struct e4c_exception * _);
+static void custom_uncaught_handler(const struct e4c_exception *);
 
 static const struct e4c_exception_type OOPS = {NULL, "Oops"};
 
@@ -30,6 +30,7 @@ int main(void) {
 }
 
 static void custom_uncaught_handler(const struct e4c_exception * _){
+    (void) _;
     TEST_PRINT_OUT("Uncaught handler %s:%d\n", __FILE__, __LINE__);
     TEST_PASS;
 }

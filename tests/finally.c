@@ -33,7 +33,7 @@ static volatile bool finalized3 = false;
  * Tests macro FINALLY.
  */
 int main(void) {
-    volatile bool caught = false;
+    volatile bool caught = false; /* NOSONAR */
     TRY {
         aux1();
     } CATCH (OOPS) {

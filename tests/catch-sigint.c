@@ -26,7 +26,7 @@ static void throw_on_signal(int);
  * Tests that signal SIGINT can be converted into a exception.
  */
 int main(void) {
-    volatile bool caught = false;
+    volatile bool caught = false; /* NOSONAR */
 
     signal(SIGINT, throw_on_signal);
 
@@ -42,5 +42,6 @@ int main(void) {
 }
 
 static void throw_on_signal(int _) {
+    (void) _;
     THROW(USERINT, NULL);
 }

@@ -38,5 +38,6 @@ int main(void) {
 }
 
 static void custom_finalizer(const struct e4c_exception * _) {
+    (void) _;
     custom_handler_was_finalized = true;
 }

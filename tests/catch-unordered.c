@@ -24,8 +24,7 @@ static const struct e4c_exception_type SPECIFIC = {&GENERIC, "Specific error"};
  * Specific CATCH blocks should go before generic ones.
  */
 int main(void) {
-    volatile bool caught1 = false;
-    volatile bool caught2 = false;
+    volatile bool caught1 = false, caught2 = false; /* NOSONAR */
     TRY {
         THROW(SPECIFIC, NULL);
     } CATCH (GENERIC) {
