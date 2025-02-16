@@ -38,7 +38,7 @@ int main(void) {
                 TEST_PRINT_OUT("reacquisitions: %d\n", total_acquisitions - 1);
             }
             THROW(OOPS, NULL);
-        } USE {
+        } USE (true) {
             TEST_PRINT_OUT("foo: %d", foo);
         } CATCH (OOPS) {
             REACQUIRE(2, GIVE_UP, NULL);

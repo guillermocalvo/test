@@ -260,6 +260,7 @@ extern "C" {
  *
  * @param resource the thing to acquire, use and then dispose of.
  * @param dispose the function (or macro) to dispose of the resource.
+ * @param predicate the condition that determines if the resource can be used.
  * @param acquire the function (or macro) to acquire the resource.
  * @param ... an optional list of arguments to be passed to <tt>acquire</tt>.
  *
@@ -280,11 +281,11 @@ extern "C" {
  *
  * @see WITH
  */
-#define USING(resource, dispose, acquire, ...)                              \
+#define USING(resource, dispose, predicate, acquire, ...)                   \
                                                                             \
   WITH((resource), dispose) {                                               \
     (resource) = acquire(__VA_ARGS__);                                      \
-  } USE
+  } USE (predicate)
 
 /**
  * Opens a block of code with automatic disposal of a resource
@@ -372,6 +373,8 @@ extern "C" {
 /**
  * Closes a block of code with automatic disposal of a resource
  *
+ * @param predicate the condition that determines if the resource can be used.
+ *
  * A #USE block **must** always be preceded by a #WITH block. These two
  * keywords are designed so the compiler will complain about *dangling*
  * #WITH... #USE blocks.
@@ -389,9 +392,9 @@ extern "C" {
  *
  * @see WITH
  */
-#define USE                                                                 \
+#define USE(predicate)                                                      \
                                                                             \
-  } else if (e4c_try(EXCEPTIONS4C_DEBUG))
+  } else if (e4c_try(EXCEPTIONS4C_DEBUG) && (predicate))
 
 /**
  * Repeats the previous #WITH block entirely
