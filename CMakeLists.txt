@@ -71,6 +71,7 @@ set(TESTS
         handler-initialize
         handler-finalize
         throw-cause
+        with-use
 )
 
 foreach(TEST IN LISTS TESTS)
