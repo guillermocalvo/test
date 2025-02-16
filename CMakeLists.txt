@@ -97,7 +97,7 @@ set_property(TEST throw-uncaught-2 PROPERTY WILL_FAIL TRUE)
 
 add_executable(examples-pthreads "examples/pthreads.c")
 target_link_libraries(examples-pthreads exceptions4c Threads::Threads)
-target_include_directories(examples-pthreads PUBLIC src examples)
+target_include_directories(examples-pthreads PUBLIC src)
 add_test(NAME examples-pthreads COMMAND $<TARGET_FILE:examples-pthreads>)
 
 add_executable(examples-signals "examples/signals.c")

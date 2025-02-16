@@ -182,7 +182,6 @@ bin_check_examples_customization_LDADD      = $(EXCEPTIONS4C_LIBRARY)
 bin_check_examples_customization_SOURCES    = examples/customization.c
 bin_check_examples_pet_store_LDADD          = $(EXCEPTIONS4C_LIBRARY)
 bin_check_examples_pet_store_SOURCES        = examples/pet-store.c
-bin_check_examples_pthreads_CFLAGS          = -Wall -Werror --pedantic -Wno-missing-braces -I$(EXCEPTIONS4C_PATH) -Iexamples
 bin_check_examples_pthreads_LDADD           = $(EXCEPTIONS4C_LIBRARY)
 bin_check_examples_pthreads_SOURCES         = examples/pthreads.c
 bin_check_examples_signals_LDADD            = $(EXCEPTIONS4C_LIBRARY)

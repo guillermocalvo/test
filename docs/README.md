@@ -132,24 +132,24 @@ This block is optional. And, for each #TRY block, there can be only one #FINALLY
 
 ## Dispose Pattern
 
-This is a powerful design pattern for resource management. It is a clean and terse way to handle all kinds of resources
-with implicit acquisition and automatic disposal.
+This is a powerful design pattern for resource management. It is a clean and terse way to handle the acquisition and
+disposal of all kinds of resources.
 
-These macros can save you from having to call the disposing or acquiring functions manually in common situations.
+These macros will help you make sure that no resource is leaked in your program.
 
 - #USING
 - #WITH ... #USE
 
 ### Simple Resource Acquisition
 
-A #USING block allows you to automatically acquire and dispose of a resource. It is similar to a `for` statement,
-because it receives three comma-separated expressions that will be evaluated in order.
+A #USING block allows you to easily acquire and dispose of a resource. It is similar to a `for` statement, because it
+receives three comma-separated expressions that will be evaluated in order.
 
 - An "acquisition" expression that will try to acquire the resource.
 - A "test" expression that defines the condition for using the resource.
 - A "disposal" expression that will dispose of the resource.
 
-Both the three expressions and the code block that uses the resource are free to throw exceptions.
+Both these expressions and the code block that uses the resource are free to throw exceptions.
 
 @snippet pet-store.c using
 
@@ -258,6 +258,9 @@ All you have to do is set the exception context supplier, so that each POSIX thr
 
 In the event of an uncaught exception, instead of terminating the program, only the current thread will be canceled.
 
+> [!NOTE]
+> [Read the docs][EXCEPTIONS4C_PTHREADS_DOCS] for more information about this extension.
+
 ## Signal Handling
 
 You can turn some standard signals such as `SIGHUP`, `SIGFPE`, and `SIGSEGV` into exceptions so they can be handled in a
@@ -307,6 +310,7 @@ The source code is [available on GitHub][SOURCE_CODE].
 [EXAMPLE]:                      example.png
 [EXCEPTIONS4C_LITE]:            https://github.com/guillermocalvo/exceptions4c-lite
 [EXCEPTIONS4C_PTHREADS]:        https://github.com/guillermocalvo/exceptions4c-pthreads
+[EXCEPTIONS4C_PTHREADS_DOCS]:   https://exceptions4c-pthreads.guillermo.dev
 [LATEST_RELEASE]:               https://github.com/guillermocalvo/exceptions4c/releases/latest
 [RESULT_LIBRARY]:               https://result.guillermo.dev/
 [SEMVER]:                       https://semver.org/

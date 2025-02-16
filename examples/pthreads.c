@@ -14,11 +14,27 @@
  * limitations under the License.
  */
 
-//! [setup]
 #include <stdlib.h>
 #include <pthread.h>
-#include <exceptions4c-pthreads.h>
+#include <exceptions4c.h>
 
+static void cancel_current_thread() {
+    pthread_exit(PTHREAD_CANCELED);
+}
+
+struct e4c_context dummy = {
+    ._innermost_block = NULL,
+    .uncaught_handler = NULL,
+    .termination_handler = cancel_current_thread,
+    .initialize_exception = NULL,
+    .finalize_exception = NULL
+};
+
+struct e4c_context * e4c_pthreads_context_supplier() {
+    return &dummy;
+}
+
+//! [setup]
 const struct e4c_exception_type OOPS = {NULL, "Oops"};
 
 /* A Thread that throws an exception */
@@ -39,19 +55,3 @@ int main(void) {
     return EXIT_SUCCESS;
 }
 //! [setup]
-
-static void cancel_current_thread() {
-    pthread_exit(PTHREAD_CANCELED);
-}
-
-struct e4c_context dummy = {
-    ._innermost_block = NULL,
-    .uncaught_handler = NULL,
-    .termination_handler = cancel_current_thread,
-    .initialize_exception = NULL,
-    .finalize_exception = NULL
-};
-
-struct e4c_context * e4c_pthreads_context_supplier() {
-    return &dummy;
-}
