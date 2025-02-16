@@ -148,7 +148,7 @@ that must be called. The code block using the resource is free to throw exceptio
 @snippet pet-store.c using
 
 1. The resource `pet` will be acquired by calling `pet_find` with the supplied argument `id`.
-2. The #USING block will be executed.
+2. If `pet != NULL` then the #USING block will be executed.
 3. The resource `pet` will be disposed of, by calling `pet_free`, no matter whether an exception happens or not.
 
 You can append #CATCH blocks to deal with exceptions that may happen during the manipulation of the resource. Just

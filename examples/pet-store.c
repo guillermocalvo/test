@@ -140,7 +140,7 @@ pet_status get_pet_status(int id) {
 pet_status get_pet_status(int id) {
   pet_status status = ERROR;
   Pet pet = NULL;
-  USING(pet, pet_free, pet != NULL, pet_find, id) {
+  USING(pet, pet != NULL, pet_free, pet_find, id) {
     status = pet->status;
   }
   return status;
@@ -154,7 +154,7 @@ pet_status get_pet_status(int id) {
 pet_status get_pet_status(int id) {
   pet_status status = ERROR;
   Pet pet = NULL;
-  USING(pet, pet_free, pet != NULL, pet_find, id) {
+  USING(pet, pet != NULL, pet_free, pet_find, id) {
     status = pet->status;
   } CATCH (PET_NOT_FOUND) {
     status = UNKNOWN;

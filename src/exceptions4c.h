@@ -259,8 +259,8 @@ extern "C" {
  * resource
  *
  * @param resource the thing to acquire, use and then dispose of.
- * @param dispose the function (or macro) to dispose of the resource.
  * @param predicate the condition that determines if the resource can be used.
+ * @param dispose the function (or macro) to dispose of the resource.
  * @param acquire the function (or macro) to acquire the resource.
  * @param ... an optional list of arguments to be passed to <tt>acquire</tt>.
  *
@@ -281,7 +281,7 @@ extern "C" {
  *
  * @see WITH
  */
-#define USING(resource, dispose, predicate, acquire, ...)                   \
+#define USING(resource, predicate, dispose, acquire, ...)                   \
                                                                             \
   WITH((resource), dispose) {                                               \
     (resource) = acquire(__VA_ARGS__);                                      \
