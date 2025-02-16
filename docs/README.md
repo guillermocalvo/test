@@ -140,16 +140,22 @@ These macros can save you from having to call the disposing or acquiring functio
 - #USING
 - #WITH ... #USE
 
-### Implicit Resource Acquisition
+### Simple Resource Acquisition
 
-A #USING block allows you to automatically acquire and dispose of a resource, by supplying the name of the functions
-that must be called. The code block using the resource is free to throw exceptions.
+A #USING block allows you to automatically acquire and dispose of a resource. It is similar to a `for` statement,
+because it receives three comma-separated expressions that will be evaluated in order.
+
+- An "acquisition" expression that will try to acquire the resource.
+- A "test" expression that defines the condition for using the resource.
+- A "disposal" expression that will dispose of the resource.
+
+Both the three expressions and the code block that uses the resource are free to throw exceptions.
 
 @snippet pet-store.c using
 
-1. The resource `pet` will be acquired by calling `pet_find` with the supplied argument `id`.
-2. If `pet != NULL` then the #USING block will be executed.
-3. The resource `pet` will be disposed of, by calling `pet_free`, no matter whether an exception happens or not.
+1. The resource will be acquired, using the expression `pet = pet_find(id)`.
+2. If the expression `pet != NULL` holds true, then the #USING block will be executed.
+3. The resource `pet` will be disposed of, using the expression `pet_free(pet)`, no matter whether an exception happens or not.
 
 You can append #CATCH blocks to deal with exceptions that may happen during the manipulation of the resource. Just
 remember: by the time the #CATCH block is executed, the resource will already have been disposed of.
@@ -159,10 +165,11 @@ remember: by the time the #CATCH block is executed, the resource will already ha
 > [!TIP]
 > You can even append a #FINALLY block for cleanup code other than disposing of the resource.
 
-### Explicit Resource Acquisition
+### Complex Resource Acquisition
 
-Use a #WITH block when the steps to acquire a resource are more complex than simply calling a function. It works exactly
-the same as the #USING block, except that you can write the code block in charge of actually acquiring the resource.
+Use a #WITH block when the steps to acquire a resource are more complex than simply evaluating an expression. It works
+exactly the same as the #USING block, except that you can write the code block in charge of actually acquiring the
+resource.
 
 @snippet pet-store.c with_use
 

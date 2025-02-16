@@ -17,8 +17,6 @@
 #include <exceptions4c.h>
 #include "testing.h"
 
-# define DISPOSE_FOO(IGNORE) 0
-
 static const struct e4c_exception_type OOPS = {NULL, "Oops"};
 static const struct e4c_exception_type GIVE_UP = {NULL, "Giving up"};
 
@@ -27,10 +25,10 @@ static const struct e4c_exception_type GIVE_UP = {NULL, "Giving up"};
  */
 int main(void) {
 
-    volatile int foo = 0, total_acquisitions = 0; /* NOSONAR */
+    volatile int total_acquisitions = 0; /* NOSONAR */
 
     TRY {
-        WITH(foo, DISPOSE_FOO) {
+        WITH(0) {
             total_acquisitions++;
             if (total_acquisitions == 1) {
                 TEST_PRINT_OUT("First acquisition\n");
@@ -39,7 +37,7 @@ int main(void) {
             }
             THROW(OOPS, NULL);
         } USE (true) {
-            TEST_PRINT_OUT("foo: %d", foo);
+            TEST_PRINT_OUT("use block\n");
         } CATCH (OOPS) {
             REACQUIRE(2, GIVE_UP, NULL);
         }

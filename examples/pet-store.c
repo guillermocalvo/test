@@ -140,7 +140,7 @@ pet_status get_pet_status(int id) {
 pet_status get_pet_status(int id) {
   pet_status status = ERROR;
   Pet pet = NULL;
-  USING(pet, pet != NULL, pet_free, pet_find, id) {
+  USING(pet = pet_find(id), pet != NULL, pet_free(pet)) {
     status = pet->status;
   }
   return status;
@@ -154,7 +154,7 @@ pet_status get_pet_status(int id) {
 pet_status get_pet_status(int id) {
   pet_status status = ERROR;
   Pet pet = NULL;
-  USING(pet, pet != NULL, pet_free, pet_find, id) {
+  USING(pet = pet_find(id), pet != NULL, pet_free(pet)) {
     status = pet->status;
   } CATCH (PET_NOT_FOUND) {
     status = UNKNOWN;
@@ -170,7 +170,7 @@ pet_status get_pet_status(int id) {
 pet_status get_pet_status(int id) {
   pet_status status = ERROR;
   Pet pet = NULL;
-  WITH(pet, pet_free) {
+  WITH(pet_free(pet)) {
     if (pet_store_is_closed()) {
       THROW(PET_STORE_CLOSED, NULL);
     }

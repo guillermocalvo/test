@@ -258,18 +258,11 @@ extern "C" {
  * Introduces a block of code with automatic acquisition and disposal of a
  * resource
  *
- * @param resource the thing to acquire, use and then dispose of.
- * @param predicate the condition that determines if the resource can be used.
- * @param dispose the function (or macro) to dispose of the resource.
- * @param acquire the function (or macro) to acquire the resource.
- * @param ... an optional list of arguments to be passed to <tt>acquire</tt>.
+ * @param acquisition the expression to acquire the resource.
+ * @param test defines the condition for executing the code block.
+ * @param disposal the expression to dispose of the resource.
  *
- * The specified resource will be *acquired*, *used* and then *disposed*. The
- * automatic acquisition and disposal is achieved by calling the supplied
- * functions (or macros) <strong>acquire</strong> and <strong>dispose</strong>:
- *
- *   - <tt>typeof(resource) acquire(...)</tt>
- *   - <tt>void dispose(typeof(resource) resource, bool is_uncaught)</tt>
+ * The specified resource will be *acquired*, *used* and then *disposed*.
  *
  * The semantics of the automatic acquisition and disposal are the same as for
  * blocks introduced by #WITH... #USE. For example, a #USING block can also
@@ -281,17 +274,16 @@ extern "C" {
  *
  * @see WITH
  */
-#define USING(resource, predicate, dispose, acquire, ...)                   \
+#define USING(acquisition, test, disposal)                                  \
                                                                             \
-  WITH((resource), dispose) {                                               \
-    (resource) = acquire(__VA_ARGS__);                                      \
-  } USE (predicate)
+  WITH (disposal) {                                                         \
+    (void) (acquisition);                                                   \
+  } USE (test)
 
 /**
  * Opens a block of code with automatic disposal of a resource
  *
- * @param resource the thing to dispose of.
- * @param dispose the function (or macro) to dispose of the <strong>resource</strong>.
+ * @param disposal the expression to dispose of the resource.
  *
  * The combination of #WITH... #USE encapsulates the *Dispose Pattern*.
  * This pattern consists of two separate blocks and an implicit call
@@ -363,24 +355,25 @@ extern "C" {
  * @see USE
  * @see USING
  */
-#define WITH(resource, dispose)                                             \
+#define WITH(disposal)                                                      \
                                                                             \
   EXCEPTIONS4C_START_BLOCK(true)                                            \
   if (e4c_dispose(EXCEPTIONS4C_DEBUG)) {                                    \
-    (void) dispose(resource);                                               \
+    (void) (disposal);                                                      \
   } else if (e4c_acquire(EXCEPTIONS4C_DEBUG)) {
 
 /**
  * Closes a block of code with automatic disposal of a resource
  *
- * @param predicate the condition that determines if the resource can be used.
+ * @param test defines the condition for executing the code block.
  *
  * A #USE block **must** always be preceded by a #WITH block. These two
  * keywords are designed so the compiler will complain about *dangling*
  * #WITH... #USE blocks.
  *
  * A code block introduced by the #USE keyword will only be executed *if, and
- * only if*, the acquisition of the resource *completes* without exceptions.
+ * only if*, the acquisition of the resource *completes* without exceptions AND
+ * the <tt>test</tt> expression evaluates to a truthy value.
  *
  * The disposal function will be executed, either if the #USE block completes
  * or not.
@@ -392,9 +385,9 @@ extern "C" {
  *
  * @see WITH
  */
-#define USE(predicate)                                                      \
+#define USE(test)                                                           \
                                                                             \
-  } else if (e4c_try(EXCEPTIONS4C_DEBUG) && (predicate))
+  } else if (e4c_try(EXCEPTIONS4C_DEBUG) && (test))
 
 /**
  * Repeats the previous #WITH block entirely
