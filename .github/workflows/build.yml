@@ -1,5 +1,5 @@
 # Continuous Integration
-name: Make
+name: Build
 
 on:
   push:
@@ -28,16 +28,24 @@ jobs:
       uses: actions/checkout@v4
 
     # ================================
+    # UPDATE CONFIGURE SCRIPTS
+    # ================================
+    - name: Update configure scripts
+      run: |
+        autoreconf --install
+        ./configure
+
+    # ================================
     # MAKE ALL
     # ================================
     - name: Make all
-      run: autoreconf --install; ./configure CFLAGS="-Og -g3"; make all
+      run: make all
 
     # ================================
     # TEST
     # ================================
     - name: Test
-      run: make check
+      run: make tests
 
     # ================================
     # COVERAGE
@@ -52,6 +60,7 @@ jobs:
       uses: codecov/codecov-action@v5
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+        #slug: guillermocalvo/exceptions4c
         slug: guillermocalvo/test
 
     # ================================

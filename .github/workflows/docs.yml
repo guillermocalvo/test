@@ -1,7 +1,10 @@
 # Generate and publish docs to GitHub Pages
-name: Make Docs
+name: Docs
 
 on:
+  push:
+    branches:
+    - 'main'
   workflow_dispatch:
 
 jobs:
@@ -43,10 +46,18 @@ jobs:
       uses: actions/checkout@v4
 
     # ================================
-    # DOCS
+    # UPDATE CONFIGURE SCRIPTS
+    # ================================
+    - name: Update configure scripts
+      run: |
+        autoreconf --install
+        ./configure
+
+    # ================================
+    # MAKE DOCS
     # ================================
     - name: Make docs
-      run: autoreconf --install; ./configure CFLAGS="-Og -g3"; make clean && make docs
+      run: make docs
 
     # ================================
     # COVERAGE REPORT
